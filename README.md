@@ -1,2 +1,2 @@
 # jji
-Jumbo Jug ClI
+Jumbo Jug CLI
