@@ -22,12 +22,13 @@ This tool aims to make an easy menu system to organize your cli workflow.
 * prompt base submenu system, please check the [example/jji.yml#1](example/jji.yml#1)
 * search in the menu (in the name and description)
 * all **script runs** inside a *bash* shell
-* two global function is provided:
-  * `_` which run a simple script. examples:
-    * `` _`echo hello wold` `` or
-    * `` _`echo hello wold`.lines[1].[2] `` give a separated output 
+* provided global functions:
+  * `_` which run a simple script. The output simple printed:`` _`echo hello wold` ``
+  * `__` which run a simple script, but output is not printed and parsed. examples:`` const a = __`sleep 3 && echo done && echo other done other`; console.log(a[0][0]) ``
+  * `$` for a later load menu. First parameter is a description, the second is a promise call back function. example:`$('description', (res, rej)=>{})`
+  * `$$` for a later load menu. First parameter is a description, the second is a command, the third is a promise call back function. example:`$('description', (res, cmd rej)=>{})`
 * menu control keys:
-  * **select**: space, enter
+  * **select**: enter
   * **one level up**: esc
   * **on top level**: esc equals exit
   * **terminate**: ctrl+c

@@ -81,8 +81,16 @@ module.exports.jji = async (argv = {}) => {
         const _jjFile = `${process.cwd()}/jj.js`;
         if (existsSync(_jjFile)) jjFiles.push(path.resolve(_jjFile));
 
-        const _jjFilesWithEnd = fromDir('.jj.js');
-        if (_jjFilesWithEnd) jjFiles = [...jjFiles, ..._jjFilesWithEnd];
+        if (argv.f || argv.findAll) {
+            const _jjFilesWithEnd = fromDir('.jj.js');
+            if (_jjFilesWithEnd) jjFiles = [...jjFiles, ..._jjFilesWithEnd.sort((a, b) => {
+                const _a = parseInt(a.replace('.jj.js', '').split('.').slice(-1).pop());
+                const _b = parseInt(b.replace('.jj.js', '').split('.').slice(-1).pop());
+                if (_a > _b) return 1;
+                if (_a < _b) return -1;
+                return 0;
+            })];
+        }
     }
     jjFiles.forEach(f => {
         rawMenu = { ...rawMenu, ...require(f) };
