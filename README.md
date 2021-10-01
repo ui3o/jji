@@ -1,2 +1,58 @@
 # jji
-Jumbo Jug CLI
+
+**J**ust a simple **J**umper cl**I** tool.
+
+This tool aims to make an easy menu system to organize your cli workflow.
+* Just run `jj` if you have only one `jj.js` file in the current folder or `jj script.jj.js`.
+
+# Install 
+* ```npm i -g jji```
+* Install [Cygwin](https://www.cygwin.com/) on Windows! see [here](#Dependencies)
+
+# Motivation
+* cross platform (windows and linux) script in `jj.js` because of Cygwin.
+* resolves
+    * environment variable, possible to use only process.env.ENV_VAR, no longer need on %ENV_VAR% on window
+    * possible to use same command on windows and linux with [Cygwin](https://www.cygwin.com/)
+
+
+# Features
+
+* possible to run script from `jj.js` or `*.jj.js` files.
+* prompt base submenu system, please check the [example/jji.yml#1](example/jji.yml#1)
+* search in the menu (in the name and description)
+* all **script runs** inside a *bash* shell
+* two global function is provided:
+  * `_` which run a simple script. examples:
+    * `` _`echo hello wold` `` or
+    * `` _`echo hello wold`.lines[1].[2] `` give a separated output 
+* menu control keys:
+  * **select**: space, enter
+  * **one level up**: esc
+  * **on top level**: esc equals exit
+  * **terminate**: ctrl+c
+
+# Examples
+
+Examples are located in [example](example/jj.js).
+
+# Dependencies
+
+* Install [Cygwin](https://www.cygwin.com/)
+* **IMPORTANT!! Add** Cygwin **path** to **Environment** variables to **top** level, which replace the default windows commands like find and etc.
+
+![Alt text](/docs/windows_settings.png?raw=true)
+
+# Usage
+
+| command        | description|
+| ------------- |:-------------|
+| *jj* | it gives a nice *choices* menu |
+| *jj --help* | gives a standard help manual|
+
+
+# Status
+
+* [x] support menu for select a script
+* [ ] support sequential run
+* [ ] support parallel run

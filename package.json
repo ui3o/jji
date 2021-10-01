@@ -1,0 +1,33 @@
+{
+  "name": "jji",
+  "version": "1.0.0",
+  "description": "Just a simple Jumper clI tool. This tool aims to make an easy menu system to organize your cli workflow.",
+  "scripts": {
+    "test": "echo test"
+  },
+  "homepage": "https://github.com/ui3o/jji",
+  "repository": "ui3o/jji",
+  "keywords": [
+    "cli",
+    "command",
+    "commandline",
+    "tool",
+    "npm",
+    "npm-scripts",
+    "run",
+    "sequential",
+    "serial",
+    "parallel"
+  ],
+  "bin": {
+    "jj": "./bin/jj.js"
+  },
+  "bugs": {
+    "url": "https://github.com/ui3o/jji/issues"
+  },
+  "author": "ui3o.com",
+  "license": "MIT",
+  "dependencies": {
+    "minimist": "^1.2.5"
+  }
+}
