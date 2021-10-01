@@ -1,4 +1,4 @@
-const { writeFileSync, existsSync, readFileSync } = require('fs');
+const { existsSync } = require('fs');
 const path = require('path');
 const { spawnSync, spawn } = require('child_process');
 var os = require('os')
@@ -88,33 +88,6 @@ module.exports.jji = async (argv = {}) => {
         rawMenu = { ...rawMenu, ...require(f) };
     });
     transform(rawMenu, transformedMenu);
-
-
-
-
-    // let b = { ...a };
-    // if (a.imports) {
-    //     a.imports.forEach((_, index, arr) => {
-    //         b = { ...b, ...arr[index] }
-    //     });
-    // }
-    // Object.keys(a).forEach(k => {
-    //     console.log(k)
-    // });
-
-    // const b = { ...a.lazy[0], ...a.lazy[1] }
-    // const c = { ...a, ...b }
-    // delete c.lazy;
-    // console.log(c)
-    // console.log(a.lazy, typeof a.lazy[0].mas_all, a.lazy[0].mas_all.then !== undefined)
-
-    // console.log(b)
-    // a.call[0]()
-    // console.log(process.env.huh)
-    // exit()
-
-
-    // detect local jji.js
 
     let menuPath = [];
     let menuCmd = [];
@@ -265,25 +238,6 @@ module.exports.jji = async (argv = {}) => {
         });
     }
 
-    async function ask() {
-        return new Promise((resolve) => {
-            const handler = buffer => {
-                process.stdin.removeListener("data", handler);
-                process.stdin.setRawMode(false);
-                process.stdin.pause();
-                const bytes = Array.from(buffer);
-                if (bytes.length && bytes[0] === 3) {
-                    exit(1);
-                }
-                process.nextTick(resolve);
-            };
-
-            process.stdin.resume();
-            process.stdin.setRawMode(true);
-            process.stdin.once("data", handler);
-        });
-    }
-
     function initGlobals() {
         global._ = _;
         global.__ = __;
@@ -296,6 +250,4 @@ module.exports.jji = async (argv = {}) => {
             return { __desc__: desc, __menu_entry__: new Promise(prom), __cmd__: cmd };
         }
     }
-    // exit(0);
-
 }
