@@ -19,7 +19,7 @@ This tool aims to make an easy menu system to organize your cli workflow.
 # Features
 
 * possible to run script from `jj.js` or `*.jj.js` files.
-* prompt base submenu system, please check the [example/jji.yml#1](example/jji.yml#1)
+* prompt base submenu system, please check the [example/jji.yml#1](example/jji.js#1)
 * search in the menu (in the name and description)
 * all **script runs** inside a *bash* shell
 * provided global functions:
