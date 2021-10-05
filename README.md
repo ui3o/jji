@@ -15,7 +15,6 @@ This tool aims to make an easy menu system to organize your cli workflow.
     * environment variable, possible to use only process.env.ENV_VAR, no longer need on %ENV_VAR% on window
     * possible to use same command on windows and linux with [Cygwin](https://www.cygwin.com/)
 
-
 # Features
 
 * possible to run script from `jj.js` or `*.jj.js`
