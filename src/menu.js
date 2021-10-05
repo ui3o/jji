@@ -20,7 +20,7 @@ const menu = {
     blinkHandler: undefined,
     // const variables
     maxVisibleCount: 5,
-    prefix: (index) => menu.visible.poi === index ? prompt.cursor.sel : ' ',
+    prefix: (index) => menu.visible.poi === index ? ` ${prompt.cursor.sel} ` : `   `,
     separator: ' - ',
     title: 'Please select:',
     lazyTitle: 'lazy',
@@ -32,7 +32,7 @@ const prompt = {
     inputString: [],
     promptPrefix: [],
     // const variables
-    _: () => `${menu.full.menu.length}|${menu.filtered.menu.length}|${menu.filtered.menu.length ? menu.filtered.poi + 1 : menu.filtered.poi}`,
+    _: () => `[${menu.full.menu.length}|${menu.filtered.menu.length}|${menu.filtered.menu.length ? menu.filtered.poi + 1 : menu.filtered.poi}]`,
     cursor: { sel: os.platform() === 'win32' ? '>' : '➜', in: " > ", promptChar: '_' }
 };
 
@@ -235,9 +235,9 @@ const _menuPrint = ({ inputChar, add } = {}) => {
         printedLines += _newLine(menu.titleHeight);
         menu.visible.menu.forEach((item, index) => {
             if (item.loading > -1)
-                Term.startLine().green().putStr(menu.prefix(index)).defaultColor().brightBlack().putStr(' ').putArr(_highlightFiltered(item.title, Term.colorCodeBrightBlack));
+                Term.startLine().green().putStr(menu.prefix(index)).defaultColor().brightBlack().putArr(_highlightFiltered(item.title, Term.colorCodeBrightBlack));
             else
-                Term.startLine().green().putStr(menu.prefix(index)).defaultColor().putStr(' ').putArr(_highlightFiltered(item.title));
+                Term.startLine().green().putStr(menu.prefix(index)).defaultColor().putArr(_highlightFiltered(item.title));
             if (item.desc.length) Term.brightBlack().putStr(menu.separator).putArr(_highlightFiltered(item.desc, Term.colorCodeBrightBlack));
             if (item.lazy) Term.formatReset().brightMagenta().putStr(` [${menu.lazyTitle}]`).formatReset();
             if (item.loading > -1) Term.formatReset().brightCyan().putStr(` [${Term.progressBar[item.loading]}]`).formatReset();

@@ -1,9 +1,9 @@
-const aTrue = true;
-const aOther = 'other';
-const wow = () => { return `${aOther} else` }
+const use_boolean = true;
+const use_string = 'other';
+const use_env_var = () => { return `${use_string} else` }
 
-module.exports.a = () => {
-    process.env.wow = aOther
+module.exports.test_from_simple = () => {
+    process.env.use_env_var = use_string;
     _('echo extra ', false)
-    _`echo hii ${aTrue} space ${wow()}`
+    _`echo hii ${use_boolean} space ${use_env_var()}`
 }

@@ -3,26 +3,25 @@ const { a } = require('./simple.module');
 process.env.HELLO = 'hello';
 process.env.WORLD = 'world';
 
-module.exports.call = a
-module.exports.test = [`test description`, {
-    run: ['run comment', 'echo command', {
-        a: 'run test for A option',
-        b: 'run test for B option'
+module.exports.use_require_in_jj_js = a
+module.exports.sub_menu_test = [`sub menu test description`, {
+    run: ['run comment', 'echo', {
+        a: 'if only one string param exist that will be the command',
+        b: 'if string is specified the program join them and run'
     }],
-    eval: ['eval description', () => { console.log('simple eval') }],
-    find: [`find desc`, `find . -type f -exec echo file from jj.js: {} \\;`],
-    roo: "echo ... jj.js: run test for test:roo ...",
-    ruu: ["echo ... jj.js: run test for test:ruu ...", () => { console.log('simple eval'); }]
+    eval: ['description: eval a javascript code', () => { console.log('simple eval') }],
+    find: [`find files desc`, `find . -type f -exec echo file from jj.js: {} \\;`],
+    roo: "echo simple run an echo",
 }]
 module.exports.multiline = {
     var: {
-        create: [`create env var`, () => {
-            console.log('create env var');
+        echo_process_env: [`echo process env var`, () => {
+            console.log('console log env var and run echo');
             process.env.HELLO = 'hello';
             process.env.WORLD = 'world';
             _`echo $HELLO && echo $WORLD`;
         }],
-        echo: [`echo var:echo`, `
+        echo_with_echo_command: [`echo process env var`, `
                 echo $HELLO;
                 echo $WORLD`]
     },
@@ -32,10 +31,7 @@ module.exports.multiline = {
                     echo s$i;
                 done`]
 }
-module.exports.test_run0 = ["jj test.r*", () => { console.log('simple1 eval') }]
-module.exports.test_run1 = ["jj test.r*", () => {
+module.exports.run = ["run simple javascript code", () => { console.log('simple1 eval') }]
+module.exports.run_and_parse = ["run and echo and parse output", () => {
     const a = __`sleep 3 && echo done && echo other done other`; console.log(a[0][0]);
 }]
-module.exports.test_run = "echo test.r*"
-module.exports.test_all_run = "echo test.run.*"
-module.exports.test_all = "echo test**"

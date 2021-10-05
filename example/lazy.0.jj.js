@@ -1,16 +1,16 @@
-module.exports.mas_all = $$((res) => {
+module.exports.lazy_test = $$((res) => {
     setTimeout(() => {
         res({
-            ten_sec_test_run: "echo lazy test",
-            ten_sec_test_all_run: () => { console.log('simple eval'); _`sleep 3 && echo hello world`; },
-            test_later: $((res) => {
+            simple_echo: "echo lazy test",
+            simple_eval_a_function: () => { console.log('simple eval'); _`sleep 3 && echo hello world`; },
+            async_load: $((res) => {
                 setTimeout(() => {
                     res({
-                        test_run: "echo lazy test",
-                        test_all_run: () => { console.log('simple eval'); _`sleep 3 && echo hello world`; },
+                        echo_test: "echo lazy test",
+                        eval_test: () => { console.log('simple eval'); _`sleep 3 && echo hello world`; },
                     })
-                }, 5000);
-            }, 'later load desc')
+                }, 3000);
+            }, 'load async menu item')
         })
-    }, 6000);
-}, 'ten sec later load desc')
+    }, 3000);
+}, 'load lazy menu item')
