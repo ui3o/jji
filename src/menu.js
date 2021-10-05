@@ -14,6 +14,7 @@ const menu = {
         menu: [],
         poi: 0
     },
+    loadingPoi: 0,
     loadingHandler: undefined,
     blinkHandler: undefined,
     // const variables
@@ -205,8 +206,6 @@ const _menuPrint = ({ inputChar, add } = {}) => {
     }
 }
 
-let poi = 0;
-
 const _startMenuItemBlinking = () => {
     menu.blinkHandler = setInterval(() => {
         menu.visible.menu.forEach((item) => {
@@ -231,9 +230,9 @@ const _refreshLoading = () => {
     const lastPrintedLines = printedLines;
     printedLines = 0;
     Term.home();
-    printedLines += Term.startLine().putStr('This menu item is ').brightCyan().putStr(Term.progressBar[poi]).
-        formatReset().putStr(' you can return back to prev menu[ESC] or quit[CTRL+C].').flush();
-    poi = poi === Term.progressBar.length - 1 ? 0 : poi + 1;
+    printedLines += Term.startLine().putStr('This menu item is ').brightCyan().putStr(Term.progressBar[menu.loadingPoi])
+        .formatReset().putStr(' you can return back to prev menu[ESC] or quit[CTRL+C].').flush();
+    menu.loadingPoi = menu.loadingPoi === Term.progressBar.length - 1 ? 0 : menu.loadingPoi + 1;
     _clearLasts(lastPrintedLines)
 }
 

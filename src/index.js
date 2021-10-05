@@ -130,8 +130,8 @@ module.exports.jji = async (argv = {}) => {
                     });
                 } else {
                     Term.clear();
-                    Term.printEsc(`..::`).green().print(` ${menuPath.join('/')}`.split(''));
-                    Term.printEsc(` ::..\n`);
+                    Term.printf(`..::`).formatGreen().printf(` ${menuPath.join('/')}`).formatFormatReset();
+                    Term.printf(` ::..\n`);
                     if (typeof menuCmd[menuCmd.length - 1] === 'function') await menuCmd[menuCmd.length - 1]();
                     else await _(menuCmd.join(' '));
                     exit(0);
