@@ -23,6 +23,7 @@ const menu = {
     prefix: (index) => menu.visible.poi === index ? prompt.cursor.sel : ' ',
     separator: ' - ',
     title: 'Please select:',
+    lazyTitle: 'lazy',
     titleHeight: 0, // space between menu and title
     footerHeight: 0 // space between last prompt and last menu
 };
@@ -84,9 +85,13 @@ const _moveSelection = down => {
 /**
  * Example:
  *  setMenu([
- *     ['test1', 'menu for test x item', true],
+ *     ['test1', 'menu for test x item', 0 or 1 or 2],
  *     ['test2', 'menu for test x item'],
  * ]);
+ * in the menu the third param means:
+ *   * 0 - normal menu
+ *   * 1 - loading menu, at the program start the menu start to load
+ *   * 2 - lazy menu, every menu enter the menu sub menu reloading
  * @param {*} _menu 
  * @param {*} promptPrefix 
  * @param {*} title 
@@ -102,7 +107,8 @@ const setMenu = (_menu = [], promptPrefix = [], title = '?') => {
         const fm = {
             title: m[0] !== undefined ? m[0] : '',
             desc: m[1] !== undefined ? m[1] : '',
-            loading: m[2] !== undefined && m[2] === true ? 0 : -1,
+            loading: m[2] !== undefined && m[2] === 0 ? -1 : m[2] !== undefined && m[2] === 1 ? 0 : -1,
+            lazy: m[2] !== undefined && m[2] === 2 ? true : false,
             index,
         };
         formattedMenu.push(fm);
@@ -115,9 +121,10 @@ const setMenu = (_menu = [], promptPrefix = [], title = '?') => {
 
 /**
  * update existing menu status, specially loading remove
+ * 
  * Example:
  *  updateMenu ([
- *     ['test1', 'menu for test x item', false],
+ *     ['test1', 'menu for test x item', 0],
  *     ['test2', 'menu for test x item'],
  * ]);
  * @param {*} _menu 
@@ -129,7 +136,8 @@ const updateMenu = (_menu = []) => {
         const fm = {
             title: m[0] !== undefined ? m[0] : '',
             desc: m[1] !== undefined ? m[1] : '',
-            loading: m[2] !== undefined && m[2] === true ? 0 : -1,
+            loading: m[2] !== undefined && m[2] === 0 ? -1 : m[2] !== undefined && m[2] === 1 ? 0 : -1,
+            lazy: m[2] !== undefined && m[2] === 2 ? true : false,
             index,
         };
         formattedMenu.push(fm);
@@ -231,6 +239,7 @@ const _menuPrint = ({ inputChar, add } = {}) => {
             else
                 Term.startLine().green().putStr(menu.prefix(index)).defaultColor().putStr(' ').putArr(_highlightFiltered(item.title));
             if (item.desc.length) Term.brightBlack().putStr(menu.separator).putArr(_highlightFiltered(item.desc, Term.colorCodeBrightBlack));
+            if (item.lazy) Term.formatReset().brightMagenta().putStr(` [${menu.lazyTitle}]`).formatReset();
             if (item.loading > -1) Term.formatReset().brightCyan().putStr(` [${Term.progressBar[item.loading]}]`).formatReset();
             if (item.loading > -1 && !menu.blinkHandler) _startMenuItemBlinking();
             printedLines += Term.flush();

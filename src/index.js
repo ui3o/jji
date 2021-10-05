@@ -68,29 +68,27 @@ async function ___(script, onData = (data) => { }) {
     });
 }
 
-module.exports.jji = async (argv = {}) => {
+module.exports.jji = async (argv = {}, rawMenu = {}) => {
 
     console.log = console.error;
     log = (argv.d || argv.debug) ? console.log : () => { };
     error = msg => { console.error(`[ERROR] ${msg}`) };
 
     let jjFiles = argv._.length ? argv._ : [];
-    let rawMenu = {}, transformedMenu = {};
+    let transformedMenu = {};
     initGlobals();
     if (!jjFiles.length) {
         const _jjFile = `${process.cwd()}/jj.js`;
         if (existsSync(_jjFile)) jjFiles.push(path.resolve(_jjFile));
 
-        if (argv.f || argv.findAll) {
-            const _jjFilesWithEnd = fromDir('.jj.js');
-            if (_jjFilesWithEnd) jjFiles = [...jjFiles, ..._jjFilesWithEnd.sort((a, b) => {
-                const _a = parseInt(a.replace('.jj.js', '').split('.').slice(-1).pop());
-                const _b = parseInt(b.replace('.jj.js', '').split('.').slice(-1).pop());
-                if (_a > _b) return 1;
-                if (_a < _b) return -1;
-                return 0;
-            })];
-        }
+        const _jjFilesWithEnd = fromDir('.jj.js');
+        if (_jjFilesWithEnd) jjFiles = [...jjFiles, ..._jjFilesWithEnd.sort((a, b) => {
+            const _a = parseInt(a.replace('.jj.js', '').split('.').slice(-1).pop());
+            const _b = parseInt(b.replace('.jj.js', '').split('.').slice(-1).pop());
+            if (_a > _b) return 1;
+            if (_a < _b) return -1;
+            return 0;
+        })];
     }
     jjFiles.forEach(f => {
         rawMenu = { ...rawMenu, ...require(f) };
@@ -104,12 +102,12 @@ module.exports.jji = async (argv = {}) => {
 
     function menuWalker(update) {
         currentMenuRef = getPath(transformedMenu, menuPath.join('.'));
-        currentMenuList = Object.keys(currentMenuRef).filter(e => e !== '__name__' && e !== '__desc__' && e !== '__cmd__' && e !== '__index__')
+        currentMenuList = Object.keys(currentMenuRef).filter(e => e !== '__name__' && e !== '__desc__' && e !== '__cmd__' && e !== '__index__' && e !== '__menu_entry__' && e !== '__onload_menu__')
             .sort((a, b) => {
                 if (currentMenuRef[a].__index__ > currentMenuRef[b].__index__) return 1;
                 if (currentMenuRef[a].__index__ < currentMenuRef[b].__index__) return -1;
                 return 0;
-            }).map(e => { return [currentMenuRef[e].__name__, currentMenuRef[e].__desc__, currentMenuRef[e].__menu_entry__ ? true : false] });
+            }).map(e => { return [currentMenuRef[e].__name__, currentMenuRef[e].__desc__, currentMenuRef[e].__menu_entry__ ? 1 : currentMenuRef[e].__onload_menu__ ? 2 : 0] });
         let mp = []; menuPath.forEach(p => { mp = [...mp, Term.colorCodeGreen, ...p.split(''), Term.colorCodeBrightBlack, ' ', '>', ' '] })
         if (update) menu.updateMenu(currentMenuList);
         else menu.setMenu(currentMenuList, mp);
@@ -130,6 +128,16 @@ module.exports.jji = async (argv = {}) => {
                     _currentMenuRef.__menu_entry__.then((_menu) => {
                         if (hasSubMenu()) menuWalker();
                     });
+                } else if (_currentMenuRef.__onload_menu__ !== undefined) {
+                    menu.showLoading();
+                    const __currentPath = menuPath.join('.');
+                    new Promise(_currentMenuRef.__onload_menu__).then((_menu) => {
+                        if(__currentPath === menuPath.join('.')) {
+                            transform(_menu, _currentMenuRef, '', _currentMenuRef.__cmd__ ? [_currentMenuRef.__cmd__] : []);
+                            if (hasSubMenu()) menuWalker();
+                        }
+                    });
+
                 } else {
                     Term.clear();
                     Term.printf(`..::`).formatGreen().printf(` ${menuPath.join(`${Term.colorCodeBrightBlack} > ${Term.colorCodeGreen}`)}`).formatFormatReset();
@@ -143,6 +151,14 @@ module.exports.jji = async (argv = {}) => {
                 if (!menuPath.length) {
                     Term.clear();
                     exit(1);
+                }
+                const __currentMenuRef = getPath(transformedMenu, menuPath.join('.'));
+                // remove menu item from __onload_menu__
+                if (__currentMenuRef.__onload_menu__ !== undefined) {
+                    const _currentMenuList = Object.keys(__currentMenuRef).filter(e => e !== '__name__' && e !== '__desc__' && e !== '__cmd__' && e !== '__index__' && e !== '__menu_entry__' && e !== '__onload_menu__');
+                    _currentMenuList.forEach(m => {
+                        delete __currentMenuRef[m];
+                    });
                 }
                 menuPath.pop();
                 menuCmd.pop();
@@ -161,7 +177,7 @@ module.exports.jji = async (argv = {}) => {
 
     function hasSubMenu() {
         const _currentMenuRef = getPath(transformedMenu, menuPath.join('.'));
-        currentMenuList = Object.keys(_currentMenuRef).filter(e => e !== '__name__' && e !== '__desc__' && e !== '__cmd__' && e !== '__index__' && e !== '__menu_entry__');
+        currentMenuList = Object.keys(_currentMenuRef).filter(e => e !== '__name__' && e !== '__desc__' && e !== '__cmd__' && e !== '__index__' && e !== '__menu_entry__' && e !== '__onload_menu__');
         return currentMenuList.length ? true : false;
     }
 
@@ -234,6 +250,11 @@ module.exports.jji = async (argv = {}) => {
                     transform(_menu, _currentMenuRef, '', _currentMenuRef.__cmd__ ? [_currentMenuRef.__cmd__] : []);
                     if (hasSubMenu()) menuWalker(true);
                 });
+            } else if (typeof src[key] === 'object' && src[key].__onload_menu__ !== undefined) {
+                transformedObj[key].__desc__ = src[key].__desc__;
+                transformedObj[key].__onload_menu__ = src[key].__onload_menu__;
+                transformedObj[key].__cmd__ = src[key].__cmd__;
+                _cmdList = [..._cmdList, transformedObj[key].__cmd__];
             } else if (typeof src[key] === 'string' || typeof src[key] === 'function') {
                 transformedObj[key].__cmd__ = src[key];
                 _cmdList = [..._cmdList, transformedObj[key].__cmd__];
@@ -253,12 +274,13 @@ module.exports.jji = async (argv = {}) => {
         global._ = _;
         global.__ = __;
 
-        global.$ = function (desc = '', prom = (res, rej) => { }) {
-            return { __desc__: desc, __menu_entry__: new Promise(prom), __cmd__: '' };
+
+        global.$ = function (prom = (res, rej) => { }, desc = '', cmd = '') {
+            return { __desc__: desc, __menu_entry__: new Promise(prom), __cmd__: cmd };
         }
 
-        global.$$ = function (desc = '', cmd = '', prom = (res, rej) => { }) {
-            return { __desc__: desc, __menu_entry__: new Promise(prom), __cmd__: cmd };
+        global.$$ = function (prom = (res, rej) => { }, desc = '', cmd = '') {
+            return { __desc__: desc, __onload_menu__: prom, __cmd__: cmd };
         }
     }
 }

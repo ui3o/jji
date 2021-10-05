@@ -13,7 +13,6 @@ if (argv.h || argv.help) {
             { name: `jj [options] script.jj.js`, desc: 'run specified script.jj.js in the current directory' }
         ],
         options: [
-            { desc: "find all *.jj.js which are possible sorted with number. ex. *.0.jj,js *.1.jj,js", switch: '-f, --findAll', type: 'boolean' },
             { desc: "print debug to stderr, because it doesn't break the normal workflow", switch: '-d, --debug', type: 'boolean' },
             { desc: 'show help', switch: '-h, --help', type: 'boolean' },
         ],
