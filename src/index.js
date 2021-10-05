@@ -71,17 +71,17 @@ async function ___(script, onData = (data) => { }) {
 module.exports.jji = async (argv = {}, rawMenu = {}) => {
 
     console.log = console.error;
-    log = (argv.d || argv.debug) ? console.log : () => { };
     error = msg => { console.error(`[ERROR] ${msg}`) };
 
     let jjFiles = argv._.length ? argv._ : [];
     let transformedMenu = {};
     initGlobals();
     if (!jjFiles.length) {
-        const _jjFile = `${process.cwd()}/jj.js`;
+        const lookupPath = argv.d ? argv.d : process.cwd();
+        const _jjFile = `${lookupPath}/jj.js`;
         if (existsSync(_jjFile)) jjFiles.push(path.resolve(_jjFile));
 
-        const _jjFilesWithEnd = fromDir('.jj.js');
+        const _jjFilesWithEnd = fromDir('.jj.js', lookupPath);
         if (_jjFilesWithEnd) jjFiles = [...jjFiles, ..._jjFilesWithEnd.sort((a, b) => {
             const _a = parseInt(a.replace('.jj.js', '').split('.').slice(-1).pop());
             const _b = parseInt(b.replace('.jj.js', '').split('.').slice(-1).pop());
@@ -127,7 +127,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                     menu.showLoading();
                     const __currentPath = menuPath.join('.');
                     _currentMenuRef.__menu_entry__.then((_menu) => {
-                        if(__currentPath === menuPath.join('.')) {
+                        if (__currentPath === menuPath.join('.')) {
                             if (hasSubMenu()) menuWalker();
                         }
                     });
@@ -135,7 +135,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                     menu.showLoading();
                     const __currentPath = menuPath.join('.');
                     new Promise(_currentMenuRef.__onload_menu__).then((_menu) => {
-                        if(__currentPath === menuPath.join('.')) {
+                        if (__currentPath === menuPath.join('.')) {
                             transform(_menu, _currentMenuRef, '', _currentMenuRef.__cmd__ ? [_currentMenuRef.__cmd__] : []);
                             if (hasSubMenu()) menuWalker();
                         }

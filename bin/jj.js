@@ -13,7 +13,7 @@ if (argv.h || argv.help) {
             { name: `jj [options] script.jj.js`, desc: 'run specified script.jj.js in the current directory' }
         ],
         options: [
-            { desc: "print debug to stderr, because it doesn't break the normal workflow", switch: '-d, --debug', type: 'boolean' },
+            { desc: "read *.jj.js files from specified working directory", switch: '-d', type: 'string' },
             { desc: 'show help', switch: '-h, --help', type: 'boolean' },
         ],
         version: packageJson.version,
