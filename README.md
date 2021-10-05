@@ -10,7 +10,7 @@ This tool aims to make an easy menu system to organize your cli workflow.
 * Install [Cygwin](https://www.cygwin.com/) on Windows! see [here](#Dependencies)
 
 # Motivation
-* cross platform (windows and linux) script in `jj.js` because of Cygwin.
+* cross platform (windows and linux) script in `jj.js` with Cygwin.
 * resolves
     * environment variable, possible to use only process.env.ENV_VAR, no longer need on %ENV_VAR% on window
     * possible to use same command on windows and linux with [Cygwin](https://www.cygwin.com/)
@@ -24,9 +24,9 @@ This tool aims to make an easy menu system to organize your cli workflow.
 * all **script runs** inside a *bash* shell
 * provided global functions:
   * `_` which run a simple script. The output simple printed:`` _`echo hello wold` ``
-  * `__` which run a simple script, but output is not printed and parsed. examples:`` const a = __`sleep 3 && echo done && echo other done other`; console.log(a[0][0]) ``
-  * `$` for a later load menu, which means the Promise start after the program start. First parameter is a promise call back function, the second is  a description, the third is a command. example:`$((res, rej)=>{}, 'description', 'echo')`
-  * `$$` for a lazy load menu, which means when you enter into the menu the Promise start after the enter. First parameter is a promise call back function, the second is  a description, the third is a command. example:`$((res, rej)=>{}, 'description', 'echo')`
+  * `__` which run a simple script, but output is not printed and parsed. Example:`` const a = __`sleep 3 && echo done && echo other done other`; console.log(a[0][0]) ``
+  * `$` for a later load menu, which means the Promise start after the program start. First parameter is a promise call back function, the second is  a description, the third is a command. Example:`$((res, rej)=>{}, 'description', 'echo')`
+  * `$$` for a lazy load menu, which means when you enter into the menu the Promise start after the enter. First parameter is a promise call back function, the second is  a description, the third is a command. Example:`$((res, rej)=>{}, 'description', 'echo')`
 * menu control keys:
   * **select**: enter
   * **one level up**: esc
