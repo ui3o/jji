@@ -186,7 +186,7 @@ const _menuPrint = ({ inputChar, add } = {}) => {
         const lastPrintedLines = printedLines;
         printedLines = 0;
         Term.home();
-        printedLines += Term.startLine().brightBlue().putStr(menu.title + prompt.cursor.in).formatReset().putArr(prompt.promptPrefix)
+        printedLines += Term.startLine().cyan().putStr(menu.title).formatReset().brightBlack().putStr(prompt.cursor.in).formatReset().putArr(prompt.promptPrefix)
             .formatReset().putStr(prompt.inputString.join('') + prompt.cursor.promptChar).flush();
         printedLines += _newLine(menu.titleHeight);
         menu.visible.menu.forEach((item, index) => {
