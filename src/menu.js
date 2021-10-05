@@ -2,31 +2,6 @@ const os = require('os');
 const { keymap, detectKey, getVisibleCharacters } = require("./keymap");
 const { Term } = require('./term');
 
-const loading = {
-    active: false,
-    linePos: 0,
-    iconPoi: 0,
-    icon: os.platform() === 'win32' ? [
-        "┤",
-        "┘",
-        "┴",
-        "└",
-        "├",
-        "┌",
-        "┬",
-        "┐"
-    ] : [
-        "⣾",
-        "⣽",
-        "⣻",
-        "⢿",
-        "⡿",
-        "⣟",
-        "⣯",
-        "⣷"
-    ]
-};
-
 const menu = {
     full: {
         menu: [],
@@ -39,20 +14,23 @@ const menu = {
         menu: [],
         poi: 0
     },
+    loadingHandler: undefined,
+    blinkHandler: undefined,
     // const variables
     maxVisibleCount: 3,
-    prefix: (index, hideCursor) => menu.visible.poi === index && !hideCursor ? [Term.colorGreen, prompt.cursor.sel] : [' '],
+    prefix: (index) => menu.visible.poi === index ? prompt.cursor.sel : ' ',
     separator: ' - ',
-    title: 'Please select:\n\n',
-    footerHeight: 1 // space between last prompt and last menu
+    title: 'Please select:',
+    titleHeight: 0, // space between menu and title
+    footerHeight: 0 // space between last prompt and last menu
 };
 
 const prompt = {
     inputString: [],
     promptPrefix: '',
     // const variables
-    _: () => `${loading.active ? loading.icon[loading.iconPoi] : ' '} ${menu.filtered.menu.length ? menu.filtered.poi + 1 : menu.filtered.poi}|${menu.filtered.menu.length}|${menu.full.menu.length} ${prompt.cursor.in + prompt.promptPrefix}`,
-    cursor: { sel: os.platform() === 'win32' ? '>' : '➜', in: "/", promptChar: '_' }
+    _: () => `${menu.full.menu.length}|${menu.filtered.menu.length}|${menu.filtered.menu.length ? menu.filtered.poi + 1 : menu.filtered.poi}`,
+    cursor: { sel: os.platform() === 'win32' ? '>' : '➜', in: " > ", promptChar: '_' }
 };
 
 const config = {
@@ -62,7 +40,7 @@ const config = {
     disableProcessExitOnAbort: false,
 };
 
-let printedText = [];
+let printedLines = [];
 
 const _moveSelection = down => {
     if (!menu.visible.menu.length) return;
@@ -86,49 +64,12 @@ const _moveSelection = down => {
             return;
         }
     }
-    // clear cursor
-    Term.saveCursor();
-    Term.previousLine(menu.visible.menu[menu.visible.poi].linePos);
-    Term.printEsc(' ');
-    Term.restoreCursor();
     // set new cursor position
     if (down)
         menu.visible.poi = menu.visible.poi === menu.visible.menu.length - 1 ? 0 : menu.visible.poi + 1;
     else
         menu.visible.poi = menu.visible.poi === 0 ? menu.visible.menu.length - 1 : menu.visible.poi - 1;
-    Term.saveCursor();
-    Term.previousLine(menu.visible.menu[menu.visible.poi].linePos);
-    Term.green().print([prompt.cursor.sel]);
-    Term.restoreCursor();
-    _printPrompt();
-}
-
-const _initCursor = (end) => {
-    menu.visible.poi = end ? menu.visible.menu.length - 1 : 0;
-    if (!menu.visible.menu.length) return;
-    Term.saveCursor();
-    Term.previousLine(menu.visible.menu[menu.visible.poi].linePos);
-    Term.green().print([prompt.cursor.sel]);
-    Term.restoreCursor();
-}
-
-const _linesCalc = (_allSize = 0) => {
-    const _reversePrintedText = [...printedText].reverse();
-    menu.visible.menu.reverse();
-    // calculate prompt at 0 pos
-    const prompt = _reversePrintedText.shift();
-    _allSize = prompt.length % Term.width === 0 ? _allSize + (prompt.length / Term.width) : 1 + (prompt.length / Term.width);
-    _allSize = _allSize - (_allSize % 1);
-    loading.linePos = _allSize;
-    // calculate menu
-    _reversePrintedText.forEach((text, index) => {
-        _allSize += (text.length / Term.width);
-        _allSize += (text.length / Term.width) % 1 === 0 ? 0 : 1;
-        _allSize = _allSize - (_allSize % 1);
-        menu.visible.menu[index].linePos = _allSize - 1 + menu.footerHeight;
-    })
-    menu.visible.menu.reverse();
-    return _allSize;
+    _menuPrint();
 }
 
 /**
@@ -141,7 +82,9 @@ const _linesCalc = (_allSize = 0) => {
  * @param {*} promptPrefix 
  * @param {*} title 
  */
-const setMenu = (_menu = [], promptPrefix = '', title = 'Please select:\n\n') => {
+const setMenu = (_menu = [], promptPrefix = '', title = '?') => {
+    _stopMenuItemBlinking();
+    _stopLoading();
     prompt.inputString = [];
     const formattedMenu = [];
     prompt.promptPrefix = promptPrefix;
@@ -150,6 +93,7 @@ const setMenu = (_menu = [], promptPrefix = '', title = 'Please select:\n\n') =>
         const fm = {
             title: m[0] !== undefined ? m[0] : '',
             desc: m[1] !== undefined ? m[1] : '',
+            loading: m[2] !== undefined && m[2] === true ? 0 : -1,
             index,
         };
         formattedMenu.push(fm);
@@ -180,19 +124,14 @@ const _setFilteredMenu = () => {
 
 
 const _setNewMenu = (_menu, end) => {
+    menu.visible.poi = end ? menu.visible.menu.length - 1 : 0;
     menu.visible.menu = _menu;
-    _menuPrint({ hideCursor: true });
-    _initCursor(end);
-    _printPrompt();
+    menu.visible.menu.forEach((item) => {
+        if (item.loading > -1) item.loading = 0;
+    });
+    _menuPrint();
 }
 
-const _removeColorCodes = (str = []) => {
-    const splittedStr = [];
-    for (let count = 0; count < str.length; count++) {
-        if (!str[count].startsWith('\x1b[')) splittedStr.push(str[count]);
-    }
-    return splittedStr.join('');
-}
 
 const _findHighlights = (str = "", searchFor = "", splitted = [], offset = 0) => {
     const index = str.indexOf(searchFor);
@@ -203,7 +142,7 @@ const _findHighlights = (str = "", searchFor = "", splitted = [], offset = 0) =>
         _findHighlights(str.substring(index + searchFor.length, str.length), searchFor, splitted, offset + index + searchFor.length);
 }
 
-const _highlightFiltered = (str = "", defaultColor = Term.colorDefaultColor) => {
+const _highlightFiltered = (str = "", defaultColor = Term.colorCodeDefaultColor) => {
     const splitted = str.split('').map(c => { return { c, h: false } });
     if (!prompt.inputString.length) return splitted.map(char => { return char.c });
     const input = prompt.inputString.join('').split(' ');
@@ -214,80 +153,107 @@ const _highlightFiltered = (str = "", defaultColor = Term.colorDefaultColor) => 
     let started = false;
     const highlighted = [];
     splitted.forEach(char => {
-        if (char.h && !started) { highlighted.push(Term.colorYellow); started = true; }
+        if (char.h && !started) { highlighted.push(Term.colorCodeYellow); started = true; }
         if (!char.h && started) { highlighted.push(defaultColor); started = false; }
         highlighted.push(char.c);
     });
     return highlighted;
 }
 
-const _menuPrint = ({ inputChar, add, hideCursor } = {}) => {
-    if (add === undefined) {
-        Term.clear();
+// generate new line
+const _newLine = (line = 0) => {
+    for (let index = 0; index < line; index++)
+        Term.newLine();
+    return line;
+}
+
+const _clearLasts = (lastPrintedLines = 0) => {
+    // clear last printed lines
+    const lineDiff = lastPrintedLines - printedLines;
+    if (lineDiff > 0) _newLine(lineDiff);
+}
+
+const _menuPrint = ({ inputChar, add } = {}) => {
+    if (menu.loadingHandler) return;
+    if (add !== undefined) {
+        _stopMenuItemBlinking();
+        if (add === true) prompt.inputString.push(inputChar);
+        if (add === false) prompt.inputString.pop();
+        _setFilteredMenu();
     }
-    if (add === undefined) { Term.eraseDisplayBelow(); Term.brightBlue().print(menu.title.split('')); }
-    if (add === false) { _removePrompt(); }
-    printedText = [];
-    menu.visible.menu.forEach((item, index) => {
-        const menuLine = item.desc.length ? [...menu.prefix(index, hideCursor), ' ', Term.colorDefaultColor,
-        ..._highlightFiltered(item.title),
-        Term.colorBrightBlack, ...menu.separator.split(''),
-        ..._highlightFiltered(item.desc, Term.colorBrightBlack),
-        ] : [...menu.prefix(index, hideCursor), ' ', Term.colorDefaultColor,
-        ..._highlightFiltered(item.title),
-        ];
-        printedText.push(`${_removeColorCodes(menuLine)}`);
-        if (add === undefined) Term.print([...menuLine, '\n']);
-    });
-    if (add === undefined) Term.printEsc('\n'.repeat(menu.footerHeight));
-    if (add === true) { prompt.inputString.push(inputChar); Term.backDelete().printEsc(inputChar).printEsc(prompt.cursor.promptChar); }
-    if (add === false) prompt.inputString.pop();
-    const _in = `${prompt._() + prompt.inputString.join('') + prompt.cursor.promptChar}`;
-    printedText.push(_in);
-    if (add !== true) Term.print(_in.split(''));
-    // recalculation for menu items position 
-    if (_in.length % Term.width === 0) { Term.printEsc('\n'); }
-    _linesCalc(_in.length % Term.width === 0 ? 1 : 0);
-    if (add !== undefined) _setFilteredMenu();
+    else {
+        const lastPrintedLines = printedLines;
+        printedLines = 0;
+        Term.home();
+        printedLines += Term.startLine().brightBlue().putStr(menu.title + prompt.cursor.in + prompt.promptPrefix).defaultColor()
+            .putStr(prompt.inputString.join('') + prompt.cursor.promptChar).flush();
+        printedLines += _newLine(menu.titleHeight);
+        menu.visible.menu.forEach((item, index) => {
+            if (item.loading > -1)
+                Term.startLine().green().putStr(menu.prefix(index)).defaultColor().brightBlack().putStr(' ').putArr(_highlightFiltered(item.title, Term.colorCodeBrightBlack));
+            else
+                Term.startLine().green().putStr(menu.prefix(index)).defaultColor().putStr(' ').putArr(_highlightFiltered(item.title));
+            if (item.desc.length) Term.brightBlack().putStr(menu.separator).putArr(_highlightFiltered(item.desc, Term.colorCodeBrightBlack));
+            if (item.loading > -1) Term.formatReset().brightCyan().putStr(` [${Term.progressBar[item.loading]}]`).formatReset();
+            if (item.loading > -1 && !menu.blinkHandler) _startMenuItemBlinking();
+            printedLines += Term.flush();
+        });
+        printedLines += _newLine(menu.footerHeight);
+        printedLines += Term.startLine().brightBlack().putStr(prompt._()).flush();
+        // clear last printed lines
+        _clearLasts(lastPrintedLines);
+    }
 }
 
-const _refreshLoading = (active = true) => {
-    loading.active = active;
-    loading.iconPoi = 0;
-    _printPrompt();
+let poi = 0;
+
+const _startMenuItemBlinking = () => {
+    menu.blinkHandler = setInterval(() => {
+        menu.visible.menu.forEach((item) => {
+            if (item.loading > -1) item.loading = item.loading === Term.progressBar.length - 1 ? 0 : item.loading + 1;
+        });
+        _menuPrint();
+    }, 500);
 }
 
-const startLoading = () => {
+
+const _stopMenuItemBlinking = () => {
+    clearInterval(menu.blinkHandler);
+    menu.blinkHandler = undefined;
+}
+
+const _stopLoading = () => {
+    clearInterval(menu.loadingHandler);
+    menu.loadingHandler = undefined;
+}
+
+const _refreshLoading = () => {
+    const lastPrintedLines = printedLines;
+    printedLines = 0;
+    Term.home();
+    printedLines += Term.startLine().putStr('This menu item is ').brightCyan().putStr(Term.progressBar[poi]).
+        formatReset().putStr(' you can return back to prev menu[ESC] or quit[CTRL+C].').flush();
+    poi = poi === Term.progressBar.length - 1 ? 0 : poi + 1;
+    _clearLasts(lastPrintedLines)
+}
+
+const showLoading = () => {
+    _stopLoading();
     _refreshLoading();
+    menu.loadingHandler = setInterval(() => {
+        _refreshLoading();
+    }, 500);
 }
 
-const stopLoading = () => {
-    _refreshLoading(false);
-}
-
-const _removePrompt = () => {
-    Term.previousLine(loading.linePos);
-    Term.down(1);
-    Term.eraseDisplayBelow();
-    Term.eraseLine();
-}
-
-const _printPrompt = () => {
-    Term.saveCursor();
-    Term.previousLine(loading.linePos);
-    Term.down(1);
-    Term.print(prompt._().split(''));
-    Term.restoreCursor();
-}
 
 const _reportExit = (eventType = event.EXITED) => {
     if (eventType === event.EXITED) {
         if (!config.disableSelectedOutputPrint) Term.clear();
-        if (!config.disableSelectedOutputPrint) Term.print(`[selected] = [none]\n`.split(''));
+        if (!config.disableSelectedOutputPrint) Term.printf(`[selected] = [none]\n`);
         _eventListener(eventType);
     } else {
         Term.clear();
-        if (!config.disableSelectedOutputPrint) Term.print(`[selected] = [none]\n`.split(''));
+        if (!config.disableSelectedOutputPrint) Term.printf(`[selected] = [none]\n`);
     }
 }
 
@@ -297,7 +263,7 @@ const _keyHandler = (key) => {
         case keymap.ENTER:
             if (!config.disableSelectedOutputPrint) Term.clear();
             if (menu.filtered.menu.length) {
-                if (!config.disableSelectedOutputPrint) Term.print(`[selected] = ${menu.filtered.menu[menu.filtered.poi].title}\n`.split(''));
+                if (!config.disableSelectedOutputPrint) Term.printf(`[selected] = ${menu.filtered.menu[menu.filtered.poi].title}\n`);
                 if (!config.disableProcessExitOnSelect) { Term.cursorShow(); process.exit(); }
                 _eventListener(event.SELECT, menu.filtered.menu[menu.filtered.poi].index);
             }
@@ -307,10 +273,16 @@ const _keyHandler = (key) => {
             if (!config.disableProcessExitOnExit) { Term.cursorShow(); process.exit(1); }
             break;
         case keymap.CTRL_A:
-            startLoading()
+            showLoading()
             break;
         case keymap.CTRL_S:
-            stopLoading()
+            setMenu([
+                ['a item', 'd option'],
+                ['b item', 'e option'],
+                ['c item', 'f option'],
+                ['d item', 'g option'],
+                ['b', undefined, true],
+            ])
             break;
         case keymap.CTRL_C:
             _reportExit(event.ABORTED);
@@ -335,38 +307,23 @@ const _keyHandler = (key) => {
 }
 
 const _windowResizeHandler = () => {
-    // Term.width = process.stdout.rows;
     Term.clear();
-    Term.width = process.stdout.columns - 1;
     _menuPrint();
-}
-
-const _loadingHandler = () => {
-    if (loading.active) {
-        _printPrompt();
-        loading.iconPoi = loading.iconPoi === loading.icon.length - 1 ? 0 : loading.iconPoi + 1;
-    }
 }
 
 let _eventListener = undefined;
 
 const open = (eventListener = (event, key) => { }) => {
     _eventListener = eventListener;
-    Term.width = process.stdout.columns - 1;
-    // const { _, y } = await Term.getCursorLocation();
-    Term.cursorHide();
-    Term.printEsc('\n'.repeat(process.stdout.rows - 1));
-    Term.clear();
+    Term.cursorHide().newScreen().clear();
     process.stdin.on('data', _keyHandler);
     process.stdout.on('resize', _windowResizeHandler);
-    setInterval(_loadingHandler, 150);
 }
 
 const close = () => {
     Term.cursorShow();
     process.stdin.removeListener('data', _keyHandler);
     process.stdout.removeListener('resize', _windowResizeHandler);
-    clearInterval(_loadingHandler, 150);
 }
 
 const configure = {
@@ -401,5 +358,5 @@ const event = {
 };
 
 module.exports = {
-    open, close, startLoading, stopLoading, setMenu, event, configure
+    open, close, showLoading, setMenu, event, configure
 }

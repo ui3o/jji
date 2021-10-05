@@ -109,7 +109,7 @@ module.exports.jji = async (argv = {}) => {
                 if (currentMenuRef[a].__index__ > currentMenuRef[b].__index__) return 1;
                 if (currentMenuRef[a].__index__ < currentMenuRef[b].__index__) return -1;
                 return 0;
-            }).map(e => { return [currentMenuRef[e].__name__, currentMenuRef[e].__desc__] });
+            }).map(e => { return [currentMenuRef[e].__name__, currentMenuRef[e].__desc__, currentMenuRef[e].__menu_entry__ ? true : false] });
         menu.setMenu(currentMenuList, menuPath.join('/') + ' ');
     }
 
@@ -124,12 +124,8 @@ module.exports.jji = async (argv = {}) => {
                 const _currentMenuRef = getPath(transformedMenu, menuPath.join('.'));
                 if (hasSubMenu()) menuWalker();
                 else if (_currentMenuRef.__menu_entry__ !== undefined) {
-                    menu.setMenu([], menuPath.join('/') + ' ', "Wait for menu loading...");
-                    menu.startLoading();
+                    menu.showLoading();
                     _currentMenuRef.__menu_entry__.then((_menu) => {
-                        menu.stopLoading();
-                        delete _currentMenuRef.__menu_entry__;
-                        transform(_menu, _currentMenuRef, '', _currentMenuRef.__cmd__ ? [_currentMenuRef.__cmd__] : []);
                         if (hasSubMenu()) menuWalker();
                     });
                 } else {
@@ -153,7 +149,6 @@ module.exports.jji = async (argv = {}) => {
             default:
                 break;
         }
-
     });
     menuWalker();
 
@@ -231,6 +226,12 @@ module.exports.jji = async (argv = {}) => {
                 transformedObj[key].__menu_entry__ = src[key].__menu_entry__;
                 transformedObj[key].__cmd__ = src[key].__cmd__;
                 _cmdList = [..._cmdList, transformedObj[key].__cmd__];
+                const _currentMenuRef = transformedObj[key];
+                _currentMenuRef.__menu_entry__.then((_menu) => {
+                    delete _currentMenuRef.__menu_entry__;
+                    transform(_menu, _currentMenuRef, '', _currentMenuRef.__cmd__ ? [_currentMenuRef.__cmd__] : []);
+                    if (hasSubMenu()) menuWalker();
+                });
             } else if (typeof src[key] === 'string' || typeof src[key] === 'function') {
                 transformedObj[key].__cmd__ = src[key];
                 _cmdList = [..._cmdList, transformedObj[key].__cmd__];

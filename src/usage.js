@@ -17,7 +17,7 @@ const _get = (prop = '') => {
 
 const _printTitles = (title, info = []) => {
     if (info.length && _get(info[0].name)) {
-        Term.bold().printEsc(USAGE.header + title);
+        Term.formatBold().printf(USAGE.header + title);
         let longestDescLength = 0;
         info.forEach(i => {
             if (i.name && i.name.length && longestDescLength < i.name.length && i.name.length < USAGE.maxSwitchLength) {
@@ -26,14 +26,14 @@ const _printTitles = (title, info = []) => {
         });
         longestDescLength += USAGE.optionIndent;
         info.forEach(i => {
-            Term.formatReset().printEsc(`${USAGE.indent + i.name}`);
+            Term.formatFormatReset().printf(`${USAGE.indent + i.name}`);
             const desc = _get(i.desc);
             if(desc) {
-                if (i.name.length < USAGE.maxSwitchLength) Term.printEsc(' '.repeat(longestDescLength - i.name.length));
-                else Term.printEsc(`\n${USAGE.indent}${' '.repeat(longestDescLength)}`);
-                Term.formatReset().brightBlack().printEsc(`${desc}`);
+                if (i.name.length < USAGE.maxSwitchLength) Term.printf(' '.repeat(longestDescLength - i.name.length));
+                else Term.printf(`\n${USAGE.indent}${' '.repeat(longestDescLength)}`);
+                Term.formatFormatReset().formatBrightBlack().printf(`${desc}`);
             }
-            Term.formatReset().printEsc(`\n`);
+            Term.formatFormatReset().printf(`\n`);
         });
     }
 }
@@ -56,22 +56,22 @@ module.exports.printUsage = (u = {
         longestSwitchLength += USAGE.optionIndent;
         u.options.forEach(o => {
             if (o.switch.length) {
-                if (!optionTitlePrinted) { optionTitlePrinted = true; Term.bold().printEsc(USAGE.header + USAGE.options).formatReset(); }
-                Term.yellow().printEsc(`${USAGE.indent + o.switch}`);
-                if (o.switch.length < USAGE.maxSwitchLength) Term.printEsc(' '.repeat(longestSwitchLength - o.switch.length));
-                else Term.printEsc(`\n${USAGE.indent}${' '.repeat(longestSwitchLength)}`);
-                Term.formatReset().printEsc(`${o.desc}`);
-                if (o.type) Term.cyan().printEsc(`${USAGE.typeIndent}[${o.type}]`);
-                Term.printEsc(USAGE.header);
+                if (!optionTitlePrinted) { optionTitlePrinted = true; Term.formatBold().printf(USAGE.header + USAGE.options).formatFormatReset(); }
+                Term.formatYellow().printf(`${USAGE.indent + o.switch}`);
+                if (o.switch.length < USAGE.maxSwitchLength) Term.printf(' '.repeat(longestSwitchLength - o.switch.length));
+                else Term.printf(`\n${USAGE.indent}${' '.repeat(longestSwitchLength)}`);
+                Term.formatFormatReset().printf(`${o.desc}`);
+                if (o.type) Term.formatCyan().printf(`${USAGE.typeIndent}[${o.type}]`);
+                Term.printf(USAGE.header);
             }
         });
     }
-    Term.printEsc(USAGE.header);
-    if ((u.version && u.version.length) || (u.copyright && u.copyright.length)) Term.printEsc('== ');
-    if (u.version && u.version.length) Term.printEsc(`v${u.version}`);
+    Term.printf(USAGE.header);
+    if ((u.version && u.version.length) || (u.copyright && u.copyright.length)) Term.printf('== ');
+    if (u.version && u.version.length) Term.printf(`v${u.version}`);
     if (u.copyright && u.copyright.length) {
-        if (u.version && u.version.length) Term.printEsc(` - `);
-        Term.printEsc(u.copyright);
+        if (u.version && u.version.length) Term.printf(` - `);
+        Term.printf(u.copyright);
     };
-    if ((u.version && u.version.length) || (u.copyright && u.copyright.length)) Term.printEsc(' ==\n\n');
+    if ((u.version && u.version.length) || (u.copyright && u.copyright.length)) Term.printf(' ==\n\n');
 }
