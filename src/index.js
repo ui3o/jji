@@ -110,7 +110,8 @@ module.exports.jji = async (argv = {}) => {
                 if (currentMenuRef[a].__index__ < currentMenuRef[b].__index__) return -1;
                 return 0;
             }).map(e => { return [currentMenuRef[e].__name__, currentMenuRef[e].__desc__, currentMenuRef[e].__menu_entry__ ? true : false] });
-        menu.setMenu(currentMenuList, menuPath.join('/') + ' ');
+        let mp = []; menuPath.forEach(p => { mp = [...mp, Term.colorCodeGreen, ...p.split(''), Term.colorCodeBrightBlue, ' ', '>', ' '] })
+        menu.setMenu(currentMenuList, mp);
     }
 
     menu.configure.disableProcessExitOnSelect().disableSelectedPrint().disableProcessExitOnExit();
@@ -130,7 +131,7 @@ module.exports.jji = async (argv = {}) => {
                     });
                 } else {
                     Term.clear();
-                    Term.printf(`..::`).formatGreen().printf(` ${menuPath.join('/')}`).formatFormatReset();
+                    Term.printf(`..::`).formatGreen().printf(` ${menuPath.join(`${Term.colorCodeBlue} > ${Term.colorCodeGreen}`)}`).formatFormatReset();
                     Term.printf(` ::..\n`);
                     if (typeof menuCmd[menuCmd.length - 1] === 'function') await menuCmd[menuCmd.length - 1]();
                     else await _(menuCmd.join(' '));

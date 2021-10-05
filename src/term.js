@@ -29,8 +29,11 @@ const Term = {
      */
     putArr: function (arr = []) {
         const that = this._();
-        that.charCount += arr.filter(c => !c.startsWith('\x1b[')).length;
-        that.charList = [...that.charList, ...arr]; return that;
+        if (arr && arr.length) {
+            that.charCount += arr.filter(c => !c.startsWith('\x1b[')).length;
+            that.charList = [...that.charList, ...arr];
+        }
+        return that;
     },
     /**
     * flush the temporary new line buffer
@@ -89,7 +92,7 @@ const Term = {
     bgBrightMagenta: function () { this.charList.push(this.colorCodeBgBrightMagenta); return this; },
     bgBrightCyan: function () { this.charList.push(this.colorCodeBgBrightCyan); return this; },
     bgBrightWhite: function () { this.charList.push(this.colorCodeBgBrightWhite); return this; },
-    
+
     // standalone style print
     formatFormatReset: function () { this.formatStyleReset().formatDefaultColor().formatBgDefaultColor(); return this; },
     formatStyleReset: function () { this.printf('\x1b[0m'); return this; },

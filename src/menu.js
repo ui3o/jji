@@ -28,7 +28,7 @@ const menu = {
 
 const prompt = {
     inputString: [],
-    promptPrefix: '',
+    promptPrefix: [],
     // const variables
     _: () => `${menu.full.menu.length}|${menu.filtered.menu.length}|${menu.filtered.menu.length ? menu.filtered.poi + 1 : menu.filtered.poi}`,
     cursor: { sel: os.platform() === 'win32' ? '>' : '➜', in: " > ", promptChar: '_' }
@@ -83,7 +83,7 @@ const _moveSelection = down => {
  * @param {*} promptPrefix 
  * @param {*} title 
  */
-const setMenu = (_menu = [], promptPrefix = '', title = '?') => {
+const setMenu = (_menu = [], promptPrefix = [], title = '?') => {
     _stopMenuItemBlinking();
     _stopLoading();
     prompt.inputString = [];
@@ -186,8 +186,8 @@ const _menuPrint = ({ inputChar, add } = {}) => {
         const lastPrintedLines = printedLines;
         printedLines = 0;
         Term.home();
-        printedLines += Term.startLine().brightBlue().putStr(menu.title + prompt.cursor.in + prompt.promptPrefix).defaultColor()
-            .putStr(prompt.inputString.join('') + prompt.cursor.promptChar).flush();
+        printedLines += Term.startLine().brightBlue().putStr(menu.title + prompt.cursor.in).formatReset().putArr(prompt.promptPrefix)
+            .formatReset().putStr(prompt.inputString.join('') + prompt.cursor.promptChar).flush();
         printedLines += _newLine(menu.titleHeight);
         menu.visible.menu.forEach((item, index) => {
             if (item.loading > -1)
