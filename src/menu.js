@@ -271,18 +271,6 @@ const _keyHandler = (key) => {
             _reportExit(event.EXITED);
             if (!config.disableProcessExitOnExit) { Term.cursorShow(); process.exit(1); }
             break;
-        case keymap.CTRL_A:
-            showLoading()
-            break;
-        case keymap.CTRL_S:
-            setMenu([
-                ['a item', 'd option'],
-                ['b item', 'e option'],
-                ['c item', 'f option'],
-                ['d item', 'g option'],
-                ['b', undefined, true],
-            ])
-            break;
         case keymap.CTRL_C:
             _reportExit(event.ABORTED);
             if (!config.disableProcessExitOnAbort) { Term.cursorShow(); process.exit(1); }
