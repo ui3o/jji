@@ -125,8 +125,11 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                 if (hasSubMenu()) menuWalker();
                 else if (_currentMenuRef.__menu_entry__ !== undefined) {
                     menu.showLoading();
+                    const __currentPath = menuPath.join('.');
                     _currentMenuRef.__menu_entry__.then((_menu) => {
-                        if (hasSubMenu()) menuWalker();
+                        if(__currentPath === menuPath.join('.')) {
+                            if (hasSubMenu()) menuWalker();
+                        }
                     });
                 } else if (_currentMenuRef.__onload_menu__ !== undefined) {
                     menu.showLoading();
