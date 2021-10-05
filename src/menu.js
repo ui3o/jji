@@ -8,7 +8,8 @@ const menu = {
     },
     filtered: {
         menu: [],
-        poi: 0
+        poi: 0,
+        slice: { start: 0, end: 0 }
     },
     visible: {
         menu: [],
@@ -43,6 +44,13 @@ const config = {
 
 let printedLines = [];
 
+const _setNewFilteredMenu = ({ start, end, cursorToEnd, update } = {}) => {
+    if (start !== undefined) menu.filtered.slice.start = start;
+    if (end !== undefined) menu.filtered.slice.end = end;
+    if (menu.filtered.slice.end === 0) _setNewMenu(menu.filtered.menu.slice(menu.filtered.slice.start), cursorToEnd, update);
+    else _setNewMenu(menu.filtered.menu.slice(menu.filtered.slice.start, menu.filtered.slice.end), cursorToEnd, update);
+}
+
 const _moveSelection = down => {
     if (!menu.visible.menu.length) return;
     const fullPoi = menu.filtered.poi;
@@ -51,8 +59,8 @@ const _moveSelection = down => {
         if (menu.visible.poi === menu.visible.menu.length - 1) {
             const top = fullPoi - menu.maxVisibleCount + 1;
             const windowStart = top < 0 ? 0 : top + 1;
-            if (fullPoi < menu.filtered.menu.length - 1) _setNewMenu(menu.filtered.menu.slice(windowStart, windowStart + menu.maxVisibleCount), true);
-            if (fullPoi === menu.filtered.menu.length - 1) _setNewMenu(menu.filtered.menu.slice(0, menu.maxVisibleCount));
+            if (fullPoi < menu.filtered.menu.length - 1) _setNewFilteredMenu({ start: windowStart, end: windowStart + menu.maxVisibleCount, cursorToEnd: true });
+            if (fullPoi === menu.filtered.menu.length - 1) _setNewFilteredMenu({ start: 0, end: menu.maxVisibleCount });
             return;
         }
     }
@@ -60,8 +68,8 @@ const _moveSelection = down => {
         menu.filtered.poi = menu.filtered.poi === 0 ? menu.filtered.menu.length - 1 : menu.filtered.poi - 1;
         if (menu.visible.poi === 0) {
             const windowStart = fullPoi - 1;
-            if (fullPoi !== 0) _setNewMenu(menu.filtered.menu.slice(windowStart, windowStart + menu.maxVisibleCount));
-            if (fullPoi === 0) _setNewMenu(menu.filtered.menu.slice(0 - menu.maxVisibleCount), true);
+            if (fullPoi !== 0) _setNewFilteredMenu({ start: windowStart, end: windowStart + menu.maxVisibleCount });
+            if (fullPoi === 0) _setNewFilteredMenu({ start: 0 - menu.maxVisibleCount, end: 0, cursorToEnd: true });
             return;
         }
     }
@@ -76,7 +84,7 @@ const _moveSelection = down => {
 /**
  * Example:
  *  setMenu([
- *     ['test1', 'menu for test x item'],
+ *     ['test1', 'menu for test x item', true],
  *     ['test2', 'menu for test x item'],
  * ]);
  * @param {*} _menu 
@@ -102,10 +110,35 @@ const setMenu = (_menu = [], promptPrefix = [], title = '?') => {
     menu.full.menu = formattedMenu;
     menu.filtered.menu = formattedMenu;
     menu.filtered.poi = 0;
-    _setNewMenu(menu.filtered.menu.slice(menu.filtered.poi, menu.maxVisibleCount));
+    _setNewFilteredMenu({ start: menu.filtered.poi, end: menu.maxVisibleCount });
 }
 
-const _setFilteredMenu = () => {
+/**
+ * update existing menu status, specially loading remove
+ * Example:
+ *  updateMenu ([
+ *     ['test1', 'menu for test x item', false],
+ *     ['test2', 'menu for test x item'],
+ * ]);
+ * @param {*} _menu 
+ */
+const updateMenu = (_menu = []) => {
+    _stopMenuItemBlinking();
+    const formattedMenu = [];
+    _menu.forEach((m, index) => {
+        const fm = {
+            title: m[0] !== undefined ? m[0] : '',
+            desc: m[1] !== undefined ? m[1] : '',
+            loading: m[2] !== undefined && m[2] === true ? 0 : -1,
+            index,
+        };
+        formattedMenu.push(fm);
+    });
+    menu.full.menu = formattedMenu;
+    _setFilteredMenu(true);
+}
+
+const _setFilteredMenu = (update) => {
     if (prompt.inputString.length) {
         const input = prompt.inputString.join('').split(' ');
         menu.filtered.menu = [];
@@ -119,13 +152,16 @@ const _setFilteredMenu = () => {
         });
     }
     else menu.filtered.menu = menu.full.menu;
-    menu.filtered.poi = 0;
-    _setNewMenu(menu.filtered.menu.slice(menu.filtered.poi, menu.maxVisibleCount));
+    if (update) _setNewFilteredMenu({ update });
+    else {
+        menu.filtered.poi = 0;
+        _setNewFilteredMenu({ start: menu.filtered.poi, end: menu.maxVisibleCount, update });
+    }
 }
 
 
-const _setNewMenu = (_menu, end) => {
-    menu.visible.poi = end ? menu.visible.menu.length - 1 : 0;
+const _setNewMenu = (_menu, end, update) => {
+    if (!update) menu.visible.poi = end ? menu.visible.menu.length - 1 : 0;
     menu.visible.menu = _menu;
     menu.visible.menu.forEach((item) => {
         if (item.loading > -1) item.loading = 0;
@@ -345,5 +381,5 @@ const event = {
 };
 
 module.exports = {
-    open, close, showLoading, setMenu, event, configure
+    open, close, showLoading, setMenu, updateMenu, event, configure
 }

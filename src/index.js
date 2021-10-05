@@ -102,7 +102,7 @@ module.exports.jji = async (argv = {}) => {
     let currentMenuRef = {};
     let currentMenuList = {};
 
-    function menuWalker() {
+    function menuWalker(update) {
         currentMenuRef = getPath(transformedMenu, menuPath.join('.'));
         currentMenuList = Object.keys(currentMenuRef).filter(e => e !== '__name__' && e !== '__desc__' && e !== '__cmd__' && e !== '__index__')
             .sort((a, b) => {
@@ -111,7 +111,8 @@ module.exports.jji = async (argv = {}) => {
                 return 0;
             }).map(e => { return [currentMenuRef[e].__name__, currentMenuRef[e].__desc__, currentMenuRef[e].__menu_entry__ ? true : false] });
         let mp = []; menuPath.forEach(p => { mp = [...mp, Term.colorCodeGreen, ...p.split(''), Term.colorCodeBrightBlack, ' ', '>', ' '] })
-        menu.setMenu(currentMenuList, mp);
+        if (update) menu.updateMenu(currentMenuList);
+        else menu.setMenu(currentMenuList, mp);
     }
 
     menu.configure.disableProcessExitOnSelect().disableSelectedPrint().disableProcessExitOnExit();
@@ -231,7 +232,7 @@ module.exports.jji = async (argv = {}) => {
                 _currentMenuRef.__menu_entry__.then((_menu) => {
                     delete _currentMenuRef.__menu_entry__;
                     transform(_menu, _currentMenuRef, '', _currentMenuRef.__cmd__ ? [_currentMenuRef.__cmd__] : []);
-                    if (hasSubMenu()) menuWalker();
+                    if (hasSubMenu()) menuWalker(true);
                 });
             } else if (typeof src[key] === 'string' || typeof src[key] === 'function') {
                 transformedObj[key].__cmd__ = src[key];
