@@ -19,7 +19,7 @@ const menu = {
     loadingHandler: undefined,
     blinkHandler: undefined,
     // const variables
-    maxVisibleCount: 3,
+    maxVisibleCount: 5,
     prefix: (index) => menu.visible.poi === index ? prompt.cursor.sel : ' ',
     separator: ' - ',
     title: 'Please select:',
