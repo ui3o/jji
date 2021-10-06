@@ -3,9 +3,9 @@ const path = require('path');
 const { spawnSync, spawn } = require('child_process');
 var os = require('os')
 
-const menu = require('./menu');
-const { Term } = require('./term');
-const { fromDir } = require('./file.finder');
+const menu = require('./src/menu');
+const { Term } = require('./src/term');
+const { fromDir } = require('./src/file.finder');
 
 const isWin = process.platform === "win32";
 

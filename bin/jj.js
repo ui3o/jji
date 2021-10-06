@@ -22,4 +22,4 @@ if (argv.h || argv.help) {
     process.exit(0);
 }
 
-require("../src/index").jji(argv);
+require("../index").jji(argv);
