@@ -73,7 +73,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
     console.log = console.error;
     error = msg => { console.error(`[ERROR] ${msg}`) };
 
-    let jjFiles = argv._.length ? argv._ : [];
+    let jjFiles = argv._ && argv._.length ? argv._ : [];
     let transformedMenu = {};
     initGlobals();
     if (!jjFiles.length) {
