@@ -48,6 +48,62 @@ const Term = {
         that.formatFormatReset();
         return lines;
     },
+    /**
+     * flush the temporary new line buffer and justify words to right
+     */
+    flushJustifyToRight: function (indent = 0) {
+        const that = this._();
+        const width = that.stdout.columns - indent;
+        let lastSpace = 0, charCount = 1, out = '';
+        for (let index = 0; index < that.charList.length; index++) {
+            const c = that.charList[index];
+            if (!c.startsWith('\x1b[')) {
+                if (c === ' ') lastSpace = index;
+                if (charCount && !(charCount % width)) {
+                    if (c === ' ') {
+                        that.charList[index] = '\n';
+                        const line = that.charList.splice(0, index + 1).join('');
+                        index = 0; charCount = 0; lastSpace = 0;
+                        out = out + ' '.repeat(indent) + line;
+                    }
+                    else {
+                        if (index !== that.charList.length - 1) {
+                            that.charList[lastSpace] = '\n';
+                            index = 0;
+                            charCount = 0;
+                            // join and space replace
+                            const line = that.charList.splice(0, lastSpace + 1).join('').split(' ');
+                            lastSpace = 0;
+                            let linePoi = 0, visibleCharCount = 0;
+                            line.join('').split('').forEach(c => { if (!c.startsWith('\x1b[') && !c.startsWith('\n')) visibleCharCount++ });
+                            const needSpace = width - visibleCharCount - line.length - 1;
+                            for (let sPoi = 0; sPoi < needSpace; sPoi++) {
+                                line[linePoi] = `${line[linePoi]} `;
+                                linePoi = line.length === 1 ? 0 : linePoi === line.length - 2 ? 0 : linePoi + 1;
+                            }
+                            out = out + ' '.repeat(indent) + line.join(' ');
+                        } else {
+                            index = 0; charCount = 0;
+                            const line = that.charList.splice(0, lastSpace + 1).join('');
+                            lastSpace = 0;
+                            out = out + ' '.repeat(indent) + line;
+                        }
+                    }
+                } else if (index === that.charList.length - 1) {
+                    index = 0; charCount = 0;
+                    const line = that.charList.length <= width ? that.charList.splice(0).join('') : lastSpace ? that.charList.splice(0, lastSpace + 1).join('') : that.charList.splice(0).join('');
+                    lastSpace = 0;
+                    out = out + ' '.repeat(indent) + line;
+                }
+                charCount++;
+            } else if (index === that.charList.length - 1) {
+                out = out + ' '.repeat(indent) + that.charList.join('');
+            }
+        }
+        that.printf(out);
+        that.formatFormatReset();
+        return that;
+    },
 
     formatReset: function () { this.styleReset().defaultColor().bgDefaultColor(); return this; },
     styleReset: function () { this.charList.push('\x1b[0m'); return this; },

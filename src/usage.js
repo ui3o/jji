@@ -4,7 +4,7 @@ const USAGE = {
     name: 'NAME\n',
     usage: 'USAGE\n',
     options: 'OPTIONS\n',
-    indent: '       ',
+    indent: '    ',
     typeIndent: '   ',
     optionIndent: 4,
     maxSwitchLength: 25,
@@ -28,10 +28,9 @@ const _printTitles = (title, info = []) => {
         info.forEach(i => {
             Term.formatFormatReset().printf(`${USAGE.indent + i.name}`);
             const desc = _get(i.desc);
-            if(desc) {
-                if (i.name.length < USAGE.maxSwitchLength) Term.printf(' '.repeat(longestDescLength - i.name.length));
-                else Term.printf(`\n${USAGE.indent}${' '.repeat(longestDescLength)}`);
-                Term.formatFormatReset().formatBrightBlack().printf(`${desc}`);
+            if (desc) {
+                Term.formatFormatReset().printf('\n');
+                Term.startLine().formatBrightBlack().putStr(`${desc}`).flushJustifyToRight(2 * USAGE.optionIndent);
             }
             Term.formatFormatReset().printf(`\n`);
         });
@@ -57,12 +56,12 @@ module.exports.printUsage = (u = {
         u.options.forEach(o => {
             if (o.switch.length) {
                 if (!optionTitlePrinted) { optionTitlePrinted = true; Term.formatBold().printf(USAGE.header + USAGE.options).formatFormatReset(); }
-                Term.formatYellow().printf(`${USAGE.indent + o.switch}`);
-                if (o.switch.length < USAGE.maxSwitchLength) Term.printf(' '.repeat(longestSwitchLength - o.switch.length));
-                else Term.printf(`\n${USAGE.indent}${' '.repeat(longestSwitchLength)}`);
-                Term.formatFormatReset().printf(`${o.desc}`);
-                if (o.type) Term.formatCyan().printf(`${USAGE.typeIndent}[${o.type}]`);
-                Term.printf(USAGE.header);
+                Term.formatBrightWhite().formatBold().printf(`${USAGE.indent + o.switch}\n`);
+                //if (o.switch.length < USAGE.maxSwitchLength) Term.printf(' '.repeat(longestSwitchLength - o.switch.length));
+                //else Term.printf(`\n${USAGE.indent}${' '.repeat(longestSwitchLength)}`);
+                Term.startLine().formatBrightBlack().putStr(`${o.desc}`);
+                if (o.type) Term.cyan().putStr(` [${o.type}]`);
+                Term.flushJustifyToRight(2 * USAGE.optionIndent).printf('\n');
             }
         });
     }
