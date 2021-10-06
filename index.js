@@ -68,6 +68,18 @@ async function ___(script, onData = (data) => { }) {
     });
 }
 
+// init globals
+global._ = _;
+global.__ = __;
+
+global.$ = function (prom = (res, rej) => { }, desc = '', cmd = '') {
+    return { __desc__: desc, __menu_entry__: new Promise(prom), __cmd__: cmd };
+}
+
+global.$$ = function (prom = (res, rej) => { }, desc = '', cmd = '') {
+    return { __desc__: desc, __onload_menu__: prom, __cmd__: cmd };
+}
+
 module.exports.jji = async (argv = {}, rawMenu = {}) => {
 
     console.log = console.error;
@@ -75,7 +87,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
 
     let jjFiles = argv._ && argv._.length ? argv._ : [];
     let transformedMenu = {};
-    initGlobals();
+
     if (!jjFiles.length) {
         const lookupPath = argv.d ? argv.d : process.cwd();
         const _jjFile = `${lookupPath}/jj.js`;
@@ -273,17 +285,4 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
         });
     }
 
-    function initGlobals() {
-        global._ = _;
-        global.__ = __;
-
-
-        global.$ = function (prom = (res, rej) => { }, desc = '', cmd = '') {
-            return { __desc__: desc, __menu_entry__: new Promise(prom), __cmd__: cmd };
-        }
-
-        global.$$ = function (prom = (res, rej) => { }, desc = '', cmd = '') {
-            return { __desc__: desc, __onload_menu__: prom, __cmd__: cmd };
-        }
-    }
 }
