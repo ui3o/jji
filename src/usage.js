@@ -15,7 +15,7 @@ const _get = (prop = '') => {
     return prop !== undefined && prop.length ? prop : undefined;
 }
 
-const _printTitles = (title, info = []) => {
+const _printTitles = (title, info = [], bold) => {
     if (info.length && _get(info[0].name)) {
         Term.formatBold().printf(USAGE.header + title);
         let longestDescLength = 0;
@@ -26,7 +26,9 @@ const _printTitles = (title, info = []) => {
         });
         longestDescLength += USAGE.optionIndent;
         info.forEach(i => {
-            Term.formatFormatReset().printf(`${USAGE.indent + i.name}`);
+            Term.formatFormatReset();
+            if(bold)Term.formatBrightWhite().formatBold();
+            Term.printf(`${USAGE.indent + i.name}`);
             const desc = _get(i.desc);
             if (desc) {
                 Term.formatFormatReset().printf('\n');
@@ -43,7 +45,7 @@ module.exports.printUsage = (u = {
     copyright: 'copyright@2020', version: '0.0.1'
 }) => {
     _printTitles(USAGE.name, [{ name: u.name }]);
-    _printTitles(USAGE.usage, u.usage);
+    _printTitles(USAGE.usage, u.usage, true);
     if (u.options && u.options.length) {
         let optionTitlePrinted = false;
         let longestSwitchLength = 0;
