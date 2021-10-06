@@ -15,9 +15,11 @@ const menu = {
         menu: [],
         poi: 0
     },
+    initCursorPos: 0,
     loadingPoi: 0,
     loadingHandler: undefined,
     blinkHandler: undefined,
+    clearEnabled: false,
     // const variables
     maxVisibleCount: 5,
     prefix: (index) => menu.visible.poi === index ? ` ${prompt.cursor.sel}  ` : `    `,
@@ -43,7 +45,7 @@ const config = {
     disableProcessExitOnAbort: false,
 };
 
-let printedLines = [];
+let printedLines = 0;
 
 const _setNewFilteredMenu = ({ start, end, cursorToEnd, update } = {}) => {
     if (start !== undefined) menu.filtered.slice.start = start;
@@ -228,8 +230,9 @@ const _menuPrint = ({ inputChar, add } = {}) => {
     }
     else {
         const lastPrintedLines = printedLines;
+        if (menu.clearEnabled) Term.home();
+        else Term.restoreCursor().saveCursor();
         printedLines = 0;
-        Term.home();
         printedLines += Term.startLine().cyan().putStr(menu.title).formatReset().brightBlack().putStr(prompt.cursor.in).formatReset().putArr(prompt.promptPrefix)
             .formatReset().putStr(prompt.inputString.join('') + prompt.cursor.promptChar).flush();
         printedLines += _newLine(menu.titleHeight);
@@ -248,6 +251,7 @@ const _menuPrint = ({ inputChar, add } = {}) => {
         printedLines += Term.startLine().customColor(136).putStr(prompt._()).flush();
         // clear last printed lines
         _clearLasts(lastPrintedLines);
+        if (!menu.initCursorPos) { Term.restoreCursor().previousLine(printedLines - 1).saveCursor(); menu.initCursorPos = -1; }
     }
 }
 
@@ -271,10 +275,12 @@ const _stopLoading = () => {
     menu.loadingHandler = undefined;
 }
 
+
 const _refreshLoading = () => {
     const lastPrintedLines = printedLines;
     printedLines = 0;
-    Term.home();
+    if (menu.clearEnabled) Term.home();
+    else Term.restoreCursor().saveCursor();
     printedLines += Term.startLine().putStr('This menu item is ').brightCyan().putStr(Term.progressBar[menu.loadingPoi])
         .formatReset().putStr(' you can return back to prev menu[ESC] or quit[CTRL+C].').flush();
     menu.loadingPoi = menu.loadingPoi === Term.progressBar.length - 1 ? 0 : menu.loadingPoi + 1;
@@ -303,6 +309,7 @@ const _reportExit = (eventType = event.EXITED) => {
 
 const _keyHandler = (key) => {
     const keyEvent = detectKey(key);
+    if (!menu.clearEnabled) { Term.restoreCursor().eraseDisplayBelow().newScreen(); menu.clearEnabled = true; }
     switch (keyEvent) {
         case keymap.ENTER:
             if (!config.disableSelectedOutputPrint) Term.clear();
@@ -339,15 +346,20 @@ const _keyHandler = (key) => {
 }
 
 const _windowResizeHandler = () => {
+    if (!menu.clearEnabled) { Term.restoreCursor().eraseDisplayBelow().newScreen(); menu.clearEnabled = true; }
     Term.clear();
     _menuPrint();
 }
 
 let _eventListener = undefined;
 
-const open = (eventListener = (event, key) => { }) => {
+const open = async (eventListener = (event, key) => { }) => {
     _eventListener = eventListener;
-    Term.cursorHide().newScreen().clear();
+    const { _, y } = await Term.requestCursorLocation();
+    menu.initCursorPos = y === process.stdout.rows ? 0 : -1;
+    Term.cursorHide();
+    if (menu.clearEnabled) Term.newScreen().clear();
+    else Term.saveCursor();
     process.stdin.on('data', _keyHandler);
     process.stdout.on('resize', _windowResizeHandler);
 }
@@ -373,6 +385,10 @@ const configure = {
     },
     disableProcessExitOnExit: () => {
         config.disableProcessExitOnExit = true;
+        return configure;
+    },
+    enableClearAtTheStart: () => {
+        menu.clearEnabled = true;
         return configure;
     },
 };

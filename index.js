@@ -105,7 +105,6 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
     jjFiles.forEach(f => {
         rawMenu = { ...rawMenu, ...require(f) };
     });
-    transform(rawMenu, transformedMenu);
 
     let menuPath = [];
     let menuCmd = [];
@@ -126,7 +125,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
     }
 
     menu.configure.disableProcessExitOnSelect().disableSelectedPrint().disableProcessExitOnExit();
-    menu.open(async (event, arg) => {
+    await menu.open(async (event, arg) => {
         switch (event) {
             case menu.event.SELECT:
                 const pos = arg;
@@ -183,6 +182,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                 break;
         }
     });
+    transform(rawMenu, transformedMenu);
     menuWalker();
 
     function exit(code) {

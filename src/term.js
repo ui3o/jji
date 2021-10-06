@@ -9,9 +9,19 @@ const Term = {
     newLine: function () { this.printf(' '.repeat(this.stdout.columns)); return this; },
     clear: function () { this.printf(`\x1b[${this.stdout.rows}F\x1b[0J`); return this; },
     home: function () { this.printf(`\x1b[${this.stdout.rows}F`); return this; },
+    previousLine: function (lines) { this.printf(`\x1b[${lines}F`); return this; },
+    eraseDisplayBelow: function () { this.printf(`\x1b[0J`); return this; },
     cursorHide: function () { this.printf(`\x1b[?25l`); return this; },
     cursorShow: function () { this.printf(`\x1b[?25h`); return this; },
-
+    requestCursorLocation: function () {
+        return new Promise((res) => {
+            process.stdin.once("data", data => {
+                const raw = data.split('[')[1].replace('R', '').split(';');
+                res({ x: parseInt(raw[1]), y: parseInt(raw[0]) });
+            })
+            this.printf(`\x1b[6n`);
+        });
+    },
     /**
      * print format
      */
