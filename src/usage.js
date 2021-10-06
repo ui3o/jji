@@ -57,8 +57,6 @@ module.exports.printUsage = (u = {
             if (o.switch.length) {
                 if (!optionTitlePrinted) { optionTitlePrinted = true; Term.formatBold().printf(USAGE.header + USAGE.options).formatFormatReset(); }
                 Term.formatBrightWhite().formatBold().printf(`${USAGE.indent + o.switch}\n`);
-                //if (o.switch.length < USAGE.maxSwitchLength) Term.printf(' '.repeat(longestSwitchLength - o.switch.length));
-                //else Term.printf(`\n${USAGE.indent}${' '.repeat(longestSwitchLength)}`);
                 Term.startLine().formatBrightBlack().putStr(`${o.desc}`);
                 if (o.type) Term.cyan().putStr(` [${o.type}]`);
                 Term.flushJustifyToRight(2 * USAGE.optionIndent).printf('\n');
