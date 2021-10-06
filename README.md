@@ -19,7 +19,7 @@ This tool aims to make an easy menu system to organize your cli workflow.
 
 * possible to run script from `jj.js` or `*.jj.js`
 * if the working folder contains *.jj.js possible to sort with number. ex. *.0.jj,js *.1.jj,js
-* prompt base submenu system, please check the [example/jj.js#1](example/jj.js#1)
+* prompt base submenu system, please check the [example/demo/jj.js#1](example/demo/jj.js#1)
 * search in the menu (in the name and description)
 * all **script runs** inside a *bash* shell
 * provided global functions:
@@ -35,7 +35,7 @@ This tool aims to make an easy menu system to organize your cli workflow.
 
 # Examples
 
-Examples are located in [example](example/jj.js).
+Examples are located in [example](example/demo/jj.js).
 
 # Dependencies
 
