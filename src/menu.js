@@ -245,7 +245,7 @@ const _menuPrint = ({ inputChar, add } = {}) => {
             printedLines += Term.flush();
         });
         printedLines += _newLine(menu.footerHeight);
-        printedLines += Term.startLine().brightBlack().putStr(prompt._()).flush();
+        printedLines += Term.startLine().customColor(136).putStr(prompt._()).flush();
         // clear last printed lines
         _clearLasts(lastPrintedLines);
     }
