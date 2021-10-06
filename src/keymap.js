@@ -192,6 +192,10 @@ Object.entries(_keymap).forEach(key => {
     }
 })
 
+module.exports.isCursorPos = (key) => {
+    return key.match(/\x1B\[\d+;\d+R/gi) === null ? false : true;
+}
+
 module.exports.detectKey = (key) => {
     const index = flatKeymapValues.findIndex(k => k === key);
     return index > -1 ? flatKeymapKeys[index] : undefined;

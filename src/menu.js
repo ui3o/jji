@@ -1,5 +1,5 @@
 const os = require('os');
-const { keymap, detectKey, getVisibleCharacters } = require("./keymap");
+const { keymap, detectKey, getVisibleCharacters, isCursorPos } = require("./keymap");
 const { Term } = require('./term');
 
 const menu = {
@@ -15,7 +15,7 @@ const menu = {
         menu: [],
         poi: 0
     },
-    initCursorPos: 0,
+    virtualCursorPos: 0,
     loadingPoi: 0,
     loadingHandler: undefined,
     blinkHandler: undefined,
@@ -251,7 +251,10 @@ const _menuPrint = ({ inputChar, add } = {}) => {
         printedLines += Term.startLine().customColor(136).putStr(prompt._()).flush();
         // clear last printed lines
         _clearLasts(lastPrintedLines);
-        if (!menu.initCursorPos) { Term.restoreCursor().previousLine(printedLines - 1).saveCursor(); menu.initCursorPos = -1; }
+        if (menu.virtualCursorPos !== 1 && !menu.clearEnabled) {
+            if (menu.virtualCursorPos + printedLines - 1 >= process.stdout.rows) Term.previousLine(printedLines - 1).saveCursor();
+            menu.virtualCursorPos = process.stdout.rows - printedLines + 1;
+        }
     }
 }
 
@@ -308,6 +311,7 @@ const _reportExit = (eventType = event.EXITED) => {
 }
 
 const _keyHandler = (key) => {
+    if (isCursorPos(key)) return;
     const keyEvent = detectKey(key);
     if (!menu.clearEnabled) { Term.restoreCursor().eraseDisplayBelow().newScreen(); menu.clearEnabled = true; }
     switch (keyEvent) {
@@ -346,9 +350,15 @@ const _keyHandler = (key) => {
 }
 
 const _windowResizeHandler = () => {
-    if (!menu.clearEnabled) { Term.restoreCursor().eraseDisplayBelow().newScreen(); menu.clearEnabled = true; }
-    Term.clear();
-    _menuPrint();
+    if (!menu.clearEnabled) {
+        if (menu.virtualCursorPos + printedLines - 1 >= process.stdout.rows) Term.previousLine(printedLines - 1).saveCursor();
+        if (!menu.clearEnabled) { Term.restoreCursor().eraseDisplayBelow().newScreen(); menu.clearEnabled = true; }
+        Term.clear();
+        _menuPrint();
+    } else {
+        Term.clear();
+        _menuPrint();
+    }
 }
 
 let _eventListener = undefined;
@@ -356,8 +366,8 @@ let _eventListener = undefined;
 const open = async (eventListener = (event, key) => { }) => {
     _eventListener = eventListener;
     const { _, y } = await Term.requestCursorLocation();
-    menu.initCursorPos = y === process.stdout.rows ? 0 : -1;
-    Term.cursorHide();
+    menu.virtualCursorPos = y;
+    //Term.cursorHide();
     if (menu.clearEnabled) Term.newScreen().clear();
     else Term.saveCursor();
     process.stdin.on('data', _keyHandler);
