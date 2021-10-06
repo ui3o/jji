@@ -74,6 +74,7 @@ const Term = {
     brightMagenta: function () { this.charList.push(this.colorCodeBrightMagenta); return this; },
     brightCyan: function () { this.charList.push(this.colorCodeBrightCyan); return this; },
     brightWhite: function () { this.charList.push(this.colorCodeBrightWhite); return this; },
+    customColor: function (code) { this.charList.push(`\x1b[38;5;${code}m`); return this; },
 
     bgDefaultColor: function () { this.charList.push(this.colorCodeBgDefaultColor); return this; },
     bgBlack: function () { this.charList.push(this.colorCodeBgBlack); return this; },
@@ -92,6 +93,7 @@ const Term = {
     bgBrightMagenta: function () { this.charList.push(this.colorCodeBgBrightMagenta); return this; },
     bgBrightCyan: function () { this.charList.push(this.colorCodeBgBrightCyan); return this; },
     bgBrightWhite: function () { this.charList.push(this.colorCodeBgBrightWhite); return this; },
+    customBgColor: function (code) { this.charList.push(`\x1b[48;5;${code}m`); return this; },
 
     // standalone style print
     formatFormatReset: function () { this.formatStyleReset().formatDefaultColor().formatBgDefaultColor(); return this; },
@@ -119,6 +121,7 @@ const Term = {
     formatBrightMagenta: function () { this.printf(this.colorCodeBrightMagenta); return this; },
     formatBrightCyan: function () { this.printf(this.colorCodeBrightCyan); return this; },
     formatBrightWhite: function () { this.printf(this.colorCodeBrightWhite); return this; },
+    formatCustomColor: function (code) { this.printf(`\x1b[38;5;${code}m`); return this; },
 
     // Background color print
     formatBgDefaultColor: function () { this.printf(this.colorCodeBgDefaultColor); return this; },
@@ -138,6 +141,7 @@ const Term = {
     formatBgBrightMagenta: function () { this.printf(this.colorCodeBgBrightMagenta); return this; },
     formatBgBrightCyan: function () { this.printf(this.colorCodeBgBrightCyan); return this; },
     formatBgBrightWhite: function () { this.printf(this.colorCodeBgBrightWhite); return this; },
+    formatCustomBgColor: function (code) { this.printf(`\x1b[48;5;${code}m`); return this; },
 
     // Foreground color
     colorCodeDefaultColor: '\x1b[39m',
