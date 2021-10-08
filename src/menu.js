@@ -205,13 +205,15 @@ const _highlightFiltered = (str = "", defaultColor = Term.colorCodeDefaultColor)
     return highlighted;
 }
 
-const _jumpHome = () => {
+const jumpHome = () => {
     if (printedCharsCount) {
         const columns = Term.stdout.columns;
         const extra = printedCharsCount % columns;
         const toAdd = extra ? columns - extra : extra;
         const lines = (toAdd + printedCharsCount) / columns;
         Term.previousLine(lines - 1);
+        // if one line length move down one === beginning of the line  
+        if (lines === 1) Term.printf('\x1b[1B');
     }
 }
 
@@ -231,7 +233,7 @@ const _menuPrint = ({ inputChar, add } = {}) => {
         _setFilteredMenu();
     }
     else {
-        _jumpHome();
+        jumpHome();
         printedLinesCount = printedCharsCount = 0;
         var out = Term.startLine().cyan().putStr(menu.title).formatReset().brightBlack().putStr(prompt.cursor.in).formatReset().putArr(prompt.promptPrefix)
             .formatReset().putStr(prompt.inputString.join('') + prompt.cursor.promptChar).flush();
@@ -279,7 +281,7 @@ const _stopLoading = () => {
 
 
 const _refreshLoading = () => {
-    _jumpHome();
+    jumpHome();
     printedLinesCount = printedCharsCount = 0;
     const out = Term.startLine().putStr('This menu item is ').brightCyan().putStr(Term.progressBar[menu.loadingPoi])
         .formatReset().putStr(' you can return back to prev menu[ESC] or quit[CTRL+C].').flush();
@@ -299,11 +301,11 @@ const showLoading = () => {
 
 const _reportExit = (eventType = event.EXITED) => {
     if (eventType === event.EXITED) {
-        if (!config.disableSelectedOutputPrint) Term.clear();
+        if (!config.disableSelectedOutputPrint) { jumpHome(); Term.eraseDisplayBelow(); }
         if (!config.disableSelectedOutputPrint) Term.printf(`[selected] = [none]\n`);
         _eventListener(eventType);
     } else {
-        Term.clear();
+        jumpHome(); Term.eraseDisplayBelow();
         if (!config.disableSelectedOutputPrint) Term.printf(`[selected] = [none]\n`);
     }
 }
@@ -313,7 +315,7 @@ const _keyHandler = (key) => {
     const keyEvent = detectKey(key);
     switch (keyEvent) {
         case keymap.ENTER:
-            if (!config.disableSelectedOutputPrint) Term.clear();
+            if (!config.disableSelectedOutputPrint) { jumpHome(); Term.eraseDisplayBelow(); }
             if (menu.filtered.menu.length) {
                 if (!config.disableSelectedOutputPrint) Term.printf(`[selected] = ${menu.filtered.menu[menu.filtered.poi].title}\n`);
                 if (!config.disableProcessExitOnSelect) { Term.cursorShow(); process.exit(); }
@@ -338,6 +340,9 @@ const _keyHandler = (key) => {
         case keymap.BACKSPACE:
             _menuPrint({ add: false });
             break;
+        case keymap.CTRL_S:
+            showLoading()
+            break;
         default:
             const visibleKey = getVisibleCharacters(key);
             if (visibleKey) _menuPrint({ add: true, inputChar: key });
@@ -354,7 +359,7 @@ let _eventListener = undefined;
 
 const open = async (eventListener = (event, key) => { }) => {
     _eventListener = eventListener;
-    Term.cursorHide();
+    //Term.cursorHide();
     process.stdin.on('data', _keyHandler);
     process.stdout.on('resize', _windowResizeHandler);
 }
@@ -397,5 +402,5 @@ const event = {
 };
 
 module.exports = {
-    open, close, showLoading, setMenu, updateMenu, event, configure
+    open, close, showLoading, setMenu, updateMenu, event, configure, jumpHome
 }

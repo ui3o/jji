@@ -153,7 +153,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                     });
 
                 } else {
-                    Term.clear();
+                    menu.jumpHome(); Term.eraseDisplayBelow();
                     Term.printf(`..::`).formatGreen().printf(` ${menuPath.join(`${Term.colorCodeBrightBlack} > ${Term.colorCodeGreen}`)}`).formatFormatReset();
                     Term.printf(` ::..\n`);
                     if (typeof menuCmd[menuCmd.length - 1] === 'function') await menuCmd[menuCmd.length - 1]();
@@ -163,7 +163,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                 break;
             case menu.event.EXITED:
                 if (!menuPath.length) {
-                    Term.clear();
+                    menu.jumpHome(); Term.eraseDisplayBelow();
                     exit(1);
                 }
                 const __currentMenuRef = getPath(transformedMenu, menuPath.join('.'));
