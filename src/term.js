@@ -52,11 +52,12 @@ const Term = {
         const that = this._();
         const columns = that.stdout.columns;
         const extra = columns - that.charCount % columns;
+        const chars = extra + that.charCount;
         const lines = (extra + that.charCount) / columns;
         const out = [...that.charList, ...' '.repeat(extra)];
         that.printf(out.join(''));
         that.formatFormatReset();
-        return lines;
+        return { lines, chars };
     },
     /**
      * flush the temporary new line buffer and justify words to right

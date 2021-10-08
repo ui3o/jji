@@ -15,11 +15,9 @@ const menu = {
         menu: [],
         poi: 0
     },
-    virtualCursorPos: 0,
     loadingPoi: 0,
     loadingHandler: undefined,
     blinkHandler: undefined,
-    clearEnabled: false,
     // const variables
     maxVisibleCount: 5,
     prefix: (index) => menu.visible.poi === index ? ` ${prompt.cursor.sel}  ` : `    `,
@@ -45,7 +43,7 @@ const config = {
     disableProcessExitOnAbort: false,
 };
 
-let printedLines = 0;
+let printedLinesCount = 0, printedCharsCount = 0;
 
 const _setNewFilteredMenu = ({ start, end, cursorToEnd, update } = {}) => {
     if (start !== undefined) menu.filtered.slice.start = start;
@@ -207,17 +205,21 @@ const _highlightFiltered = (str = "", defaultColor = Term.colorCodeDefaultColor)
     return highlighted;
 }
 
+const _jumpHome = () => {
+    if (printedCharsCount) {
+        const columns = Term.stdout.columns;
+        const extra = printedCharsCount % columns;
+        const toAdd = extra ? columns - extra : extra;
+        const lines = (toAdd + printedCharsCount) / columns;
+        Term.previousLine(lines - 1);
+    }
+}
+
 // generate new line
 const _newLine = (line = 0) => {
     for (let index = 0; index < line; index++)
         Term.newLine();
     return line;
-}
-
-const _clearLasts = (lastPrintedLines = 0) => {
-    // clear last printed lines
-    const lineDiff = lastPrintedLines - printedLines;
-    if (lineDiff > 0) _newLine(lineDiff);
 }
 
 const _menuPrint = ({ inputChar, add } = {}) => {
@@ -229,13 +231,12 @@ const _menuPrint = ({ inputChar, add } = {}) => {
         _setFilteredMenu();
     }
     else {
-        const lastPrintedLines = printedLines;
-        if (menu.clearEnabled) Term.home();
-        else Term.restoreCursor().saveCursor();
-        printedLines = 0;
-        printedLines += Term.startLine().cyan().putStr(menu.title).formatReset().brightBlack().putStr(prompt.cursor.in).formatReset().putArr(prompt.promptPrefix)
+        _jumpHome();
+        printedLinesCount = printedCharsCount = 0;
+        var out = Term.startLine().cyan().putStr(menu.title).formatReset().brightBlack().putStr(prompt.cursor.in).formatReset().putArr(prompt.promptPrefix)
             .formatReset().putStr(prompt.inputString.join('') + prompt.cursor.promptChar).flush();
-        printedLines += _newLine(menu.titleHeight);
+        printedLinesCount += out.lines; printedCharsCount += out.chars;
+        printedLinesCount += _newLine(menu.titleHeight); printedCharsCount += menu.titleHeight * process.stdout.columns;
         menu.visible.menu.forEach((item, index) => {
             if (item.loading > -1)
                 Term.startLine().green().putStr(menu.prefix(index)).defaultColor().brightBlack().putArr(_highlightFiltered(item.title, Term.colorCodeBrightBlack));
@@ -245,16 +246,14 @@ const _menuPrint = ({ inputChar, add } = {}) => {
             if (item.lazy) Term.formatReset().brightMagenta().putStr(` [${menu.lazyTitle}]`).formatReset();
             if (item.loading > -1) Term.formatReset().brightCyan().putStr(` [${Term.progressBar[item.loading]}]`).formatReset();
             if (item.loading > -1 && !menu.blinkHandler) _startMenuItemBlinking();
-            printedLines += Term.flush();
+            var out = Term.flush();
+            printedLinesCount += out.lines; printedCharsCount += out.chars;
         });
-        printedLines += _newLine(menu.footerHeight);
-        printedLines += Term.startLine().customColor(136).putStr(prompt._()).flush();
+        printedLinesCount += _newLine(menu.footerHeight); printedCharsCount += menu.footerHeight * process.stdout.columns;
+        var out = Term.startLine().customColor(136).putStr(prompt._()).flush();
+        printedLinesCount += out.lines; printedCharsCount += out.chars;
         // clear last printed lines
-        _clearLasts(lastPrintedLines);
-        if (menu.virtualCursorPos !== 1 && !menu.clearEnabled) {
-            if (menu.virtualCursorPos + printedLines - 1 >= process.stdout.rows) Term.previousLine(printedLines - 1).saveCursor();
-            menu.virtualCursorPos = process.stdout.rows - printedLines + 1;
-        }
+        Term.eraseDisplayBelow();
     }
 }
 
@@ -280,14 +279,13 @@ const _stopLoading = () => {
 
 
 const _refreshLoading = () => {
-    const lastPrintedLines = printedLines;
-    printedLines = 0;
-    if (menu.clearEnabled) Term.home();
-    else Term.restoreCursor().saveCursor();
-    printedLines += Term.startLine().putStr('This menu item is ').brightCyan().putStr(Term.progressBar[menu.loadingPoi])
+    _jumpHome();
+    printedLinesCount = printedCharsCount = 0;
+    const out = Term.startLine().putStr('This menu item is ').brightCyan().putStr(Term.progressBar[menu.loadingPoi])
         .formatReset().putStr(' you can return back to prev menu[ESC] or quit[CTRL+C].').flush();
+    printedLinesCount += out.lines; printedCharsCount += out.chars;
     menu.loadingPoi = menu.loadingPoi === Term.progressBar.length - 1 ? 0 : menu.loadingPoi + 1;
-    _clearLasts(lastPrintedLines)
+    Term.eraseDisplayBelow();
 }
 
 const showLoading = () => {
@@ -313,7 +311,6 @@ const _reportExit = (eventType = event.EXITED) => {
 const _keyHandler = (key) => {
     if (isCursorPos(key)) return;
     const keyEvent = detectKey(key);
-    if (!menu.clearEnabled) { Term.restoreCursor().eraseDisplayBelow().newScreen(); menu.clearEnabled = true; }
     switch (keyEvent) {
         case keymap.ENTER:
             if (!config.disableSelectedOutputPrint) Term.clear();
@@ -350,26 +347,14 @@ const _keyHandler = (key) => {
 }
 
 const _windowResizeHandler = () => {
-    if (!menu.clearEnabled) {
-        if (menu.virtualCursorPos + printedLines - 1 >= process.stdout.rows) Term.previousLine(printedLines - 1).saveCursor();
-        if (!menu.clearEnabled) { Term.restoreCursor().eraseDisplayBelow().newScreen(); menu.clearEnabled = true; }
-        Term.clear();
-        _menuPrint();
-    } else {
-        Term.clear();
-        _menuPrint();
-    }
+    _menuPrint();
 }
 
 let _eventListener = undefined;
 
 const open = async (eventListener = (event, key) => { }) => {
     _eventListener = eventListener;
-    const { _, y } = await Term.requestCursorLocation();
-    menu.virtualCursorPos = y;
-    //Term.cursorHide();
-    if (menu.clearEnabled) Term.newScreen().clear();
-    else Term.saveCursor();
+    Term.cursorHide();
     process.stdin.on('data', _keyHandler);
     process.stdout.on('resize', _windowResizeHandler);
 }
@@ -396,11 +381,7 @@ const configure = {
     disableProcessExitOnExit: () => {
         config.disableProcessExitOnExit = true;
         return configure;
-    },
-    enableClearAtTheStart: () => {
-        menu.clearEnabled = true;
-        return configure;
-    },
+    }
 };
 
 // init stdin
