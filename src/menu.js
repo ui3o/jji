@@ -352,6 +352,7 @@ const _keyHandler = (key) => {
 }
 
 const _windowResizeHandler = () => {
+    Term.cursorHide();
     _menuPrint();
 }
 
