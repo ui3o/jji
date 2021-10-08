@@ -359,7 +359,7 @@ let _eventListener = undefined;
 
 const open = async (eventListener = (event, key) => { }) => {
     _eventListener = eventListener;
-    //Term.cursorHide();
+    Term.cursorHide();
     process.stdin.on('data', _keyHandler);
     process.stdout.on('resize', _windowResizeHandler);
 }
