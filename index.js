@@ -118,8 +118,9 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                 if (currentMenuRef[a].__index__ > currentMenuRef[b].__index__) return 1;
                 if (currentMenuRef[a].__index__ < currentMenuRef[b].__index__) return -1;
                 return 0;
-            }).map(e => { return [currentMenuRef[e].__name__, currentMenuRef[e].__desc__, currentMenuRef[e].__menu_entry__ ? 1 : currentMenuRef[e].__onload_menu__ ? 2 : 0] });
-        let mp = []; menuPath.forEach(p => { mp = [...mp, Term.colorCodeGreen, ...p.split(''), Term.colorCodeBrightBlack, ' ', '>', ' '] })
+            }).map(
+                e => { return [currentMenuRef[e].__name__, currentMenuRef[e].__desc__, currentMenuRef[e].__menu_entry__ ? 1 : currentMenuRef[e].__onload_menu__ ? 2 : currentMenuRef[e].__cmd__ === null ? 3 : 0] });
+        let mp = []; menuPath.forEach(p => { mp = [...mp, Term.colorCodeBold, Term.colorCodeBrightWhite, ...p.split(''), Term.colorCodeStyleReset, Term.colorCodeBrightBlack, ' ', '>', ' '] })
         if (update) menu.updateMenu(currentMenuList);
         else menu.setMenu(currentMenuList, mp);
     }
@@ -133,8 +134,12 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                 menuPath.push(_name);
                 menuCmd.push(currentMenuRef[_name].__cmd__);
                 const _currentMenuRef = getPath(transformedMenu, menuPath.join('.'));
-                if (hasSubMenu()) menuWalker();
-                else if (_currentMenuRef.__menu_entry__ !== undefined) {
+                if (_currentMenuRef.__cmd__ === null) {
+                    menuPath.pop();
+                    menuCmd.pop();
+                } else if (hasSubMenu()) {
+                    menuWalker();
+                } else if (_currentMenuRef.__menu_entry__ !== undefined) {
                     menu.showLoading();
                     const __currentPath = menuPath.join('.');
                     _currentMenuRef.__menu_entry__.then((_menu) => {
@@ -151,10 +156,9 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                             if (hasSubMenu()) menuWalker();
                         }
                     });
-
                 } else {
                     menu.jumpHome(); Term.eraseDisplayBelow();
-                    Term.printf(`..::`).formatGreen().printf(` ${menuPath.join(`${Term.colorCodeBrightBlack} > ${Term.colorCodeGreen}`)}`).formatFormatReset();
+                    Term.printf(`..::`).formatBold().formatBrightWhite().printf(` ${menuPath.join(`${Term.colorCodeStyleReset + Term.colorCodeBrightBlack} > ${Term.colorCodeBold + Term.colorCodeBrightWhite}`)}`).formatFormatReset();
                     Term.printf(` ::..\n`);
                     if (typeof menuCmd[menuCmd.length - 1] === 'function') await menuCmd[menuCmd.length - 1]();
                     else await _(menuCmd.join(' '));
@@ -235,9 +239,10 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                     exit(2);
                 } else if (_entry.length === 2) {
                     transformedObj[key].__desc__ = _entry[0];
-                    if (typeof _entry[1] === 'object') transform(_entry[1], dest, _path, _cmdList);
+                    if (typeof _entry[1] === 'object' && _entry[1] !== null) transform(_entry[1], dest, _path, _cmdList);
                     else {
-                        transformedObj[key].__cmd__ = typeTransform(_entry[1], _path);
+                        if (_entry[1] === null) transformedObj[key].__cmd__ = null;
+                        else transformedObj[key].__cmd__ = typeTransform(_entry[1], _path);
                         _cmdList = [..._cmdList, transformedObj[key].__cmd__];
                     }
                 } else if (_entry.length === 3) {
@@ -253,7 +258,9 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                     console.log(`\nWrong format on ".${_path}"! Too big array maximum 3 item is allowed!`);
                     exit(2);
                 }
-
+            } else if (typeof src[key] === 'object' && src[key] === null) {
+                transformedObj[key].__cmd__ = null;
+                _cmdList = [..._cmdList, transformedObj[key].__cmd__];
             } else if (typeof src[key] === 'object' && src[key].__menu_entry__ !== undefined) {
                 transformedObj[key].__desc__ = src[key].__desc__;
                 transformedObj[key].__menu_entry__ = src[key].__menu_entry__;
@@ -278,7 +285,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
             }
             // check cmd equals
             const allCmd = _cmdList.map(c => { return typeof c !== 'string' });
-            if (!allCmd.every(c => c === false) && !allCmd.every(c => c === true)) {
+            if (!allCmd.every(c => c === false) && !allCmd.every(c => c === true) && _cmdList[_cmdList.length - 1] !== null) {
                 console.log(`\nWrong format on ".${_path}"! On the path not all cmd is same type! Use just string or just function!`);
                 exit(2);
             }

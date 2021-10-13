@@ -121,6 +121,7 @@ const Term = {
     bold: function () { this.charList.push('\x1b[1m'); return this; },
     italic: function () { this.charList.push('\x1b[3m'); return this; },
     underline: function () { this.charList.push('\x1b[4m'); return this; },
+    inverse: function () { this.charList.push('\x1b[7m'); return this; },
     strike: function () { this.charList.push('\x1b[9m'); return this; },
 
     // colors
@@ -168,6 +169,7 @@ const Term = {
     formatBold: function () { this.printf('\x1b[1m'); return this; },
     formatItalic: function () { this.printf('\x1b[3m'); return this; },
     formatUnderline: function () { this.printf('\x1b[4m'); return this; },
+    formatInverse: function () { this.printf('\x1b[7m'); return this; },
     formatStrike: function () { this.printf('\x1b[9m'); return this; },
 
     // Foreground color print
@@ -211,6 +213,13 @@ const Term = {
     formatCustomBgColor: function (code) { this.printf(`\x1b[48;5;${code}m`); return this; },
 
     // Foreground color
+    colorCodeStyleReset: '\x1b[0m',
+    colorCodeBold: '\x1b[1m',
+    colorCodeItalic: '\x1b[3m',
+    colorCodeUnderline: '\x1b[4m',
+    colorCodeInverse: '\x1b[7m',
+    colorCodeStrike: '\x1b[9m',
+ 
     colorCodeDefaultColor: '\x1b[39m',
     colorCodeBlack: '\x1b[30m',
     colorCodeRed: '\x1b[31m',
@@ -228,6 +237,8 @@ const Term = {
     colorCodeBrightMagenta: '\x1b[95m',
     colorCodeBrightCyan: '\x1b[96m',
     colorCodeBrightWhite: '\x1b[97m',
+    colorCodeCustomColor: function (code) { return `\x1b[38;5;${code}m`; },
+
 
     // Background color
     colorCodeBgDefaultColor: '\x1b[49m',
@@ -247,6 +258,7 @@ const Term = {
     colorCodeBgBrightMagenta: '\x1b[105m',
     colorCodeBgBrightCyan: '\x1b[106m',
     colorCodeBgBrightWhite: '\x1b[107m',
+    colorCodeCustomBgColor: function (code) { return `\x1b[48;5;${code}m`; },
 
     progressBar: [
         "loading   ",

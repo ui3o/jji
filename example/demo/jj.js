@@ -35,3 +35,5 @@ module.exports.run = ["run simple javascript code", () => { console.log('simple1
 module.exports.run_and_parse = ["run and echo and parse output", () => {
     const a = __`sleep 3 && echo done && echo other done other`; console.log(a[0][0]);
 }]
+module.exports.simple_null = null;
+module.exports.null_with_desc = ["not selectable menu item", null];

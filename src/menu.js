@@ -92,6 +92,7 @@ const _moveSelection = down => {
  *   * 0 - normal menu
  *   * 1 - loading menu, at the program start the menu start to load
  *   * 2 - lazy menu, every menu enter the menu sub menu reloading
+ *   * 3 - readonly - not selectable menu item
  * @param {*} _menu 
  * @param {*} promptPrefix 
  * @param {*} title 
@@ -109,6 +110,7 @@ const setMenu = (_menu = [], promptPrefix = [], title = '?') => {
             desc: m[1] !== undefined ? m[1] : '',
             loading: m[2] !== undefined && m[2] === 0 ? -1 : m[2] !== undefined && m[2] === 1 ? 0 : -1,
             lazy: m[2] !== undefined && m[2] === 2 ? true : false,
+            readonly: m[2] !== undefined && m[2] === 3 ? true : false,
             index,
         };
         formattedMenu.push(fm);
@@ -138,6 +140,7 @@ const updateMenu = (_menu = []) => {
             desc: m[1] !== undefined ? m[1] : '',
             loading: m[2] !== undefined && m[2] === 0 ? -1 : m[2] !== undefined && m[2] === 1 ? 0 : -1,
             lazy: m[2] !== undefined && m[2] === 2 ? true : false,
+            readonly: m[2] !== undefined && m[2] === 3 ? true : false,
             index,
         };
         formattedMenu.push(fm);
@@ -187,7 +190,7 @@ const _findHighlights = (str = "", searchFor = "", splitted = [], offset = 0) =>
         _findHighlights(str.substring(index + searchFor.length, str.length), searchFor, splitted, offset + index + searchFor.length);
 }
 
-const _highlightFiltered = (str = "", defaultColor = Term.colorCodeDefaultColor) => {
+const _highlightFiltered = (str = "", defaultColor = Term.colorCodeDefaultColor, highlightColor = Term.colorCodeYellow) => {
     const splitted = str.split('').map(c => { return { c, h: false } });
     if (!prompt.inputString.length) return splitted.map(char => { return char.c });
     const input = prompt.inputString.join('').split(' ');
@@ -198,7 +201,7 @@ const _highlightFiltered = (str = "", defaultColor = Term.colorCodeDefaultColor)
     let started = false;
     const highlighted = [];
     splitted.forEach(char => {
-        if (char.h && !started) { highlighted.push(Term.colorCodeYellow); started = true; }
+        if (char.h && !started) { highlighted.push(highlightColor); started = true; }
         if (!char.h && started) { highlighted.push(defaultColor); started = false; }
         highlighted.push(char.c);
     });
@@ -240,13 +243,16 @@ const _menuPrint = ({ inputChar, add } = {}) => {
         printedLinesCount += out.lines; printedCharsCount += out.chars;
         printedLinesCount += _newLine(menu.titleHeight); printedCharsCount += menu.titleHeight * process.stdout.columns;
         menu.visible.menu.forEach((item, index) => {
-            if (item.loading > -1)
-                Term.startLine().green().putStr(menu.prefix(index)).defaultColor().brightBlack().putArr(_highlightFiltered(item.title, Term.colorCodeBrightBlack));
+            Term.startLine().customColor(39).putStr(menu.prefix(index));
+            if (menu.visible.poi === index) Term.customColor(81);
+            if (item.loading > -1 || item.readonly)
+                Term.brightBlack().putArr(_highlightFiltered(item.title, Term.colorCodeBrightBlack, Term.colorCodeCustomColor(180)));
             else
-                Term.startLine().green().putStr(menu.prefix(index)).defaultColor().putArr(_highlightFiltered(item.title));
-            if (item.desc.length) Term.brightBlack().putStr(menu.separator).putArr(_highlightFiltered(item.desc, Term.colorCodeBrightBlack));
-            if (item.lazy) Term.formatReset().brightMagenta().putStr(` [${menu.lazyTitle}]`).formatReset();
-            if (item.loading > -1) Term.formatReset().brightCyan().putStr(` [${Term.progressBar[item.loading]}]`).formatReset();
+                Term.putArr(_highlightFiltered(item.title, Term.colorCodeCustomColor(39), Term.colorCodeCustomColor(180)));
+            Term.formatReset();
+            if (item.desc.length) Term.brightBlack().putStr(menu.separator).putArr(_highlightFiltered(item.desc, Term.colorCodeBrightBlack, Term.colorCodeCustomColor(180)));
+            if (item.lazy) Term.brightMagenta().putStr(` [${menu.lazyTitle}]`).formatReset();
+            if (item.loading > -1) Term.brightCyan().putStr(` [${Term.progressBar[item.loading]}]`).formatReset();
             if (item.loading > -1 && !menu.blinkHandler) _startMenuItemBlinking();
             var out = Term.flush();
             printedLinesCount += out.lines; printedCharsCount += out.chars;
