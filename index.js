@@ -1,7 +1,8 @@
 const { existsSync } = require('fs');
 const path = require('path');
 const { spawnSync, spawn } = require('child_process');
-var os = require('os')
+const os = require('os')
+const readline = require('readline');
 
 const menu = require('./src/menu');
 const { Term } = require('./src/term');
@@ -84,8 +85,18 @@ global.jj = { prop: { stayInMenu: false } };
 global.jj.stay = function () {
     global.jj.prop.stayInMenu = true;
 }
+
 global.jj.home = function () {
     global.jj.prop.jumpHome = true;
+}
+
+global.jj.rl = function () {
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout, });
+    return new Promise(res => {
+        rl.on('line', function (line) {
+            res(line);
+        })
+    });
 }
 
 module.exports.jji = async (argv = {}, rawMenu = {}) => {

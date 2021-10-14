@@ -35,6 +35,11 @@ module.exports.multiline = {
 module.exports.run = ["run simple javascript code", () => { console.log('simple1 eval') }]
 module.exports.run_eval_and_stay = ["run simple javascript code and stay in the same level in the menu", () => { console.log('simple eval and reopen the menu'); jj.stay() }]
 module.exports.run_eval_and_home = ["run simple javascript code and jump to root level in the menu", () => { console.log('simple eval and jump to root in the menu'); jj.home() }]
+module.exports.run_eval_and_readline = ["run simple javascript code and read line inside", async () => {
+    process.stdout.write('Please type your name: ');
+    const name = await jj.rl();
+    console.log(`Hi ${name}!`); jj.stay()
+}]
 module.exports.run_and_parse = ["run and echo and parse output", () => {
     const a = __`sleep 3 && echo done && echo other done other`; console.log(a[0][0]);
 }]
