@@ -1,13 +1,14 @@
-const { a } = require('./simple.module');
+const { test_from_simple } = require('./simple.module');
 
 process.env.HELLO = 'hello';
 process.env.WORLD = 'world';
 
-module.exports.use_require_in_jj_js = a
+module.exports.use_require_in_jj_js = test_from_simple
 module.exports.sub_menu_test = [`sub menu test description`, {
     run: ['run comment', 'echo', {
         a: 'if only one string param exist that will be the command',
-        b: 'if string is specified the program join them and run'
+        b: 'if string is specified the program join them and run',
+        c: ['if the command is null that means not selectable, just an information', null]
     }],
     eval: ['description: eval a javascript code', () => { console.log('simple eval') }],
     find: [`find files desc`, `find . -type f -exec echo file from jj.js: {} \\;`],
@@ -32,6 +33,8 @@ module.exports.multiline = {
                 done`]
 }
 module.exports.run = ["run simple javascript code", () => { console.log('simple1 eval') }]
+module.exports.run_eval_and_stay = ["run simple javascript code and stay in the same level in the menu", () => { console.log('simple eval and reopen the menu'); jj.stay() }]
+module.exports.run_eval_and_home = ["run simple javascript code and jump to root level in the menu", () => { console.log('simple eval and jump to root in the menu'); jj.home() }]
 module.exports.run_and_parse = ["run and echo and parse output", () => {
     const a = __`sleep 3 && echo done && echo other done other`; console.log(a[0][0]);
 }]

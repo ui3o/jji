@@ -80,8 +80,17 @@ global.$$ = function (prom = (res, rej) => { }, desc = '', cmd = '') {
     return { __desc__: desc, __onload_menu__: prom, __cmd__: cmd };
 }
 
+global.jj = { prop: { stayInMenu: false } };
+global.jj.stay = function () {
+    global.jj.prop.stayInMenu = true;
+}
+global.jj.home = function () {
+    global.jj.prop.jumpHome = true;
+}
+
 module.exports.jji = async (argv = {}, rawMenu = {}) => {
 
+    const MENU_SEPARATOR = '<<>>';
     console.log = console.error;
     error = msg => { console.error(`[ERROR] ${msg}`) };
 
@@ -112,7 +121,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
     let currentMenuList = {};
 
     function menuWalker(update) {
-        currentMenuRef = getPath(transformedMenu, menuPath.join('.'));
+        currentMenuRef = getPath(transformedMenu, menuPath.join(MENU_SEPARATOR));
         currentMenuList = Object.keys(currentMenuRef).filter(e => e !== '__name__' && e !== '__desc__' && e !== '__cmd__' && e !== '__index__' && e !== '__menu_entry__' && e !== '__onload_menu__')
             .sort((a, b) => {
                 if (currentMenuRef[a].__index__ > currentMenuRef[b].__index__) return 1;
@@ -133,7 +142,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                 const _name = currentMenuList[pos][0];
                 menuPath.push(_name);
                 menuCmd.push(currentMenuRef[_name].__cmd__);
-                const _currentMenuRef = getPath(transformedMenu, menuPath.join('.'));
+                const _currentMenuRef = getPath(transformedMenu, menuPath.join(MENU_SEPARATOR));
                 if (_currentMenuRef.__cmd__ === null) {
                     menuPath.pop();
                     menuCmd.pop();
@@ -141,17 +150,17 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                     menuWalker();
                 } else if (_currentMenuRef.__menu_entry__ !== undefined) {
                     menu.showLoading();
-                    const __currentPath = menuPath.join('.');
+                    const __currentPath = menuPath.join(MENU_SEPARATOR);
                     _currentMenuRef.__menu_entry__.then((_menu) => {
-                        if (__currentPath === menuPath.join('.')) {
+                        if (__currentPath === menuPath.join(MENU_SEPARATOR)) {
                             if (hasSubMenu()) menuWalker();
                         }
                     });
                 } else if (_currentMenuRef.__onload_menu__ !== undefined) {
                     menu.showLoading();
-                    const __currentPath = menuPath.join('.');
+                    const __currentPath = menuPath.join(MENU_SEPARATOR);
                     new Promise(_currentMenuRef.__onload_menu__).then((_menu) => {
-                        if (__currentPath === menuPath.join('.')) {
+                        if (__currentPath === menuPath.join(MENU_SEPARATOR)) {
                             transform(_menu, _currentMenuRef, '', _currentMenuRef.__cmd__ ? [_currentMenuRef.__cmd__] : []);
                             if (hasSubMenu()) menuWalker();
                         }
@@ -160,8 +169,10 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                     menu.jumpHome(); Term.eraseDisplayBelow();
                     Term.printf(`..::`).formatBold().formatBrightWhite().printf(` ${menuPath.join(`${Term.colorCodeStyleReset + Term.colorCodeBrightBlack} > ${Term.colorCodeBold + Term.colorCodeBrightWhite}`)}`).formatFormatReset();
                     Term.printf(` ::..\n`);
+                    menu.mute();
                     if (typeof menuCmd[menuCmd.length - 1] === 'function') await menuCmd[menuCmd.length - 1]();
                     else await _(menuCmd.join(' '));
+                    menu.unmute();
                     exit(0);
                 }
                 break;
@@ -170,7 +181,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                     menu.jumpHome(); Term.eraseDisplayBelow();
                     exit(1);
                 }
-                const __currentMenuRef = getPath(transformedMenu, menuPath.join('.'));
+                const __currentMenuRef = getPath(transformedMenu, menuPath.join(MENU_SEPARATOR));
                 // remove menu item from __onload_menu__
                 if (__currentMenuRef.__onload_menu__ !== undefined) {
                     const _currentMenuList = Object.keys(__currentMenuRef).filter(e => e !== '__name__' && e !== '__desc__' && e !== '__cmd__' && e !== '__index__' && e !== '__menu_entry__' && e !== '__onload_menu__');
@@ -190,12 +201,24 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
     menuWalker();
 
     function exit(code) {
+        if (code === 0) {
+            if (global.jj.prop.stayInMenu) {
+                if (menuPath.length) { menuPath.pop(); menuCmd.pop(); }
+                if (hasSubMenu()) menuWalker(true);
+                return;
+            } else if (global.jj.prop.jumpHome) {
+                global.jj.prop.jumpHome = false;
+                menuPath = []; menuCmd = [];
+                menuWalker();
+                return;
+            }
+        }
         menu.close();
         process.exit(code);
     }
 
     function hasSubMenu() {
-        const _currentMenuRef = getPath(transformedMenu, menuPath.join('.'));
+        const _currentMenuRef = getPath(transformedMenu, menuPath.join(MENU_SEPARATOR));
         currentMenuList = Object.keys(_currentMenuRef).filter(e => e !== '__name__' && e !== '__desc__' && e !== '__cmd__' && e !== '__index__' && e !== '__menu_entry__' && e !== '__onload_menu__');
         return currentMenuList.length ? true : false;
     }
@@ -216,7 +239,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
 
     function getPath(obj, path = '') {
         if (path.length) {
-            path = path.split('.');
+            path = path.split(MENU_SEPARATOR);
             for (var i = 0; i < path.length; i++) {
                 obj = obj[path[i]];
             }
@@ -226,7 +249,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
 
     function transform(src, dest, path = '', cmdList = []) {
         Object.keys(src).forEach((key, index) => {
-            const _path = path.length ? `${path}.${key}` : key;
+            const _path = path.length ? `${path + MENU_SEPARATOR + key}` : key;
             const transformedObj = getPath(dest, path);
             let _cmdList = [...cmdList];
             transformedObj[key] = {};

@@ -27,6 +27,10 @@ This tool aims to make an easy menu system to organize your cli workflow.
   * `__` which run a simple script, but output is not printed and parsed. Example:`` const a = __`sleep 3 && echo done && echo other done other`; console.log(a[0][0]) ``
   * `$` for a later load menu, which means the Promise start after the program start. First parameter is a promise call back function, the second is  a description, the third is a command. Example:`$((res, rej)=>{}, 'description', 'echo')`
   * `$$` for a lazy load menu, which means when you enter into the menu the Promise start after the enter. First parameter is a promise call back function, the second is  a description, the third is a command. Example:`$((res, rej)=>{}, 'description', 'echo')`
+  * `jj` for a jj global function access. In your javascript code you van use the followings:
+    * `jj.home()` which wil reopen the menu on the top (root) level after the function finish
+    * `jj.stay()` which wil reopen the menu on the same level after the function finish
+
 * menu control keys:
   * **select**: enter
   * **one level up**: esc

@@ -41,6 +41,7 @@ const config = {
     disableSelectedOutputPrint: false,
     disableProcessExitOnExit: false,
     disableProcessExitOnAbort: false,
+    mute: false,
 };
 
 let printedLinesCount = 0, printedCharsCount = 0;
@@ -317,6 +318,7 @@ const _reportExit = (eventType = event.EXITED) => {
 }
 
 const _keyHandler = (key) => {
+    if (config.mute) return;
     if (isCursorPos(key)) return;
     const keyEvent = detectKey(key);
     switch (keyEvent) {
@@ -358,6 +360,7 @@ const _keyHandler = (key) => {
 }
 
 const _windowResizeHandler = () => {
+    if (config.mute) return;
     Term.cursorHide();
     _menuPrint();
 }
@@ -365,6 +368,11 @@ const _windowResizeHandler = () => {
 let _eventListener = undefined;
 
 const open = async (eventListener = (event, key) => { }) => {
+    // init stdin
+    process.stdin.setRawMode(true);
+    process.stdin.resume();
+    process.stdin.setEncoding('utf8');
+
     _eventListener = eventListener;
     Term.cursorHide();
     process.stdin.on('data', _keyHandler);
@@ -375,6 +383,17 @@ const close = () => {
     Term.cursorShow();
     process.stdin.removeListener('data', _keyHandler);
     process.stdout.removeListener('resize', _windowResizeHandler);
+}
+
+const mute = () => {
+    Term.cursorShow();
+    config.mute = true;
+}
+
+const unmute = () => {
+    Term.cursorHide();
+    config.mute = false;
+    printedLinesCount = printedCharsCount = 0;
 }
 
 const configure = {
@@ -396,11 +415,6 @@ const configure = {
     }
 };
 
-// init stdin
-process.stdin.setRawMode(true);
-process.stdin.resume();
-process.stdin.setEncoding('utf8');
-
 const event = {
     KEY: 'KEY', // one keymap event followed
     SELECT: 'SELECT', // one poi number followed 
@@ -409,5 +423,5 @@ const event = {
 };
 
 module.exports = {
-    open, close, showLoading, setMenu, updateMenu, event, configure, jumpHome
+    open, close, showLoading, setMenu, updateMenu, event, configure, jumpHome, mute, unmute
 }
