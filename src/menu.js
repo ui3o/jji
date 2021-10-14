@@ -158,7 +158,7 @@ const _setFilteredMenu = (update) => {
         menu.full.menu.forEach(m => {
             let includes = true;
             input.forEach(inp => {
-                if (includes && !(m.title.includes(inp) || m.desc.includes(inp)))
+                if (includes && !(m.title.toLowerCase().includes(inp.toLowerCase()) || m.desc.toLowerCase().includes(inp.toLowerCase())))
                     includes = false;
             });
             if (includes) menu.filtered.menu.push(m);
@@ -197,7 +197,7 @@ const _highlightFiltered = (str = "", defaultColor = Term.colorCodeDefaultColor,
     if (!prompt.inputString.length) return splitted.map(char => { return char.c });
     const input = prompt.inputString.join('').split(' ');
     input.forEach(inp => {
-        if (inp.length && str.includes(inp)) _findHighlights(str, inp, splitted);
+        if (inp.length && str.toLowerCase().includes(inp.toLowerCase())) _findHighlights(str, inp, splitted);
     });
     // group highlights
     let started = false;
