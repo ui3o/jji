@@ -3,7 +3,7 @@ const { test_from_simple } = require('./simple.module');
 process.env.HELLO = 'hello';
 process.env.WORLD = 'world';
 
-module.exports.use_require_in_jj_js = test_from_simple
+module.exports.USE_require_in_jj_js = test_from_simple
 module.exports.sub_menu_test = [`sub menu test description`, {
     run: ['run comment', 'echo', {
         a: 'if only one string param exist that will be the command',

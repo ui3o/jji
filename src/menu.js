@@ -184,7 +184,7 @@ const _setNewMenu = (_menu, end, update) => {
 
 
 const _findHighlights = (str = "", searchFor = "", splitted = [], offset = 0) => {
-    const index = str.indexOf(searchFor);
+    const index = str.toLowerCase().indexOf(searchFor);
     if (index < 0) return;
     // mark highlights
     for (let pos = 0; pos < searchFor.length; pos++)splitted[index + pos + offset].h = true;
@@ -193,12 +193,11 @@ const _findHighlights = (str = "", searchFor = "", splitted = [], offset = 0) =>
 }
 
 const _highlightFiltered = (str = "", defaultColor = Term.colorCodeDefaultColor, highlightColor = Term.colorCodeYellow) => {
-    str = str.toLowerCase();
     const splitted = str.split('').map(c => { return { c, h: false } });
     if (!prompt.inputString.length) return splitted.map(char => { return char.c });
     const input = prompt.inputString.join('').toLowerCase().split(' ');
     input.forEach(inp => {
-        if (inp.length && str.includes(inp)) _findHighlights(str, inp, splitted);
+        if (inp.length && str.toLowerCase().includes(inp)) _findHighlights(str, inp, splitted);
     });
     // group highlights
     let started = false;
