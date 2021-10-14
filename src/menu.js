@@ -245,12 +245,14 @@ const _menuPrint = ({ inputChar, add } = {}) => {
         printedLinesCount += out.lines; printedCharsCount += out.chars;
         printedLinesCount += _newLine(menu.titleHeight); printedCharsCount += menu.titleHeight * process.stdout.columns;
         menu.visible.menu.forEach((item, index) => {
-            Term.startLine().customColor(39).putStr(menu.prefix(index));
+            Term.startLine();
             if (menu.visible.poi === index) Term.customColor(81);
+            else Term.customColor(39);
+            Term.putStr(menu.prefix(index));
             if (item.loading > -1 || item.readonly)
                 Term.brightBlack().putArr(_highlightFiltered(item.title, Term.colorCodeBrightBlack, Term.colorCodeCustomColor(180)));
             else
-                Term.putArr(_highlightFiltered(item.title, Term.colorCodeCustomColor(39), Term.colorCodeCustomColor(180)));
+                Term.putArr(_highlightFiltered(item.title, menu.visible.poi === index ? Term.colorCodeCustomColor(81) : Term.colorCodeCustomColor(39), Term.colorCodeCustomColor(180)));
             Term.formatReset();
             if (item.desc.length) Term.brightBlack().putStr(menu.separator).putArr(_highlightFiltered(item.desc, Term.colorCodeBrightBlack, Term.colorCodeCustomColor(180)));
             if (item.lazy) Term.brightMagenta().putStr(` [${menu.lazyTitle}]`).formatReset();
