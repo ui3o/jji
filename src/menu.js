@@ -153,12 +153,12 @@ const updateMenu = (_menu = []) => {
 
 const _setFilteredMenu = (update) => {
     if (prompt.inputString.length) {
-        const input = prompt.inputString.join('').split(' ');
+        const input = prompt.inputString.join('').toLowerCase().split(' ');
         menu.filtered.menu = [];
         menu.full.menu.forEach(m => {
             let includes = true;
             input.forEach(inp => {
-                if (includes && !(m.title.toLowerCase().includes(inp.toLowerCase()) || m.desc.toLowerCase().includes(inp.toLowerCase())))
+                if (includes && !(m.title.toLowerCase().includes(inp) || m.desc.toLowerCase().includes(inp)))
                     includes = false;
             });
             if (includes) menu.filtered.menu.push(m);
@@ -193,11 +193,12 @@ const _findHighlights = (str = "", searchFor = "", splitted = [], offset = 0) =>
 }
 
 const _highlightFiltered = (str = "", defaultColor = Term.colorCodeDefaultColor, highlightColor = Term.colorCodeYellow) => {
+    str = str.toLowerCase();
     const splitted = str.split('').map(c => { return { c, h: false } });
     if (!prompt.inputString.length) return splitted.map(char => { return char.c });
-    const input = prompt.inputString.join('').split(' ');
+    const input = prompt.inputString.join('').toLowerCase().split(' ');
     input.forEach(inp => {
-        if (inp.length && str.toLowerCase().includes(inp.toLowerCase())) _findHighlights(str, inp, splitted);
+        if (inp.length && str.includes(inp)) _findHighlights(str, inp, splitted);
     });
     // group highlights
     let started = false;
