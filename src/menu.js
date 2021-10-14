@@ -15,6 +15,7 @@ const menu = {
         menu: [],
         poi: 0
     },
+    readInputMode: { enabled: false, line: [], question: '' },
     loadingPoi: 0,
     loadingHandler: undefined,
     blinkHandler: undefined,
@@ -232,7 +233,7 @@ const _menuPrint = ({ inputChar, add } = {}) => {
     if (menu.loadingHandler) return;
     if (add !== undefined) {
         _stopMenuItemBlinking();
-        if (add === true) prompt.inputString.push(inputChar);
+        if (add === true) { inputChar.split('').forEach(c => { prompt.inputString.push(c) }); };
         if (add === false) prompt.inputString.pop();
         _setFilteredMenu();
     }
@@ -305,7 +306,6 @@ const showLoading = () => {
     }, 500);
 }
 
-
 const _reportExit = (eventType = event.EXITED) => {
     if (eventType === event.EXITED) {
         if (!config.disableSelectedOutputPrint) { jumpHome(); Term.eraseDisplayBelow(); }
@@ -318,11 +318,11 @@ const _reportExit = (eventType = event.EXITED) => {
 }
 
 const _keyHandler = (key) => {
-    if (config.mute) return;
     if (isCursorPos(key)) return;
     const keyEvent = detectKey(key);
     switch (keyEvent) {
         case keymap.ENTER:
+            if (menu.loadingHandler || menu.readInputMode.enabled || config.mute) break;
             if (!config.disableSelectedOutputPrint) { jumpHome(); Term.eraseDisplayBelow(); }
             if (menu.filtered.menu.length) {
                 if (!config.disableSelectedOutputPrint) Term.printf(`[selected] = ${menu.filtered.menu[menu.filtered.poi].title}\n`);
@@ -331,6 +331,7 @@ const _keyHandler = (key) => {
             }
             break;
         case keymap.ESCAPE:
+            if (menu.readInputMode.enabled || config.mute) break;
             _reportExit(event.EXITED);
             if (!config.disableProcessExitOnExit) { Term.cursorShow(); process.exit(1); }
             break;
@@ -339,23 +340,57 @@ const _keyHandler = (key) => {
             if (!config.disableProcessExitOnAbort) { Term.cursorShow(); process.exit(1); }
             break;
         case keymap.UP:
+            if (menu.loadingHandler || menu.readInputMode.enabled || config.mute) break;
             _moveSelection(false)
             break;
         case keymap.DOWN:
         case keymap.TAB:
+            if (menu.loadingHandler || menu.readInputMode.enabled || config.mute) break;
             _moveSelection(true)
             break;
         case keymap.BACKSPACE:
+            if (menu.loadingHandler || menu.readInputMode.enabled || config.mute) break;
             _menuPrint({ add: false });
             break;
-        case keymap.CTRL_S:
-            showLoading()
-            break;
         default:
+            if (menu.loadingHandler || menu.readInputMode.enabled || config.mute) break;
             const visibleKey = getVisibleCharacters(key);
             if (visibleKey) _menuPrint({ add: true, inputChar: key });
             _eventListener(event.KEY, keyEvent);
             break;
+    }
+}
+
+const _refreshInputReader = () => {
+    jumpHome();
+    printedLinesCount = printedCharsCount = 0;
+    const out = Term.startLine().putStr(menu.readInputMode.question).putStr(menu.readInputMode.line.join('')).putStr(prompt.cursor.promptChar).flush();
+    printedLinesCount += out.lines; printedCharsCount += out.chars;
+    Term.eraseDisplayBelow();
+}
+
+const _inputReadHandler = (key) => {
+    if (menu.readInputMode.enabled) {
+        const keyEvent = detectKey(key);
+        switch (keyEvent) {
+            case keymap.ENTER:
+                menu.readInputMode.enabled = false;
+                _readLineListener(event.LINE, menu.readInputMode.line.join(''));
+                break;
+            case keymap.BACKSPACE:
+                menu.readInputMode.line.pop();
+                _refreshInputReader();
+                break;
+            default:
+                const visibleKey = getVisibleCharacters(key);
+                if (visibleKey) {
+                    visibleKey.split('').forEach(k => {
+                        menu.readInputMode.line.push(k);
+                    })
+                    _refreshInputReader();
+                }
+                break;
+        }
     }
 }
 
@@ -366,6 +401,16 @@ const _windowResizeHandler = () => {
 }
 
 let _eventListener = undefined;
+let _readLineListener = undefined;
+
+const readLine = async (eventListener = (event, key) => { }, question = '') => {
+    _readLineListener = eventListener;
+    printedLinesCount = printedCharsCount = 0;
+    menu.readInputMode.line = [];
+    menu.readInputMode.question = question;
+    menu.readInputMode.enabled = true;
+    _refreshInputReader();
+}
 
 const open = async (eventListener = (event, key) => { }) => {
     // init stdin
@@ -375,17 +420,20 @@ const open = async (eventListener = (event, key) => { }) => {
 
     _eventListener = eventListener;
     Term.cursorHide();
+    process.stdin.on('data', _inputReadHandler);
     process.stdin.on('data', _keyHandler);
     process.stdout.on('resize', _windowResizeHandler);
 }
 
 const close = () => {
     Term.cursorShow();
+    process.stdin.removeListener('data', _inputReadHandler);
     process.stdin.removeListener('data', _keyHandler);
     process.stdout.removeListener('resize', _windowResizeHandler);
 }
 
 const mute = () => {
+    printedLinesCount = printedCharsCount = 0;
     Term.cursorShow();
     config.mute = true;
 }
@@ -416,6 +464,7 @@ const configure = {
 };
 
 const event = {
+    LINE: 'LINE', // one string followed
     KEY: 'KEY', // one keymap event followed
     SELECT: 'SELECT', // one poi number followed 
     ABORTED: 'ABORTED', // no param - on CTRL-C  
@@ -423,5 +472,5 @@ const event = {
 };
 
 module.exports = {
-    open, close, showLoading, setMenu, updateMenu, event, configure, jumpHome, mute, unmute
+    open, close, showLoading, setMenu, updateMenu, event, configure, jumpHome, mute, unmute, readLine
 }

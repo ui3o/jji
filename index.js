@@ -90,12 +90,11 @@ global.jj.home = function () {
     global.jj.prop.jumpHome = true;
 }
 
-global.jj.rl = function () {
-    const rl = readline.createInterface({ input: process.stdin, output: process.stdout, });
+global.jj.rl = function (question = '') {
     return new Promise(res => {
-        rl.on('line', function (line) {
+        menu.readLine((_event, line) => {
             res(line);
-        })
+        }, question);
     });
 }
 

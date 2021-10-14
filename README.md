@@ -30,7 +30,7 @@ This tool aims to make an easy menu system to organize your cli workflow.
   * `jj` for a jj global function access. In your javascript code you van use the followings:
     * `jj.home()` which will reopen the menu on the top (root) level after the function finish
     * `jj.stay()` which will reopen the menu on the same level after the function finish
-    * `const rl = await jj.rl()` which will read a line from stdin
+    * `const rl = await jj.rl('Type your name')` which will read a line from stdin. One parameter is the question.
 
 * menu control keys:
   * **select**: enter
