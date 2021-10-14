@@ -81,7 +81,7 @@ global.$$ = function (prom = (res, rej) => { }, desc = '', cmd = '') {
     return { __desc__: desc, __onload_menu__: prom, __cmd__: cmd };
 }
 
-global.jj = { prop: { stayInMenu: false } };
+global.jj = { prop: { stayInMenu: false, jumpHome: false } };
 global.jj.stay = function () {
     global.jj.prop.stayInMenu = true;
 }
@@ -213,6 +213,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
     function exit(code) {
         if (code === 0) {
             if (global.jj.prop.stayInMenu) {
+                global.jj.prop.stayInMenu = false;
                 if (menuPath.length) { menuPath.pop(); menuCmd.pop(); }
                 if (hasSubMenu()) menuWalker(true);
                 return;
