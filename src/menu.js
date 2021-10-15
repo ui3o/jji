@@ -345,6 +345,10 @@ const _keyHandler = (key) => {
             if (menu.loadingHandler || menu.readInputMode.enabled || config.mute) break;
             _moveSelection(false)
             break;
+        case keymap.CTRL_L:
+            Term.clear();
+            _menuPrint();
+            break;
         case keymap.DOWN:
         case keymap.TAB:
             if (menu.loadingHandler || menu.readInputMode.enabled || config.mute) break;

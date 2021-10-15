@@ -14,6 +14,7 @@ if (argv.h || argv.help) {
         ],
         options: [
             { desc: "read *.jj.js files from specified working directory", switch: '-d', type: 'string' },
+            { desc: 'print extra log to stderr', switch: '-x', type: 'boolean' },
             { desc: 'show help', switch: '-h, --help', type: 'boolean' },
         ],
         version: packageJson.version,

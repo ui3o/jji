@@ -37,6 +37,7 @@ This tool aims to make an easy menu system to organize your cli workflow.
   * **one level up**: esc
   * **on top level**: esc equals exit
   * **terminate**: ctrl+c
+  * **clear screen**: ctrl+l
 
 # Examples
 

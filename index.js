@@ -98,11 +98,12 @@ global.jj.rl = function (question = '') {
     });
 }
 
+
 module.exports.jji = async (argv = {}, rawMenu = {}) => {
 
     const MENU_SEPARATOR = '<<>>';
-    console.log = console.error;
-    error = msg => { console.error(`[ERROR] ${msg}`) };
+    const exitError = msg => { console.error(`\n[ERROR] ${msg}`) };
+    const error = msg => { if (argv.x) console.error(`[ERROR] ${msg}`) };
 
     let jjFiles = argv._ && argv._.length ? argv._ : [];
     let transformedMenu = {};
@@ -236,13 +237,13 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
 
     function typeTransform(entry, path) {
         if (typeof entry === 'function' && entry.length) {
-            console.log(`\nWrong format on ".${path}"! Use function without parameters !`);
+            exitError(`Wrong format on ".${path}"! Use function without parameters !`);
             exit(2);
         }
         if (typeof entry === 'function' || typeof entry === 'string') {
             return entry;
         } else if (typeof entry === 'object' && entry.then !== undefined) {
-            console.log(`\nWrong format on ".${path}"! Do not use Promise! Use async function!`);
+            exitError(`Wrong format on ".${path}"! Do not use Promise! Use async function!`);
             exit(2);
         }
         return undefined;
@@ -269,7 +270,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
             if (typeof src[key] === 'object' && Array.isArray(src[key])) {
                 const _entry = src[key];
                 if (_entry.length === 1) {
-                    console.log(`\nWrong format on ".${_path}"! Use equals and not use one array with one element!`);
+                    exitError(`Wrong format on ".${_path}"! Use equals and not use one array with one element!`);
                     exit(2);
                 } else if (_entry.length === 2) {
                     transformedObj[key].__desc__ = _entry[0];
@@ -285,11 +286,11 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                     _cmdList = [..._cmdList, transformedObj[key].__cmd__];
                     if (typeof _entry[2] === 'object') transform(_entry[2], dest, _path, _cmdList);
                     else {
-                        console.log(`\nWrong format on ".${_path}"! The third (3) item has to be an object!`);
+                        exitError(`Wrong format on ".${_path}"! The third (3) item has to be an object!`);
                         exit(2);
                     }
                 } else if (_entry.length > 3) {
-                    console.log(`\nWrong format on ".${_path}"! Too big array maximum 3 item is allowed!`);
+                    exitError(`Wrong format on ".${_path}"! Too big array maximum 3 item is allowed!`);
                     exit(2);
                 }
             } else if (typeof src[key] === 'object' && src[key] === null) {
@@ -320,7 +321,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
             // check cmd equals
             const allCmd = _cmdList.map(c => { return typeof c !== 'string' });
             if (!allCmd.every(c => c === false) && !allCmd.every(c => c === true) && _cmdList[_cmdList.length - 1] !== null) {
-                console.log(`\nWrong format on ".${_path}"! On the path not all cmd is same type! Use just string or just function!`);
+                exitError(`Wrong format on ".${_path}"! On the path not all cmd is same type! Use just string or just function!`);
                 exit(2);
             }
         });
