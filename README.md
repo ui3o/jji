@@ -43,7 +43,8 @@ This tool aims to make an easy menu system to organize your cli workflow.
   * '`_`': which run a simple script. The output simple printed:``_`echo hello wold` ``
   * '`__`' which run a simple script, but output is not printed and parsed. Example:`` const a = __`sleep 3 && echo done && echo other done other`; console.log(a[0][0]) ``
   * '`$`' for a later load menu, which means the Promise start after the program start. First parameter is a promise call back function, the second is  a description, the third is a command. Example:`$((res, rej)=>{}, {options})`
-  * '`$$`' for a lazy load menu, which means when you enter into the menu the Promise start after the enter. First parameter is a promise call back function, the second is  a description, the third is a command. Example:`$((res, rej)=>{}, {options})`
+  * '`$$`' for a lazy load menu, which means when you enter into the menu the Promise start after the enter. First parameter is a promise call back function, the second is  a description, the third is a command. Example:`$$((res, rej)=>{}, {options})`
+  * '`$$$`' for a option extend, which means only the extra options extends the original function. Example:`$$$((res, rej)=>{}, {options})`
   * all command which are functions, can have options:
     * **__noPrintOnSelect** means when execute the command no header will be printed after the selection. [example/real/jj.js#26](example/real/jj.js#26)
   * `jj` for a jj global function access. In your javascript code you van use the followings:

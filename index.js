@@ -93,6 +93,16 @@ global.$$ = function (prom = (res, rej) => { }, options = {}) {
     Object.keys(options).forEach(k => { prom[k] = options[k] })
     return { __onload_menu__: prom };
 }
+/**
+ * Add options to a single function
+ * @param {*} func 
+ * @param {*} options 
+ * @returns 
+ */
+global.$$$ = function (func = () => { }, options = {}) {
+    Object.keys(options).forEach(k => { func[k] = options[k] })
+    return func;
+}
 
 global.jj = { prop: { stayInMenu: false, jumpHome: false } };
 global.jj.stay = function () {
