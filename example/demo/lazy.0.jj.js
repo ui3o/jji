@@ -12,5 +12,5 @@ module.exports.lazy_test = $$((res) => {
                 }, 3000);
             }, 'load async menu item')
         })
-    }, 3000);
+    }, 1400);
 }, 'load lazy menu item')

@@ -3,12 +3,41 @@ const { test_from_simple } = require('./simple.module');
 process.env.HELLO = 'hello';
 process.env.WORLD = 'world';
 
+module.exports.prom = $$(async (res) => {
+    const a = await __`sleep 10`
+    const menu = {
+        a: ['a menu', () => {
+            process.stdout.write('this is new line\n')
+            jj.stay();
+        }]
+    }
+
+    setTimeout(() => {
+        res(menu)
+    }, 6000);
+})
 module.exports.USE_require_in_jj_js = test_from_simple
 module.exports.sub_menu_test = [`sub menu test description`, {
     run: ['run comment', 'echo', {
         a: 'if only one string param exist that will be the command',
         b: 'if string is specified the program join them and run',
-        c: ['if the command is null that means not selectable, just an information', null]
+        c: ['if the command is null that means not selectable, just an information', null],
+        lazy_test: ['load lazy menu item', $$((res) => {
+            setTimeout(() => {
+                res({
+                    simple_echo: "echo lazy test",
+                    simple_eval_a_function: () => { console.log('simple eval'); _`sleep 3 && echo hello world`; },
+                    async_load: ['load async menu item', $((res) => {
+                        setTimeout(() => {
+                            res({
+                                echo_test: "echo lazy test",
+                                eval_test: () => { console.log('simple eval'); _`sleep 3 && echo hello world`; },
+                            })
+                        }, 3000);
+                    })]
+                })
+            }, 1411);
+        })]
     }],
     eval: ['description: eval a javascript code', () => { console.log('simple eval') }],
     find: [`find files desc`, `find . -type f -exec echo file from jj.js: {} \\;`],

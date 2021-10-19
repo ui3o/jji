@@ -1,6 +1,6 @@
 const { existsSync } = require('fs');
 const path = require('path');
-const { spawnSync, spawn } = require('child_process');
+const { spawn } = require('child_process');
 const os = require('os')
 const readline = require('readline');
 
@@ -11,7 +11,7 @@ const { fromDir } = require('./src/file.finder');
 const isWin = process.platform === "win32";
 
 /**
- * spawnSync a command
+ * spawn a command
  * 
  * @param {*} script script to execute
  * @returns 
@@ -26,11 +26,14 @@ function _(...args) {
         });
     }
     const script = out.join('');
-    if (isWin) spawnSync('cmd.exe', ['/c', 'bash', '-c', script], { stdio: 'inherit' });
-    else spawnSync('bash', ['-c', script], { stdio: 'inherit' });
+    const cmd = isWin ? spawn('cmd.exe', ['/c', 'bash', '-c', script], { stdio: 'inherit' }) :
+        spawn('bash', ['-c', script], { stdio: 'inherit' });
+    return new Promise((resolve) => {
+        cmd.on('close', (code) => resolve(code));
+    });
 }
 /**
- * spawnSync a command, but get all data with line separated
+ * spawn a command, but get all data with line separated
  * 
  * @param {*} script script to execute
  * @returns 
@@ -46,15 +49,23 @@ function __(...args) {
     }
     const script = out.join('');
     const lines = [];
-    const cmd = isWin ? spawnSync('cmd.exe', ['/c', 'bash', '-c', script], { encoding: 'utf-8' }) :
-        spawnSync('bash', ['-c', script], { encoding: 'utf-8' });
-    const _lines = cmd.stdout.split(os.EOL).filter(l => l);
-    _lines.forEach(l => lines.push(l.split(/[ \t]/)));
-    return lines;
+    const cmd = isWin ? spawn('cmd.exe', ['/c', 'bash', '-c', script], { encoding: 'utf-8' }) :
+        spawn('bash', ['-c', script], { encoding: 'utf-8' });
+    return new Promise(res => {
+        let _out = '';
+        cmd.stdout.on('data', data => {
+            _out += data;
+        });
+        cmd.on('close', (code) => {
+            const _lines = _out.split(os.EOL).filter(l => l);
+            _lines.forEach(l => lines.push(l.split(/[ \t]/)));
+            res(lines);
+        });
+    });
 }
 
 /**
- * spawnSync a command, but get all data with line separated, and possible to send to stdin (like password)
+ * spawn a command, but get all data with line separated, and possible to send to stdin (like password)
  * TODO: Fix and test
  * @param {*} script script to execute
  * @returns 
@@ -73,12 +84,12 @@ async function ___(script, onData = (data) => { }) {
 global._ = _;
 global.__ = __;
 
-global.$ = function (prom = (res, rej) => { }, desc = '', cmd = '') {
-    return { __desc__: desc, __menu_entry__: new Promise(prom), __cmd__: cmd };
+global.$ = function (prom = (res, rej) => { }) {
+    return { __menu_entry__: new Promise(prom) };
 }
 
-global.$$ = function (prom = (res, rej) => { }, desc = '', cmd = '') {
-    return { __desc__: desc, __onload_menu__: prom, __cmd__: cmd };
+global.$$ = function (prom = (res, rej) => { }) {
+    return { __onload_menu__: prom };
 }
 
 global.jj = { prop: { stayInMenu: false, jumpHome: false } };
@@ -104,6 +115,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
     const MENU_SEPARATOR = '<<>>';
     const exitError = msg => { console.error(`\n[ERROR] ${msg}`) };
     const error = msg => { if (argv.x) console.error(`[ERROR] ${msg}`) };
+    if (argv.x) console.log = console.error;
 
     let jjFiles = argv._ && argv._.length ? argv._ : [];
     let transformedMenu = {};
@@ -274,17 +286,19 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                     exit(2);
                 } else if (_entry.length === 2) {
                     transformedObj[key].__desc__ = _entry[0];
-                    if (typeof _entry[1] === 'object' && _entry[1] !== null) transform(_entry[1], dest, _path, _cmdList);
-                    else {
-                        if (_entry[1] === null) transformedObj[key].__cmd__ = null;
-                        else transformedObj[key].__cmd__ = typeTransform(_entry[1], _path);
-                        _cmdList = [..._cmdList, transformedObj[key].__cmd__];
+                    if (!delayedTransform(_entry[1], transformedObj[key], _cmdList)) {
+                        if (typeof _entry[1] === 'object' && _entry[1] !== null) transform(_entry[1], dest, _path, _cmdList);
+                        else {
+                            if (_entry[1] === null) transformedObj[key].__cmd__ = null;
+                            else transformedObj[key].__cmd__ = typeTransform(_entry[1], _path);
+                            _cmdList = [..._cmdList, transformedObj[key].__cmd__];
+                        }
                     }
                 } else if (_entry.length === 3) {
                     transformedObj[key].__desc__ = _entry[0];
                     transformedObj[key].__cmd__ = typeTransform(_entry[1], _path);
                     _cmdList = [..._cmdList, transformedObj[key].__cmd__];
-                    if (typeof _entry[2] === 'object') transform(_entry[2], dest, _path, _cmdList);
+                    if (!delayedTransform(_entry[2], transformedObj[key], _cmdList)) transform(_entry[2], dest, _path, _cmdList);
                     else {
                         exitError(`Wrong format on ".${_path}"! The third (3) item has to be an object!`);
                         exit(2);
@@ -296,26 +310,10 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
             } else if (typeof src[key] === 'object' && src[key] === null) {
                 transformedObj[key].__cmd__ = null;
                 _cmdList = [..._cmdList, transformedObj[key].__cmd__];
-            } else if (typeof src[key] === 'object' && src[key].__menu_entry__ !== undefined) {
-                transformedObj[key].__desc__ = src[key].__desc__;
-                transformedObj[key].__menu_entry__ = src[key].__menu_entry__;
-                transformedObj[key].__cmd__ = src[key].__cmd__;
-                _cmdList = [..._cmdList, transformedObj[key].__cmd__];
-                const _currentMenuRef = transformedObj[key];
-                _currentMenuRef.__menu_entry__.then((_menu) => {
-                    delete _currentMenuRef.__menu_entry__;
-                    transform(_menu, _currentMenuRef, '', _currentMenuRef.__cmd__ ? [_currentMenuRef.__cmd__] : []);
-                    if (hasSubMenu()) menuWalker(true);
-                });
-            } else if (typeof src[key] === 'object' && src[key].__onload_menu__ !== undefined) {
-                transformedObj[key].__desc__ = src[key].__desc__;
-                transformedObj[key].__onload_menu__ = src[key].__onload_menu__;
-                transformedObj[key].__cmd__ = src[key].__cmd__;
-                _cmdList = [..._cmdList, transformedObj[key].__cmd__];
             } else if (typeof src[key] === 'string' || typeof src[key] === 'function') {
                 transformedObj[key].__cmd__ = src[key];
                 _cmdList = [..._cmdList, transformedObj[key].__cmd__];
-            } else if (typeof src[key] === 'object') {
+            } else if (typeof src[key] === 'object' && !delayedTransform(src[key], transformedObj[key], _cmdList)) {
                 transform(src[key], dest, _path, [..._cmdList]);
             }
             // check cmd equals
@@ -325,6 +323,29 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                 exit(2);
             }
         });
+    }
+
+    function delayedTransform(src, transformedObj, _cmdList = []) {
+        if (typeof src === 'object' && src && src.__menu_entry__ !== undefined) {
+            transformedObj.__desc__ = src.__desc__ ? src.__desc__ : transformedObj.__desc__ ? transformedObj.__desc__ : '';
+            transformedObj.__menu_entry__ = src.__menu_entry__;
+            transformedObj.__cmd__ = src.__cmd__ ? src.__cmd__ : '';
+            _cmdList.push(transformedObj.__cmd__);
+            const _currentMenuRef = transformedObj;
+            _currentMenuRef.__menu_entry__.then((_menu) => {
+                delete _currentMenuRef.__menu_entry__;
+                transform(_menu, _currentMenuRef, '', _currentMenuRef.__cmd__ ? [_currentMenuRef.__cmd__] : []);
+                if (hasSubMenu()) menuWalker(true);
+            });
+            return true;
+        } else if (typeof src === 'object' && src && src.__onload_menu__ !== undefined) {
+            transformedObj.__desc__ = src.__desc__ ? src.__desc__ : transformedObj.__desc__ ? transformedObj.__desc__ : '';
+            transformedObj.__onload_menu__ = src.__onload_menu__;
+            transformedObj.__cmd__ = src.__cmd__ ? src.__cmd__ : '';
+            _cmdList.push(transformedObj.__cmd__);
+            return true;
+        }
+        return false;
     }
 
 }

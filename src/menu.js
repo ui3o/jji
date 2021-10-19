@@ -45,7 +45,7 @@ const config = {
     mute: false,
 };
 
-let printedLinesCount = 0, printedCharsCount = 0;
+let printedCharsCount = 0;
 
 const _setNewFilteredMenu = ({ start, end, cursorToEnd, update } = {}) => {
     if (start !== undefined) menu.filtered.slice.start = start;
@@ -239,11 +239,12 @@ const _menuPrint = ({ inputChar, add } = {}) => {
     }
     else {
         jumpHome();
-        printedLinesCount = printedCharsCount = 0;
+        printedCharsCount = 0;
         var out = Term.startLine().cyan().putStr(menu.title).formatReset().brightBlack().putStr(prompt.cursor.in).formatReset().putArr(prompt.promptPrefix)
             .formatReset().putStr(prompt.inputString.join('') + prompt.cursor.promptChar).flush();
-        printedLinesCount += out.lines; printedCharsCount += out.chars;
-        printedLinesCount += _newLine(menu.titleHeight); printedCharsCount += menu.titleHeight * process.stdout.columns;
+        printedCharsCount += out.chars;
+        // printedLinesCount += _newLine(menu.titleHeight); 
+        printedCharsCount += menu.titleHeight * process.stdout.columns;
         menu.visible.menu.forEach((item, index) => {
             Term.startLine();
             if (menu.visible.poi === index) Term.customColor(81);
@@ -259,11 +260,12 @@ const _menuPrint = ({ inputChar, add } = {}) => {
             if (item.loading > -1) Term.brightCyan().putStr(` [${Term.progressBar[item.loading]}]`).formatReset();
             if (item.loading > -1 && !menu.blinkHandler) _startMenuItemBlinking();
             var out = Term.flush();
-            printedLinesCount += out.lines; printedCharsCount += out.chars;
+            printedCharsCount += out.chars;
         });
-        printedLinesCount += _newLine(menu.footerHeight); printedCharsCount += menu.footerHeight * process.stdout.columns;
+        // printedLinesCount += _newLine(menu.footerHeight);
+        printedCharsCount += menu.footerHeight * process.stdout.columns;
         var out = Term.startLine().customColor(136).putStr(prompt._()).flush();
-        printedLinesCount += out.lines; printedCharsCount += out.chars;
+        printedCharsCount += out.chars;
         // clear last printed lines
         Term.eraseDisplayBelow();
     }
@@ -292,10 +294,10 @@ const _stopLoading = () => {
 
 const _refreshLoading = () => {
     jumpHome();
-    printedLinesCount = printedCharsCount = 0;
+    printedCharsCount = 0;
     const out = Term.startLine().putStr('This menu item is ').brightCyan().putStr(Term.progressBar[menu.loadingPoi])
         .formatReset().putStr(' you can return back to prev menu[ESC] or quit[CTRL+C].').flush();
-    printedLinesCount += out.lines; printedCharsCount += out.chars;
+    printedCharsCount += out.chars;
     menu.loadingPoi = menu.loadingPoi === Term.progressBar.length - 1 ? 0 : menu.loadingPoi + 1;
     Term.eraseDisplayBelow();
 }
@@ -369,9 +371,9 @@ const _keyHandler = (key) => {
 
 const _refreshInputReader = () => {
     jumpHome();
-    printedLinesCount = printedCharsCount = 0;
+    printedCharsCount = 0;
     const out = Term.startLine().putStr(menu.readInputMode.question).putStr(menu.readInputMode.line.join('')).putStr(prompt.cursor.promptChar).flush();
-    printedLinesCount += out.lines; printedCharsCount += out.chars;
+    printedCharsCount += out.chars;
     Term.eraseDisplayBelow();
 }
 
@@ -411,7 +413,7 @@ let _readLineListener = undefined;
 
 const readLine = async (eventListener = (event, key) => { }, question = '') => {
     _readLineListener = eventListener;
-    printedLinesCount = printedCharsCount = 0;
+    printedCharsCount = 0;
     menu.readInputMode.line = [];
     menu.readInputMode.question = question;
     menu.readInputMode.enabled = true;
@@ -439,7 +441,7 @@ const close = () => {
 }
 
 const mute = () => {
-    printedLinesCount = printedCharsCount = 0;
+    printedCharsCount = 0;
     Term.cursorShow();
     config.mute = true;
 }
@@ -447,7 +449,7 @@ const mute = () => {
 const unmute = () => {
     Term.cursorHide();
     config.mute = false;
-    printedLinesCount = printedCharsCount = 0;
+    printedCharsCount = 0;
 }
 
 const configure = {
