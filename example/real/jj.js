@@ -8,7 +8,7 @@ module.exports.less = ["less file from directory", $(async (res) => {
         })
     });
     res(menu);
-})];
+}, { __noPrintOnSelect: true })];
 
 module.exports.fileViewer = ["ls dir and less file from directory", $$(async (res) => {
     const lsc = await __`ls -al`;
@@ -18,11 +18,13 @@ module.exports.fileViewer = ["ls dir and less file from directory", $$(async (re
         const file = line[line.length - 1];
         if (line[0].startsWith('-'))
             menu[file] = [`less ${file}`, async () => { await _`less ${file}`; jj.stay(); }]
-        else
+        else {
             menu[`${file}/`] = () => {
                 process.chdir(file);
                 jj.stay();
-            }
+            };
+            menu[`${file}/`].__noPrintOnSelect = true;
+        }
     })
     res(menu);
-})];
+}, { __noPrintOnSelect: true })];

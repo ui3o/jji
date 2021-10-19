@@ -84,11 +84,13 @@ async function ___(script, onData = (data) => { }) {
 global._ = _;
 global.__ = __;
 
-global.$ = function (prom = (res, rej) => { }) {
+global.$ = function (prom = (res, rej) => { }, options = {}) {
+    Object.keys(options).forEach(k => { prom[k] = options[k] })
     return { __menu_entry__: new Promise(prom) };
 }
 
-global.$$ = function (prom = (res, rej) => { }) {
+global.$$ = function (prom = (res, rej) => { }, options = {}) {
+    Object.keys(options).forEach(k => { prom[k] = options[k] })
     return { __onload_menu__: prom };
 }
 
@@ -190,8 +192,10 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                     });
                 } else {
                     menu.jumpHome(); Term.eraseDisplayBelow();
-                    Term.printf(`..::`).formatBold().formatBrightWhite().printf(` ${menuPath.join(`${Term.colorCodeStyleReset + Term.colorCodeBrightBlack} > ${Term.colorCodeBold + Term.colorCodeBrightWhite}`)}`).formatFormatReset();
-                    Term.printf(` ::..\n`);
+                    if (typeof menuCmd[menuCmd.length - 1] !== 'function' || (typeof menuCmd[menuCmd.length - 1] === 'function' && !menuCmd[menuCmd.length - 1].__noPrintOnSelect)) {
+                        Term.printf(`..::`).formatBold().formatBrightWhite().printf(` ${menuPath.join(`${Term.colorCodeStyleReset + Term.colorCodeBrightBlack} > ${Term.colorCodeBold + Term.colorCodeBrightWhite}`)}`).formatFormatReset();
+                        Term.printf(` ::..\n`);
+                    }
                     menu.mute();
                     if (typeof menuCmd[menuCmd.length - 1] === 'function') await menuCmd[menuCmd.length - 1]();
                     else await _(menuCmd.join(' '));
