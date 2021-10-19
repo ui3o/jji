@@ -206,7 +206,8 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                         Term.printf(`..::`).formatBold().formatBrightWhite().printf(` ${menuPath.join(`${Term.colorCodeStyleReset + Term.colorCodeBrightBlack} > ${Term.colorCodeBold + Term.colorCodeBrightWhite}`)}`).formatFormatReset();
                         Term.printf(` ::..\n`);
                     }
-                    menu.mute();
+                    const __needInput = typeof menuCmd[menuCmd.length - 1] === 'function' && menuCmd[menuCmd.length - 1].__needInput ? menuCmd[menuCmd.length - 1].__needInput : false
+                    menu.mute(__needInput);
                     if (typeof menuCmd[menuCmd.length - 1] === 'function') await menuCmd[menuCmd.length - 1]();
                     else await _(menuCmd.join(' '));
                     menu.unmute();

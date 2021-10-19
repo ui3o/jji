@@ -434,11 +434,11 @@ const close = () => {
     process.stdout.removeListener('resize', _windowResizeHandler);
 }
 
-const mute = () => {
+const mute = (__needInput = false) => {
     Term.newScreen();
     Term.cursorShow();
     config.mute = true;
-    process.stdin.pause();
+    if (!__needInput) process.stdin.pause();
 }
 
 const unmute = () => {

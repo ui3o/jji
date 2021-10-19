@@ -46,7 +46,11 @@ This tool aims to make an easy menu system to organize your cli workflow.
   * '`$$`' for a lazy load menu, which means when you enter into the menu the Promise start after the enter. First parameter is a promise call back function, the second is  a description, the third is a command. Example:`$$((res, rej)=>{}, {options})`
   * '`$$$`' for a option extend, which means only the extra options extends the original function. Example:`$$$((res, rej)=>{}, {options})`
   * all command which are functions, can have options:
-    * **__noPrintOnSelect** means when execute the command no header will be printed after the selection. [example/real/jj.js#26](example/real/jj.js#26)
+    * **__noPrintOnSelect** [boolean] **true** means when execute the command no header will be printed after the selection. [example/real/jj.js#26](example/real/jj.js#26). [default]: *false*
+    * **__needInput** [boolean] **true** if you want to use '`jj.rl`' function. [example/demo/jj.js#13](example/demo/jj.js#13). [default]: *false*
+    * **__showLoadingAfter** [number] **ms**
+    * **__title** [function] **returns string**
+    * **__keyHandler** [function] when **returns true** menu can handle that key. [default]: *undefined*
   * `jj` for a jj global function access. In your javascript code you van use the followings:
     * '`jj.home()`' which will reopen the menu on the top (root) level after the function finish
     * '`jj.stay()`' which will reopen the menu on the same level after the function finish

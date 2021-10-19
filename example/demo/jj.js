@@ -6,11 +6,11 @@ process.env.WORLD = 'world';
 module.exports.prom = $$(async (res) => {
     const a = await __`sleep 10`
     const menu = {
-        a: ['a menu', async () => {
+        a: ['a menu', $$$(async () => {
             const rl = await jj.rl('Type name: ');
             process.stdout.write(`Hello ${rl}!\n`);
             jj.stay();
-        }]
+        }, { __needInput: true })]
     }
 
     setTimeout(() => {
