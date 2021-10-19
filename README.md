@@ -30,13 +30,13 @@ This tool aims to make an easy menu system to organize your cli workflow.
   * **read only** not selectable menu item (in this case the menu command is null)
 
 # Examples
-* [example/demo/jj.js#1](example/demo/jj.js#1)
-* [example/real/jj.js#1](example/real/jj.js#1)
+* [example/demo/jj.js#L1](example/demo/jj.js#L1)
+* [example/real/jj.js#L1](example/real/jj.js#L1)
 
 # Features
 * possible to run script from `jj.js` or `*.jj.js`
 * if the working folder contains *.jj.js possible to sort with number. ex. *.0.jj,js *.1.jj,js
-* prompt base sub menu system, please check the [example/demo/jj.js#1](example/demo/jj.js#1)
+* prompt base sub menu system, please check the [example/demo/jj.js#L1](example/demo/jj.js#L1)
 * search in the menu (in the name and description)
 * all **script runs** inside a **bash** shell
 * provided **global functions**, which means you **do not need to import anything** for use in your jj.js file:
@@ -46,8 +46,8 @@ This tool aims to make an easy menu system to organize your cli workflow.
   * '`$$`' for a lazy load menu, which means when you enter into the menu the Promise start after the enter. First parameter is a promise call back function, the second is  a description, the third is a command. Example:`$$((res, rej)=>{}, {options})`
   * '`$$$`' for a option extend, which means only the extra options extends the original function. Example:`$$$((res, rej)=>{}, {options})`
   * all command which are functions, can have options:
-    * **__noPrintOnSelect** [boolean] **true** means when execute the command no header will be printed after the selection. [example/real/jj.js#26](example/real/jj.js#26). [default]: *false*
-    * **__needInput** [boolean] **true** if you want to use '`jj.rl`' function. [example/demo/jj.js#13](example/demo/jj.js#13). [default]: *false*
+    * **__noPrintOnSelect** [boolean] **true** means when execute the command no header will be printed after the selection. [example/real/jj.js#L26](example/real/jj.js#L26). [default]: *false*
+    * **__needInput** [boolean] **true** if you want to use '`jj.rl`' function. [example/demo/jj.js#L13](example/demo/jj.js#L13). [default]: *false*
     * **__showLoadingAfter** [number] **ms**
     * **__title** [function] **returns string**
     * **__keyHandler** [function] when **returns true** menu can handle that key. [default]: *undefined*
