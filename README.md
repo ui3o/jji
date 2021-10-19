@@ -18,7 +18,7 @@ This tool aims to make an easy menu system to organize your cli workflow.
 # How menu structure works
 * every menu item has name: `module.export.test`
 * every menu item has command which can be: `string`, `function` or `null`
-* every menu item optionally can has a description. in this case the definition change to array where description is on the first place: `module.exports.run = ["run simple", "echo hello"]`
+* every menu item optionally can have a description. in this case the definition change to array where description is on the first place: `module.exports.run = ["run simple", "echo hello"]`
 * every menu item (**this** type of menu **is a group**) can have sub menu which can be after description or after command
   * after description: `module.exports.run = ["run simple", {...}]`
   * after command: `module.exports.run = ["run simple", "echo hello", {...}]`
