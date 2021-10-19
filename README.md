@@ -15,22 +15,35 @@ This tool aims to make an easy menu system to organize your cli workflow.
     * environment variable, possible to use only process.env.ENV_VAR, no longer need on %ENV_VAR% on window
     * possible to use same command on windows and linux with [Cygwin](https://www.cygwin.com/)
 
-# Features
+# How menu structure works
+* every menu item has name: `module.export.test`
+* every menu item has command which can be: `string`, `function` or `null`
+* every menu item optionally can has a description. in this case the definition change to array where description is on the first place: `module.exports.run = ["run simple", "echo hello"]`
+* every menu item (**this** type of menu **is a group**) can have sub menu which can be after description or after command
+  * after description: `module.exports.run = ["run simple", {...}]`
+  * after command: `module.exports.run = ["run simple", "echo hello", {...}]`
+* every group can have a group command which can be: `string`
+* when one item selected, all group command and item command going to concat into one string and executed in bash shell
+* there are 3 extra type of menu item:
+  * **lazy** load menu, which means when you enter into the menu the Promise start after the select
+  * **later** load menu, which means the Promise start after the program start
+  * **read only** not selectable menu item (in this case the menu command is null)
 
+# Features
 * possible to run script from `jj.js` or `*.jj.js`
 * if the working folder contains *.jj.js possible to sort with number. ex. *.0.jj,js *.1.jj,js
-* prompt base submenu system, please check the [example/demo/jj.js#1](example/demo/jj.js#1)
+* prompt base sub menu system, please check the [example/demo/jj.js#1](example/demo/jj.js#1)
 * search in the menu (in the name and description)
-* all **script runs** inside a *bash* shell
-* provided global functions:
-  * `_` which run a simple script. The output simple printed:`` _`echo hello wold` ``
-  * `__` which run a simple script, but output is not printed and parsed. Example:`` const a = __`sleep 3 && echo done && echo other done other`; console.log(a[0][0]) ``
-  * `$` for a later load menu, which means the Promise start after the program start. First parameter is a promise call back function, the second is  a description, the third is a command. Example:`$((res, rej)=>{}, 'description', 'echo')`
-  * `$$` for a lazy load menu, which means when you enter into the menu the Promise start after the enter. First parameter is a promise call back function, the second is  a description, the third is a command. Example:`$((res, rej)=>{}, 'description', 'echo')`
+* all **script runs** inside a **bash** shell
+* provided **global functions**, which means you **do not need to import anything** for use in your jj.js file:
+  * '`_`': which run a simple script. The output simple printed:``_`echo hello wold` ``
+  * '`__`' which run a simple script, but output is not printed and parsed. Example:`` const a = __`sleep 3 && echo done && echo other done other`; console.log(a[0][0]) ``
+  * '`$`' for a later load menu, which means the Promise start after the program start. First parameter is a promise call back function, the second is  a description, the third is a command. Example:`$((res, rej)=>{}, 'description', 'echo')`
+  * '`$$`' for a lazy load menu, which means when you enter into the menu the Promise start after the enter. First parameter is a promise call back function, the second is  a description, the third is a command. Example:`$((res, rej)=>{}, 'description', 'echo')`
   * `jj` for a jj global function access. In your javascript code you van use the followings:
-    * `jj.home()` which will reopen the menu on the top (root) level after the function finish
-    * `jj.stay()` which will reopen the menu on the same level after the function finish
-    * `const rl = await jj.rl('Type your name')` which will read a line from stdin. One parameter is the question.
+    * '`jj.home()`' which will reopen the menu on the top (root) level after the function finish
+    * '`jj.stay()`' which will reopen the menu on the same level after the function finish
+    * '`jj.rl`': `const rl = await jj.rl('Type your name')` which will read a line from stdin. One parameter is the question.
 
 * menu control keys:
   * **select**: enter
