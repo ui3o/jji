@@ -228,7 +228,21 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
             if (global.jj.prop.stayInMenu) {
                 global.jj.prop.stayInMenu = false;
                 if (menuPath.length) { menuPath.pop(); menuCmd.pop(); }
-                if (hasSubMenu()) menuWalker(true);
+                const _currentMenuRef = getPath(transformedMenu, menuPath.join(MENU_SEPARATOR));
+                if (_currentMenuRef.__onload_menu__ !== undefined) {
+                    const _items = Object.keys(currentMenuRef).filter(e => e !== '__name__' && e !== '__desc__' && e !== '__cmd__' && e !== '__index__' && e !== '__menu_entry__' && e !== '__onload_menu__');
+                    _items.forEach(k => delete _currentMenuRef[k]);
+                    menu.showLoading();
+                    const __currentPath = menuPath.join(MENU_SEPARATOR);
+                    new Promise(_currentMenuRef.__onload_menu__).then((_menu) => {
+                        if (__currentPath === menuPath.join(MENU_SEPARATOR)) {
+                            transform(_menu, _currentMenuRef, '', _currentMenuRef.__cmd__ ? [_currentMenuRef.__cmd__] : []);
+                            if (hasSubMenu()) menuWalker();
+                        }
+                    });
+                } else {
+                    if (hasSubMenu()) menuWalker(true);
+                }
                 return;
             } else if (global.jj.prop.jumpHome) {
                 global.jj.prop.jumpHome = false;

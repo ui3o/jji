@@ -10,16 +10,19 @@ module.exports.less = ["less file from directory", $(async (res) => {
     res(menu);
 })];
 
-module.exports.ls = ["ls dir and less file from directory", $(async (res) => {
+module.exports.fileViewer = ["ls dir and less file from directory", $$(async (res) => {
     const lsc = await __`ls -al`;
-    const ls = lsc.filter((_, index) => { return index > 2 });
+    const ls = lsc.filter((_, index) => { return index > 1 });
     const menu = {};
     ls.forEach(line => {
         const file = line[line.length - 1];
         if (line[0].startsWith('-'))
             menu[file] = [`less ${file}`, async () => { await _`less ${file}`; jj.stay(); }]
         else
-            menu[file] = [`${file} is a directory`, null]
+            menu[`${file}/`] = () => {
+                process.chdir(file);
+                jj.stay();
+            }
     })
     res(menu);
 })];
