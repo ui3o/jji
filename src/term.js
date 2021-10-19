@@ -1,4 +1,5 @@
 const Term = {
+    screen: { chars: [], count: 0 },
     charList: [],
     charCount: 0,
     stdout: process.stdout,
@@ -9,6 +10,7 @@ const Term = {
     newLine: function () { this.printf(' '.repeat(this.stdout.columns)); return this; },
     clear: function () { this.printf(`\x1b[${this.stdout.rows}F\x1b[0J`); return this; },
     home: function () { this.printf(`\x1b[${this.stdout.rows}F`); return this; },
+    left: function (lines) { this.printf(`\x1b[${lines}D`); return this; },
     previousLine: function (lines) { this.printf(`\x1b[${lines}F`); return this; },
     eraseDisplayBelow: function () { this.printf(`\x1b[0J`); return this; },
     cursorHide: function () { this.printf(`\x1b[?25l`); return this; },
@@ -27,9 +29,19 @@ const Term = {
      */
     printf: function (str = "") { this.stdout.write(str); return this; },
     /**
-     * start new line build
+     * start new screen build
      */
-    startLine: function () { const that = this._(); that.formatFormatReset(); that.charCount = 0, that.charList = []; return this; },
+    newScreen: function () {
+        const that = this._();
+        that.screen.count = 0; that.screen.chars = [];
+        that.charCount = 0; that.charList = [];
+        that.formatReset();
+        return this;
+    },
+    /**
+    * start new line build
+    */
+    newLine: function () { const that = this._(); that.charCount = 0; that.charList = []; that.formatReset(); return this; },
     /**
      * add characters to temporary new line buffer
      */
@@ -48,16 +60,24 @@ const Term = {
     /**
     * flush the temporary new line buffer
     */
-    flush: function () {
+    flush: function (useEOL = false) {
         const that = this._();
+        that.formatReset();
         const columns = that.stdout.columns;
         const extra = columns - that.charCount % columns;
         const chars = extra + that.charCount;
-        const lines = (extra + that.charCount) / columns;
-        const out = [...that.charList, ...' '.repeat(extra)];
-        that.printf(out.join(''));
-        that.formatFormatReset();
-        return { lines, chars };
+        const out = useEOL ? [...that.charList, '\n'] : [...that.charList, ...' '.repeat(extra)];
+        that.screen.count += chars;
+        that.screen.chars = [...that.screen.chars, ...out];
+        return that;
+    },
+    /**
+    * flush the temporary new screen buffer
+    */
+    refresh: function () {
+        const that = this._();
+        that.printf(that.screen.chars.join(''));
+        return that;
     },
     /**
      * flush the temporary new line buffer and justify words to right
@@ -123,6 +143,7 @@ const Term = {
     underline: function () { this.charList.push('\x1b[4m'); return this; },
     inverse: function () { this.charList.push('\x1b[7m'); return this; },
     strike: function () { this.charList.push('\x1b[9m'); return this; },
+    clearLine: function () { this.charList.push(this.formatCodeClearLine); return this; },
 
     // colors
     defaultColor: function () { this.charList.push(this.colorCodeDefaultColor); return this; },
@@ -212,6 +233,9 @@ const Term = {
     formatBgBrightWhite: function () { this.printf(this.colorCodeBgBrightWhite); return this; },
     formatCustomBgColor: function (code) { this.printf(`\x1b[48;5;${code}m`); return this; },
 
+    // format codes
+    formatCodeClearLine: `\x1b[2K`,
+
     // Foreground color
     colorCodeStyleReset: '\x1b[0m',
     colorCodeBold: '\x1b[1m',
@@ -219,7 +243,7 @@ const Term = {
     colorCodeUnderline: '\x1b[4m',
     colorCodeInverse: '\x1b[7m',
     colorCodeStrike: '\x1b[9m',
- 
+
     colorCodeDefaultColor: '\x1b[39m',
     colorCodeBlack: '\x1b[30m',
     colorCodeRed: '\x1b[31m',

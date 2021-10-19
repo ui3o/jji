@@ -45,8 +45,6 @@ const config = {
     mute: false,
 };
 
-let printedCharsCount = 0;
-
 const _setNewFilteredMenu = ({ start, end, cursorToEnd, update } = {}) => {
     if (start !== undefined) menu.filtered.slice.start = start;
     if (end !== undefined) menu.filtered.slice.end = end;
@@ -211,14 +209,13 @@ const _highlightFiltered = (str = "", defaultColor = Term.colorCodeDefaultColor,
 }
 
 const jumpHome = () => {
-    if (printedCharsCount) {
+    if (Term.screen.count) {
         const columns = Term.stdout.columns;
-        const extra = printedCharsCount % columns;
+        const extra = Term.screen.count % columns;
         const toAdd = extra ? columns - extra : extra;
-        const lines = (toAdd + printedCharsCount) / columns;
-        Term.previousLine(lines - 1);
-        // if one line length move down one === beginning of the line  
-        if (lines === 1) Term.printf('\x1b[1B');
+        const lines = (toAdd + Term.screen.count) / columns;
+        if (lines === 1) Term.left(columns);
+        else Term.previousLine(lines - 1);
     }
 }
 
@@ -230,7 +227,7 @@ const _newLine = (line = 0) => {
 }
 
 const _menuPrint = ({ inputChar, add } = {}) => {
-    if (menu.loadingHandler) return;
+    if (menu.loadingHandler) { _refreshLoading(); return; }
     if (add !== undefined) {
         _stopMenuItemBlinking();
         if (add === true) { inputChar.split('').forEach(c => { prompt.inputString.push(c) }); };
@@ -239,14 +236,12 @@ const _menuPrint = ({ inputChar, add } = {}) => {
     }
     else {
         jumpHome();
-        printedCharsCount = 0;
-        var out = Term.startLine().cyan().putStr(menu.title).formatReset().brightBlack().putStr(prompt.cursor.in).formatReset().putArr(prompt.promptPrefix)
+        Term.newScreen();
+        Term.newLine().cyan().putStr(menu.title).formatReset().brightBlack().putStr(prompt.cursor.in).formatReset().putArr(prompt.promptPrefix)
             .formatReset().putStr(prompt.inputString.join('') + prompt.cursor.promptChar).flush();
-        printedCharsCount += out.chars;
         // printedLinesCount += _newLine(menu.titleHeight); 
-        printedCharsCount += menu.titleHeight * process.stdout.columns;
         menu.visible.menu.forEach((item, index) => {
-            Term.startLine();
+            Term.newLine();
             if (menu.visible.poi === index) Term.customColor(81);
             else Term.customColor(39);
             Term.putStr(menu.prefix(index));
@@ -259,13 +254,11 @@ const _menuPrint = ({ inputChar, add } = {}) => {
             if (item.lazy) Term.brightMagenta().putStr(` [${menu.lazyTitle}]`).formatReset();
             if (item.loading > -1) Term.brightCyan().putStr(` [${Term.progressBar[item.loading]}]`).formatReset();
             if (item.loading > -1 && !menu.blinkHandler) _startMenuItemBlinking();
-            var out = Term.flush();
-            printedCharsCount += out.chars;
+            Term.flush();
         });
         // printedLinesCount += _newLine(menu.footerHeight);
-        printedCharsCount += menu.footerHeight * process.stdout.columns;
-        var out = Term.startLine().customColor(136).putStr(prompt._()).flush();
-        printedCharsCount += out.chars;
+        Term.newLine().customColor(136).putStr(prompt._()).flush();
+        Term.refresh();
         // clear last printed lines
         Term.eraseDisplayBelow();
     }
@@ -294,10 +287,10 @@ const _stopLoading = () => {
 
 const _refreshLoading = () => {
     jumpHome();
-    printedCharsCount = 0;
-    const out = Term.startLine().putStr('This menu item is ').brightCyan().putStr(Term.progressBar[menu.loadingPoi])
+    Term.newScreen();
+    Term.newLine().putStr('This menu item is ').brightCyan().putStr(Term.progressBar[menu.loadingPoi])
         .formatReset().putStr(' you can return back to prev menu[ESC] or quit[CTRL+C].').flush();
-    printedCharsCount += out.chars;
+    Term.refresh();
     menu.loadingPoi = menu.loadingPoi === Term.progressBar.length - 1 ? 0 : menu.loadingPoi + 1;
     Term.eraseDisplayBelow();
 }
@@ -369,12 +362,12 @@ const _keyHandler = (key) => {
     }
 }
 
-const _refreshInputReader = () => {
+const _refreshInputReader = (useEOL = false) => {
     jumpHome();
-    printedCharsCount = 0;
-    const out = Term.startLine().putStr(menu.readInputMode.question).putStr(menu.readInputMode.line.join('')).putStr(prompt.cursor.promptChar).flush();
-    printedCharsCount += out.chars;
+    Term.newScreen();
+    Term.newLine().putStr(menu.readInputMode.question).putStr(menu.readInputMode.line.join('')).putStr(prompt.cursor.promptChar).flush(useEOL);
     Term.eraseDisplayBelow();
+    Term.refresh();
 }
 
 const _inputReadHandler = (key) => {
@@ -383,6 +376,8 @@ const _inputReadHandler = (key) => {
         switch (keyEvent) {
             case keymap.ENTER:
                 menu.readInputMode.enabled = false;
+                //Term.printf(os.EOL);
+                _refreshInputReader(true);
                 _readLineListener(event.LINE, menu.readInputMode.line.join(''));
                 break;
             case keymap.BACKSPACE:
@@ -413,7 +408,7 @@ let _readLineListener = undefined;
 
 const readLine = async (eventListener = (event, key) => { }, question = '') => {
     _readLineListener = eventListener;
-    printedCharsCount = 0;
+    Term.newScreen();
     menu.readInputMode.line = [];
     menu.readInputMode.question = question;
     menu.readInputMode.enabled = true;
@@ -441,7 +436,7 @@ const close = () => {
 }
 
 const mute = () => {
-    printedCharsCount = 0;
+    Term.newScreen();
     Term.cursorShow();
     config.mute = true;
 }
@@ -449,7 +444,7 @@ const mute = () => {
 const unmute = () => {
     Term.cursorHide();
     config.mute = false;
-    printedCharsCount = 0;
+    Term.newScreen();
 }
 
 const configure = {
