@@ -288,8 +288,8 @@ const _stopLoading = () => {
 const _refreshLoading = () => {
     jumpHome();
     Term.newScreen();
-    Term.newLine().putStr('This menu item is ').brightCyan().putStr(Term.progressBar[menu.loadingPoi])
-        .formatReset().putStr(' you can return back to prev menu[ESC] or quit[CTRL+C].').flush();
+    Term.newLine().brightCyan().putStr(Term.progressBar[menu.loadingPoi])
+        .formatReset().putStr(' you can return back[ESC] or quit[CTRL+C].').flush();
     Term.refresh();
     menu.loadingPoi = menu.loadingPoi === Term.progressBar.length - 1 ? 0 : menu.loadingPoi + 1;
     Term.eraseDisplayBelow();
