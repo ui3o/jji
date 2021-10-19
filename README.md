@@ -29,6 +29,10 @@ This tool aims to make an easy menu system to organize your cli workflow.
   * **later** load menu, which means the Promise start after the program start
   * **read only** not selectable menu item (in this case the menu command is null)
 
+# Examples
+* [example/demo/jj.js#1](example/demo/jj.js#1)
+* [example/real/jj.js#1](example/real/jj.js#1)
+
 # Features
 * possible to run script from `jj.js` or `*.jj.js`
 * if the working folder contains *.jj.js possible to sort with number. ex. *.0.jj,js *.1.jj,js

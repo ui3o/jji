@@ -438,12 +438,14 @@ const mute = () => {
     Term.newScreen();
     Term.cursorShow();
     config.mute = true;
+    process.stdin.pause();
 }
 
 const unmute = () => {
     Term.cursorHide();
     config.mute = false;
     Term.newScreen();
+    process.stdin.resume();
 }
 
 const configure = {
