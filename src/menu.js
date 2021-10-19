@@ -376,7 +376,6 @@ const _inputReadHandler = (key) => {
         switch (keyEvent) {
             case keymap.ENTER:
                 menu.readInputMode.enabled = false;
-                //Term.printf(os.EOL);
                 _refreshInputReader(true);
                 _readLineListener(event.LINE, menu.readInputMode.line.join(''));
                 break;

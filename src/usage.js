@@ -32,7 +32,7 @@ const _printTitles = (title, info = [], bold) => {
             const desc = _get(i.desc);
             if (desc) {
                 Term.formatFormatReset().printf('\n');
-                Term.startLine().formatBrightBlack().putStr(`${desc}`).flushJustifyToRight(2 * USAGE.optionIndent);
+                Term.newLine().formatBrightBlack().putStr(`${desc}`).flushJustifyToRight(2 * USAGE.optionIndent);
             }
             Term.formatFormatReset().printf(`\n`);
         });
@@ -59,7 +59,7 @@ module.exports.printUsage = (u = {
             if (o.switch.length) {
                 if (!optionTitlePrinted) { optionTitlePrinted = true; Term.formatBold().printf(USAGE.header + USAGE.options).formatFormatReset(); }
                 Term.formatBrightWhite().formatBold().printf(`${USAGE.indent + o.switch}\n`);
-                Term.startLine().formatBrightBlack().putStr(`${o.desc}`);
+                Term.newLine().formatBrightBlack().putStr(`${o.desc}`);
                 if (o.type) Term.cyan().putStr(` [${o.type}]`);
                 Term.flushJustifyToRight(2 * USAGE.optionIndent).printf('\n');
             }
