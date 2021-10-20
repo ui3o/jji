@@ -27,4 +27,4 @@ module.exports.fileViewer = ["ls dir and less file from directory", $$(async (re
         }
     })
     res(menu);
-}, { __noPrintOnSelect: true })];
+}, { __noPrintOnSelect: true, __showLoadingAfter: 150 })];

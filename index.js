@@ -9,6 +9,7 @@ const { Term } = require('./src/term');
 const { fromDir } = require('./src/file.finder');
 
 const isWin = process.platform === "win32";
+const exitError = msg => { console.error(`\n[ERROR] ${msg}`) };
 
 /**
  * spawn a command
@@ -85,7 +86,12 @@ global._ = _;
 global.__ = __;
 
 global.$ = function (prom = (res, rej) => { }, options = {}) {
-    Object.keys(options).forEach(k => { prom[k] = options[k] })
+    Object.keys(options).forEach(k => {
+        prom[k] = options[k];
+        if (k === '__showLoadingAfter') {
+            exitError(`__showLoadingAfter only works with $$ (lazy load) menu item !`); menu.close(); process.exit(2);
+        }
+    });
     return { __menu_entry__: new Promise(prom) };
 }
 
@@ -100,7 +106,12 @@ global.$$ = function (prom = (res, rej) => { }, options = {}) {
  * @returns 
  */
 global.$$$ = function (func = () => { }, options = {}) {
-    Object.keys(options).forEach(k => { func[k] = options[k] })
+    Object.keys(options).forEach(k => {
+        func[k] = options[k];
+        if (k === '__showLoadingAfter') {
+            exitError(`__showLoadingAfter only works with $$ (lazy load) menu item !`); menu.close(); process.exit(2);
+        }
+    });
     return func;
 }
 
@@ -121,16 +132,15 @@ global.jj.rl = function (question = '') {
     });
 }
 
-
 module.exports.jji = async (argv = {}, rawMenu = {}) => {
 
     const MENU_SEPARATOR = '<<>>';
-    const exitError = msg => { console.error(`\n[ERROR] ${msg}`) };
     const error = msg => { if (argv.x) console.error(`[ERROR] ${msg}`) };
     if (argv.x) console.log = console.error;
 
     let jjFiles = argv._ && argv._.length ? argv._ : [];
     let transformedMenu = {};
+    let showLoadingTimer = 0;
 
     if (!jjFiles.length) {
         const lookupPath = argv.d ? argv.d : process.cwd();
@@ -156,6 +166,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
     let currentMenuList = {};
 
     function menuWalker(update) {
+        clearTimeout(showLoadingTimer);
         currentMenuRef = getPath(transformedMenu, menuPath.join(MENU_SEPARATOR));
         currentMenuList = Object.keys(currentMenuRef).filter(e => e !== '__name__' && e !== '__desc__' && e !== '__cmd__' && e !== '__index__' && e !== '__menu_entry__' && e !== '__onload_menu__')
             .sort((a, b) => {
@@ -167,6 +178,12 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
         let mp = []; menuPath.forEach(p => { mp = [...mp, Term.colorCodeBold, Term.colorCodeBrightWhite, ...p.split(''), Term.colorCodeStyleReset, Term.colorCodeBrightBlack, ' ', '>', ' '] })
         if (update) menu.updateMenu(currentMenuList);
         else menu.setMenu(currentMenuList, mp);
+    }
+
+    function showLoading(timeout = 100) {
+        showLoadingTimer = setTimeout(() => {
+            menu.showLoading();
+        }, timeout);
     }
 
     menu.configure.disableProcessExitOnSelect().disableSelectedPrint().disableProcessExitOnExit();
@@ -192,7 +209,8 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                         }
                     });
                 } else if (_currentMenuRef.__onload_menu__ !== undefined) {
-                    menu.showLoading();
+                    const __showLoadingTimeout = _currentMenuRef.__onload_menu__.__showLoadingAfter ? _currentMenuRef.__onload_menu__.__showLoadingAfter : 100;
+                    showLoading(__showLoadingTimeout);
                     const __currentPath = menuPath.join(MENU_SEPARATOR);
                     new Promise(_currentMenuRef.__onload_menu__).then((_menu) => {
                         if (__currentPath === menuPath.join(MENU_SEPARATOR)) {
@@ -206,7 +224,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                         Term.printf(`..::`).formatBold().formatBrightWhite().printf(` ${menuPath.join(`${Term.colorCodeStyleReset + Term.colorCodeBrightBlack} > ${Term.colorCodeBold + Term.colorCodeBrightWhite}`)}`).formatFormatReset();
                         Term.printf(` ::..\n`);
                     }
-                    const __needInput = typeof menuCmd[menuCmd.length - 1] === 'function' && menuCmd[menuCmd.length - 1].__needInput ? menuCmd[menuCmd.length - 1].__needInput : false
+                    const __needInput = typeof menuCmd[menuCmd.length - 1] === 'function' && menuCmd[menuCmd.length - 1].__needInput ? menuCmd[menuCmd.length - 1].__needInput : false;
                     menu.mute(__needInput);
                     if (typeof menuCmd[menuCmd.length - 1] === 'function') await menuCmd[menuCmd.length - 1]();
                     else await _(menuCmd.join(' '));
@@ -247,7 +265,8 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                 if (_currentMenuRef.__onload_menu__ !== undefined) {
                     const _items = Object.keys(currentMenuRef).filter(e => e !== '__name__' && e !== '__desc__' && e !== '__cmd__' && e !== '__index__' && e !== '__menu_entry__' && e !== '__onload_menu__');
                     _items.forEach(k => delete _currentMenuRef[k]);
-                    menu.showLoading();
+                    const __showLoadingTimeout = _currentMenuRef.__onload_menu__.__showLoadingAfter ? _currentMenuRef.__onload_menu__.__showLoadingAfter : 100;
+                    showLoading(__showLoadingTimeout);
                     const __currentPath = menuPath.join(MENU_SEPARATOR);
                     new Promise(_currentMenuRef.__onload_menu__).then((_menu) => {
                         if (__currentPath === menuPath.join(MENU_SEPARATOR)) {

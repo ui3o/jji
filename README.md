@@ -48,7 +48,7 @@ This tool aims to make an easy menu system to organize your cli workflow.
   * all command which are functions, can have options:
     * **__noPrintOnSelect** [boolean] **true** means when execute the command no header will be printed after the selection. [example/real/jj.js#L26](example/real/jj.js#L26). [default]: *false*
     * **__needInput** [boolean] **true** if you want to use '`jj.rl`' function. [example/demo/jj.js#L13](example/demo/jj.js#L13). [default]: *false*
-    * **__showLoadingAfter** [number] **ms**
+    * **__showLoadingAfter** [number] **ms** works only with lazy menu [example/real/jj.js#L30](example/real/jj.js#L30). [default]: *100*
     * **__title** [function] **returns string**
     * **__keyHandler** [function] when **returns true** menu can handle that key. [default]: *undefined*
   * `jj` for a jj global function access. In your javascript code you van use the followings:
