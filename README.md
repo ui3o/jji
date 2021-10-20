@@ -58,6 +58,7 @@ This tool aims to make an easy menu system to organize your cli workflow.
     * '`jj.home()`' which will reopen the menu on the top (root) level after the function finish
     * '`jj.stay()`' which will reopen the menu on the same level after the function finish
     * '`jj.rl`': `const rl = await jj.rl('Type your name')` which will read a line from stdin. One parameter is the question.
+  * all boolean property is available on global scope because of shorter definition. example: `await __(``hi ${false}``, { __splitByLine: true }, 'other');` ==> `await __(``hi ${false}``, { __splitByLine }, 'other');`
 
 * menu control keys:
   * **arrow-up/down and tab**: up/down in the menu

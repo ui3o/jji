@@ -95,6 +95,10 @@ async function ___(script, onData = (data) => { }) {
 // init globals
 global._ = _;
 global.__ = __;
+global.__noPrintOnSelect = true;
+global.__needInput = true;
+global.__splitByLine = true;
+global.__splitAll = true;
 
 global.$ = function (prom = (res, rej) => { }, options = {}) {
     Object.keys(options).forEach(k => {
