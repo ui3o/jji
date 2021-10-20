@@ -46,10 +46,11 @@ This tool aims to make an easy menu system to organize your cli workflow.
   * '`$$`' for a lazy load menu, which means when you enter into the menu the Promise start after the enter. First parameter is a promise call back function, the second is  a description, the third is a command. Example:`$$((res, rej)=>{}, {options})`
   * '`$$$`' for a option extend, which means only the extra options extends the original function. Example:`$$$((res, rej)=>{}, {options})`
   * all command which are functions, can have options:
-    * **__noPrintOnSelect** [boolean] **true** means when execute the command no header will be printed after the selection. [example/real/jj.js#L26](example/real/jj.js#L26). [default]: *false*
+    * **__noPrintOnSelect** [boolean] **true** means when execute the command no header will be printed after the selection. [example/real/jj.js#L33](example/real/jj.js#L33). [default]: *false*
     * **__needInput** [boolean] **true** if you want to use '`jj.rl`' function. [example/demo/jj.js#L13](example/demo/jj.js#L13). [default]: *false*
-    * **__showLoadingAfter** [number] **ms** works only with lazy menu [example/real/jj.js#L30](example/real/jj.js#L30). [default]: *100*
-    * **__title** [function] **returns string**
+    * **__showLoadingAfter** [number] **ms** works only with lazy menu [example/real/jj.js#L33](example/real/jj.js#L33). [default]: *100*
+    * **__header** [function] **returns string** print message before menu execute [example/real/jj.js#L28](example/real/jj.js#L28). you can use `jj.term.colorCode*` [src/term.js#L237](src/term.js#L237)
+    * **__footer** [function] **returns string** print message after menu execute [example/real/jj.js#L29](example/real/jj.js#L29). you can use `jj.term.colorCode*` [src/term.js#L237](src/term.js#L237)
     * **__keyHandler** [function] when **returns true** menu can handle that key. [default]: *undefined*
   * `jj` for a jj global function access. In your javascript code you van use the followings:
     * '`jj.home()`' which will reopen the menu on the top (root) level after the function finish

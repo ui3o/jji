@@ -23,7 +23,10 @@ module.exports.fileViewer = ["ls dir and less file from directory", $$(async (re
             menu[`${file}/`] = $$$(() => {
                 process.chdir(file);
                 jj.stay();
-            }, { __noPrintOnSelect: true });
+            }, {
+                __header: () => `changing directory from ${jj.term.colorCodeGreen + file + jj.term.colorCodeDefaultColor}\n`,
+                __footer: () => `to ${jj.term.colorCodeYellow + process.cwd() + jj.term.colorCodeDefaultColor}\n`
+            });
         }
     })
     res(menu);

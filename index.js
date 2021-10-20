@@ -115,7 +115,7 @@ global.$$$ = function (func = () => { }, options = {}) {
     return func;
 }
 
-global.jj = { prop: { stayInMenu: false, jumpHome: false } };
+global.jj = { term: Term, prop: { stayInMenu: false, jumpHome: false } };
 global.jj.stay = function () {
     global.jj.prop.stayInMenu = true;
 }
@@ -221,13 +221,19 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                 } else {
                     menu.jumpHome(); Term.eraseDisplayBelow();
                     if (typeof menuCmd[menuCmd.length - 1] !== 'function' || (typeof menuCmd[menuCmd.length - 1] === 'function' && !menuCmd[menuCmd.length - 1].__noPrintOnSelect)) {
-                        Term.printf(`..::`).formatBold().formatBrightWhite().printf(` ${menuPath.join(`${Term.colorCodeStyleReset + Term.colorCodeBrightBlack} > ${Term.colorCodeBold + Term.colorCodeBrightWhite}`)}`).formatFormatReset();
-                        Term.printf(` ::..\n`);
+                        if (typeof menuCmd[menuCmd.length - 1] === 'function' && !menuCmd[menuCmd.length - 1].__header) {
+                            Term.printf(`..::`).formatBold().formatBrightWhite().printf(` ${menuPath.join(`${Term.colorCodeStyleReset + Term.colorCodeBrightBlack} > ${Term.colorCodeBold + Term.colorCodeBrightWhite}`)}`).formatFormatReset();
+                            Term.printf(` ::..\n`);
+                        } else {
+                            Term.printf(menuCmd[menuCmd.length - 1].__header());
+                        }
                     }
                     const __needInput = typeof menuCmd[menuCmd.length - 1] === 'function' && menuCmd[menuCmd.length - 1].__needInput ? menuCmd[menuCmd.length - 1].__needInput : false;
                     menu.mute(__needInput);
                     if (typeof menuCmd[menuCmd.length - 1] === 'function') await menuCmd[menuCmd.length - 1]();
                     else await _(menuCmd.join(' '));
+                    if (typeof menuCmd[menuCmd.length - 1] === 'function' && menuCmd[menuCmd.length - 1].__footer)
+                        Term.printf(menuCmd[menuCmd.length - 1].__footer());
                     menu.unmute();
                     exit(0);
                 }

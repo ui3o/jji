@@ -137,12 +137,12 @@ const Term = {
     },
 
     formatReset: function () { this.styleReset().defaultColor().bgDefaultColor(); return this; },
-    styleReset: function () { this.charList.push('\x1b[0m'); return this; },
-    bold: function () { this.charList.push('\x1b[1m'); return this; },
-    italic: function () { this.charList.push('\x1b[3m'); return this; },
-    underline: function () { this.charList.push('\x1b[4m'); return this; },
-    inverse: function () { this.charList.push('\x1b[7m'); return this; },
-    strike: function () { this.charList.push('\x1b[9m'); return this; },
+    styleReset: function () { this.charList.push(this.formatCodeStyleReset); return this; },
+    bold: function () { this.charList.push(this.formatCodeBold); return this; },
+    italic: function () { this.charList.push(this.formatCodeItalic); return this; },
+    underline: function () { this.charList.push(this.formatCodeUnderline); return this; },
+    inverse: function () { this.charList.push(this.formatCodeInverse); return this; },
+    strike: function () { this.charList.push(this.formatCodeStrike); return this; },
     clearLine: function () { this.charList.push(this.formatCodeClearLine); return this; },
 
     // colors
@@ -235,6 +235,12 @@ const Term = {
 
     // format codes
     formatCodeClearLine: `\x1b[2K`,
+    formatCodeStyleReset: '\x1b[0m',
+    formatCodeBold: '\x1b[1m',
+    formatCodeItalic: '\x1b[3m',
+    formatCodeUnderline: '\x1b[4m',
+    formatCodeInverse: '\x1b[7m',
+    formatCodeStrike: '\x1b[9m',
 
     // Foreground color
     colorCodeStyleReset: '\x1b[0m',
