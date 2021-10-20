@@ -24,8 +24,8 @@ module.exports.fileViewer = ["ls dir and less file from directory", $$(async (re
                 process.chdir(file);
                 jj.stay();
             }, {
-                __header: () => `changing directory from ${jj.term.colorCodeGreen + file + jj.term.colorCodeDefaultColor}\n`,
-                __footer: () => `to ${jj.term.colorCodeYellow + process.cwd() + jj.term.colorCodeDefaultColor}\n`
+                __header: () => `changing directory from ${jj.term.colorCodeYellow + process.cwd() + jj.term.colorCodeDefaultColor}\n`,
+                __footer: () => `to ${jj.term.colorCodeGreen + process.cwd() + jj.term.colorCodeDefaultColor}\n`
             });
         }
     })
