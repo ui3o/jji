@@ -40,7 +40,11 @@ function _(...args) {
  * @returns 
  */
 function __(...args) {
-    const out = Array.isArray(args[0]) ? [] : args;
+    let options = {};
+    const out = Array.isArray(args[0]) ? [] : args.filter(o => {
+        if (o && typeof o === 'object' && (o.__noSplit || o.__splitByLine)) { options = { ...options, ...o }; return false; }
+        else return true;
+    });
     if (Array.isArray(args[0])) {
         args[0].forEach((element, index) => {
             if (index > 0)
@@ -58,9 +62,15 @@ function __(...args) {
             _out += data;
         });
         cmd.on('close', (code) => {
-            const _lines = _out.split(os.EOL).filter(l => l);
-            _lines.forEach(l => lines.push(l.split(/[ \t]/)));
-            res(lines);
+            if (options.__noSplit) res(_out);
+            else {
+                const _lines = _out.split(os.EOL).filter(l => l);
+                if (options.__splitByLine) res(_lines);
+                else {
+                    _lines.forEach(l => lines.push(l.split(/[ \t]/)));
+                    res(lines);
+                }
+            }
         });
     });
 }

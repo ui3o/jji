@@ -69,8 +69,22 @@ module.exports.run_eval_and_readline = ["run simple javascript code and read lin
     const name = await jj.rl('Please type your name: ');
     console.log(`Hi ${name}!`); jj.stay()
 }]
-module.exports.run_and_parse = ["run and echo and parse output", () => {
-    const a = __`sleep 3 && echo done && echo other done other`; console.log(a[0][0]);
+module.exports.run_and_parse = ["run and echo and parse output", async () => {
+    const a = await __`sleep 3 && echo done && echo other done other`; console.log(a[0][0]);
+}]
+module.exports.parse_tester = ["run and echo and parse output", {
+    no_split: async () => {
+        const a = await __(`echo ${false} && echo other done other`, { __noSplit: true }); console.log(a);
+        jj.stay();
+    },
+    line_split: async () => {
+        const a = await __(`echo ${false} && echo other done other`, { __splitByLine: true }, 'done'); console.log(a[1]);
+        jj.stay();
+    },
+    all_split: async () => {
+        const a = await __`echo ${false} && echo other done other`; console.log(a[0][0]);
+        jj.stay();
+    }
 }]
 module.exports.simple_null = null;
 module.exports.null_with_desc = ["not selectable menu item", null];
