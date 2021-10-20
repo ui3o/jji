@@ -139,6 +139,11 @@ global.jj.home = function () {
     global.jj.prop.jumpHome = true;
 }
 
+global.jj.err = function (msg = "") {
+    if (msg.length) exitError(msg);
+    process.exit(2);
+}
+
 global.jj.rl = function (question = '') {
     return new Promise(res => {
         menu.readLine((_event, line) => {
