@@ -41,9 +41,9 @@ This tool aims to make an easy menu system to organize your cli workflow.
 * all **script runs** inside a **bash** shell
 * provided **global functions**, which means you **do not need to import anything** for use in your jj.js file:
   * '`_`': which run a simple script. The output simple printed:``_`echo hello wold` ``
-  * '`__`' which run a simple script, but output is not printed and parsed. splits by line and split lines by [space and tab] Example:`` const a = __`sleep 3 && echo done && echo other done other`; console.log(a[0][0]) ``. Possible to add extra parameters (option object place in the arguments list no matter):
-    * **__noSplit**: the output will not be split: `__(``hi ${false}``, { __noSplit: true });` [example/demo/jj.js#L77](example/demo/jj.js#L77)
-    * **__splitByLine**: the output will not be split: `__(``hi ${false}``, { __splitByLine: true }, 'other');` [example/demo/jj.js#L81](example/demo/jj.js#L81)
+  * '`__`' which run a simple script, but output is not printed and parsed. Example:`` const a = await __`echo other done other`; console.log(a) ``. [default]: *no split*. Possible to add extra parameters (option object place in the arguments list no matter):
+    * **__splitByLine**: the output will not be split: `await __(``hi ${false}``, { __splitByLine: true }, 'other');` [example/demo/jj.js#L81](example/demo/jj.js#L81)
+    * **__splitAll**: the output will be split by line and split lines by [space and tab]: `await __(``hi ${false}``, { __splitAll: true });` [example/demo/jj.js#L77](example/demo/jj.js#L77)
   * '`$`' for a later load menu, which means the Promise start after the program start. First parameter is a promise call back function, the second is  a description, the third is a command. Example:`$((res, rej)=>{}, {options})`
   * '`$$`' for a lazy load menu, which means when you enter into the menu the Promise start after the enter. First parameter is a promise call back function, the second is  a description, the third is a command. Example:`$$((res, rej)=>{}, {options})`
   * '`$$$`' for a option extend, which means only the extra options extends the original function. Example:`$$$((res, rej)=>{}, {options})`

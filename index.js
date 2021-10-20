@@ -42,7 +42,7 @@ function _(...args) {
 function __(...args) {
     let options = {};
     const out = Array.isArray(args[0]) ? [] : args.filter(o => {
-        if (o && typeof o === 'object' && (o.__noSplit || o.__splitByLine)) { options = { ...options, ...o }; return false; }
+        if (o && typeof o === 'object' && (o.__splitAll || o.__splitByLine)) { options = { ...options, ...o }; return false; }
         else return true;
     });
     if (Array.isArray(args[0])) {
@@ -62,8 +62,7 @@ function __(...args) {
             _out += data;
         });
         cmd.on('close', (code) => {
-            if (options.__noSplit) res(_out);
-            else {
+            if (options.__splitAll || options.__splitByLine) {
                 const _lines = _out.split(os.EOL).filter(l => l);
                 if (options.__splitByLine) res(_lines);
                 else {
@@ -71,6 +70,8 @@ function __(...args) {
                     res(lines);
                 }
             }
+            else
+                res(_out);
         });
     });
 }
