@@ -49,8 +49,8 @@ This tool aims to make an easy menu system to organize your cli workflow.
     * **__noPrintOnSelect** [boolean] **true** means when execute the command no header will be printed after the selection. [example/real/jj.js#L33](example/real/jj.js#L33). [default]: *false*
     * **__needInput** [boolean] **true** if you want to use '`jj.rl`' function. you can also manage manually inside yor function with `process.stdin.pause()` or `process.stdin.resume()`.  [example/demo/jj.js#L13](example/demo/jj.js#L13). [default]: *false*
     * **__showLoadingAfter** [number] **ms** works only with lazy menu [example/real/jj.js#L33](example/real/jj.js#L33). [default]: *100*
-    * **__header** [function] **returns string** print message before menu execute [example/real/jj.js#L28](example/real/jj.js#L28). you can use `jj.term.colorCode*` [src/term.js#L237](src/term.js#L237)
-    * **__footer** [function] **returns string** print message after menu execute [example/real/jj.js#L29](example/real/jj.js#L29). you can use `jj.term.colorCode*` [src/term.js#L237](src/term.js#L237)
+    * **__header** [function] **returns string** print message before menu execute [example/real/jj.js#L27](example/real/jj.js#L27). you can use `jj.term.colorCode*` [src/term.js#L237](src/term.js#L237)
+    * **__footer** [function] **returns string** print message after menu execute [example/real/jj.js#L28](example/real/jj.js#L28). you can use `jj.term.colorCode*` [src/term.js#L237](src/term.js#L237)
     * **__keyHandler** [function] when **returns true** menu can handle that key. [default]: *undefined*
   * `jj` for a jj global function access. In your javascript code you van use the followings:
     * '`jj.home()`' which will reopen the menu on the top (root) level after the function finish
