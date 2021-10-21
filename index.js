@@ -289,7 +289,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
         menuPath.pop(); menuCmd.pop();
         const _currentMenuRef = getPath(transformedMenu, menuPath.join(MENU_SEPARATOR));
         if (_currentMenuRef.__onload_menu__ !== undefined) {
-            const _items = Object.keys(currentMenuRef).filter(e => e !== '__name__' && e !== '__desc__' && e !== '__cmd__' && e !== '__index__' && e !== '__menu_entry__' && e !== '__onload_menu__');
+            const _items = Object.keys(_currentMenuRef).filter(e => e !== '__name__' && e !== '__desc__' && e !== '__cmd__' && e !== '__index__' && e !== '__menu_entry__' && e !== '__onload_menu__');
             _items.forEach(k => delete _currentMenuRef[k])
         }
         freeLazyItemsFromPath();
