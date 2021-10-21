@@ -13,9 +13,9 @@ const exitError = msg => { console.error(`\n[ERROR] ${msg}`) };
 
 /**
  * spawn a command
- * 
+ *
  * @param {*} script script to execute
- * @returns 
+ * @returns
  */
 function _(...args) {
     const out = Array.isArray(args[0]) ? [] : args;
@@ -35,9 +35,9 @@ function _(...args) {
 }
 /**
  * spawn a command, but get all data with line separated
- * 
+ *
  * @param {*} script script to execute
- * @returns 
+ * @returns
  */
 function __(...args) {
     let options = {};
@@ -80,7 +80,7 @@ function __(...args) {
  * spawn a command, but get all data with line separated, and possible to send to stdin (like password)
  * TODO: Fix and test
  * @param {*} script script to execute
- * @returns 
+ * @returns
  */
 async function ___(script, onData = (data) => { }) {
     const lines = [];
@@ -117,9 +117,9 @@ global.$$ = function (prom = (res, rej) => { }, options = {}) {
 }
 /**
  * Add options to a single function
- * @param {*} func 
- * @param {*} options 
- * @returns 
+ * @param {*} func
+ * @param {*} options
+ * @returns
  */
 global.$$$ = function (func = () => { }, options = {}) {
     Object.keys(options).forEach(k => {
@@ -284,6 +284,17 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
     transform(rawMenu, transformedMenu);
     menuWalker();
 
+    const freeLazyItemsFromPath = () => {
+        if (menuPath.length < 2) return;
+        menuPath.pop(); menuCmd.pop();
+        const _currentMenuRef = getPath(transformedMenu, menuPath.join(MENU_SEPARATOR));
+        if (_currentMenuRef.__onload_menu__ !== undefined) {
+            const _items = Object.keys(currentMenuRef).filter(e => e !== '__name__' && e !== '__desc__' && e !== '__cmd__' && e !== '__index__' && e !== '__menu_entry__' && e !== '__onload_menu__');
+            _items.forEach(k => delete _currentMenuRef[k])
+        }
+        freeLazyItemsFromPath();
+    }
+
     function exit(code) {
         if (code === 0) {
             if (global.jj.prop.stayInMenu) {
@@ -309,6 +320,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                 return;
             } else if (global.jj.prop.jumpHome) {
                 global.jj.prop.jumpHome = false;
+                freeLazyItemsFromPath();
                 menuPath = []; menuCmd = [];
                 menuWalker();
                 return;
