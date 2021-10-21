@@ -65,10 +65,10 @@ module.exports.multiline = {
 module.exports.run = ["run simple javascript code", () => { console.log('simple1 eval') }]
 module.exports.run_eval_and_stay = ["run simple javascript code and stay in the same level in the menu", () => { console.log('simple eval and reopen the menu'); jj.stay() }]
 module.exports.run_eval_and_home = ["run simple javascript code and jump to root level in the menu", () => { console.log('simple eval and jump to root in the menu'); jj.home() }]
-module.exports.run_eval_and_readline = ["run simple javascript code and read line inside", async () => {
+module.exports.run_eval_and_readline = ["run simple javascript code and read line inside", $$$(async () => {
     const name = await jj.rl('Please type your name: ');
-    console.log(`Hi ${name}!`); jj.stay()
-}]
+    console.log(`Hi ${name}!`);
+}, { __needInput })]
 module.exports.run_and_parse = ["run and echo and parse output", async () => {
     const a = await __`sleep 3 && echo done && echo other done other`; console.log(a[0][0]);
 }]
@@ -88,3 +88,19 @@ module.exports.parse_tester = ["run and echo and parse output", {
 }]
 module.exports.simple_null = null;
 module.exports.null_with_desc = ["not selectable menu item", null];
+module.exports.lazy_clear = {
+    show_with_clear: ['when the menu clear back the last menu size ', $$(async (res) => {
+        console.log('You have to see number 10 on screen. If you can not the menu clear back last menu size');
+        for (let index = 0; index < 10; index++) {
+            console.log(index + 1);
+        }
+        res({ do_nothing: null });
+    })],
+    show_without_clear: ['when the menu NOT clear back the last menu size ', $$(async (res) => {
+        console.log('You have to see number 10 on screen');
+        for (let index = 0; index < 10; index++) {
+            console.log(index + 1);
+        }
+        res({ do_nothing: null });
+    }, { __resetMenuPos })]
+};
