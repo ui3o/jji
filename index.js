@@ -99,11 +99,12 @@ global.__noPrintOnSelect = true;
 global.__needInput = true;
 global.__splitByLine = true;
 global.__splitAll = true;
+global.__resetMenuPos = true;
 
 global.$ = function (prom = (res, rej) => { }, options = {}) {
     Object.keys(options).forEach(k => {
         prom[k] = options[k];
-        if (k === '__showLoadingAfter') {
+        if (k === '__showLoadingAfter' || k === '__resetMenuPos') {
             exitError(`__showLoadingAfter only works with $$ (lazy load) menu item !`); menu.close(); process.exit(2);
         }
     });
@@ -123,7 +124,7 @@ global.$$ = function (prom = (res, rej) => { }, options = {}) {
 global.$$$ = function (func = () => { }, options = {}) {
     Object.keys(options).forEach(k => {
         func[k] = options[k];
-        if (k === '__showLoadingAfter') {
+        if (k === '__showLoadingAfter' || k === '__resetMenuPos') {
             exitError(`__showLoadingAfter only works with $$ (lazy load) menu item !`); menu.close(); process.exit(2);
         }
     });
@@ -233,6 +234,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                     showLoading(__showLoadingTimeout);
                     const __currentPath = menuPath.join(MENU_SEPARATOR);
                     new Promise(_currentMenuRef.__onload_menu__).then((_menu) => {
+                        if (_currentMenuRef.__onload_menu__.__resetMenuPos) menu.resetMenuPos();
                         if (__currentPath === menuPath.join(MENU_SEPARATOR)) {
                             transform(_menu, _currentMenuRef, '', _currentMenuRef.__cmd__ ? [_currentMenuRef.__cmd__] : []);
                             if (hasSubMenu()) menuWalker();
@@ -295,6 +297,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                     showLoading(__showLoadingTimeout);
                     const __currentPath = menuPath.join(MENU_SEPARATOR);
                     new Promise(_currentMenuRef.__onload_menu__).then((_menu) => {
+                        if (_currentMenuRef.__onload_menu__.__resetMenuPos) menu.resetMenuPos();
                         if (__currentPath === menuPath.join(MENU_SEPARATOR)) {
                             transform(_menu, _currentMenuRef, '', _currentMenuRef.__cmd__ ? [_currentMenuRef.__cmd__] : []);
                             if (hasSubMenu()) menuWalker();

@@ -448,6 +448,10 @@ const unmute = () => {
     process.stdin.resume();
 }
 
+const resetMenuPos = () => {
+    Term.newScreen();
+}
+
 const configure = {
     disableProcessExitOnSelect: () => {
         config.disableProcessExitOnSelect = true;
@@ -476,5 +480,5 @@ const event = {
 };
 
 module.exports = {
-    open, close, showLoading, setMenu, updateMenu, event, configure, jumpHome, mute, unmute, readLine
+    open, close, showLoading, setMenu, updateMenu, event, configure, jumpHome, mute, unmute, readLine, resetMenuPos
 }
