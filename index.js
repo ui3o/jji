@@ -1,4 +1,4 @@
-const { existsSync } = require('fs');
+const { existsSync, mkdir, rm } = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
 const os = require('os')
@@ -11,6 +11,29 @@ const { fromDir } = require('./src/file.finder');
 const isWin = process.platform === "win32";
 const exitError = msg => { console.error(`\n[ERROR] ${msg}`) };
 
+function scriptCollector(...args) {
+    let script = [];
+    let options = {};
+    args = args.filter(o => {
+        if (o && typeof o === 'object' && (o.__splitAll || o.__splitByLine)) { options = { ...options, ...o }; return false; }
+        else return true;
+    });
+    if (Array.isArray(args[0])) {
+        const out = [];
+        args[0].forEach((element, index) => {
+            if (index > 0) out.push(args[index]);
+            out.push(element);
+        });
+        script = out.join('').split(' ');
+    } else {
+        args.forEach(e => {
+            if (Array.isArray(e)) script = [...script, ...e];
+            else script = [...script, ...e.split(' ')];
+        });
+    }
+    return { script, options };
+}
+
 /**
  * spawn a command
  *
@@ -18,17 +41,8 @@ const exitError = msg => { console.error(`\n[ERROR] ${msg}`) };
  * @returns
  */
 function _(...args) {
-    const out = Array.isArray(args[0]) ? [] : args;
-    if (Array.isArray(args[0])) {
-        args[0].forEach((element, index) => {
-            if (index > 0)
-                out.push(args[index]);
-            out.push(element);
-        });
-    }
-    const script = out.join('');
-    const cmd = isWin ? spawn('cmd.exe', ['/c', 'bash', '-c', script], { stdio: 'inherit' }) :
-        spawn('bash', ['-c', script], { stdio: 'inherit' });
+    const { script } = scriptCollector(...args);
+    const cmd = spawn(script.shift(), [...script], { stdio: 'inherit' });
     return new Promise((resolve) => {
         cmd.on('close', (code) => resolve(code));
     });
@@ -36,26 +50,17 @@ function _(...args) {
 /**
  * spawn a command, but get all data with line separated
  *
+ * possible options:
+ *   * __splitAll
+ *   * __splitByLine
+ * 
  * @param {*} script script to execute
  * @returns
  */
 function __(...args) {
-    let options = {};
-    const out = Array.isArray(args[0]) ? [] : args.filter(o => {
-        if (o && typeof o === 'object' && (o.__splitAll || o.__splitByLine)) { options = { ...options, ...o }; return false; }
-        else return true;
-    });
-    if (Array.isArray(args[0])) {
-        args[0].forEach((element, index) => {
-            if (index > 0)
-                out.push(args[index]);
-            out.push(element);
-        });
-    }
-    const script = out.join('');
+    const { script, options } = scriptCollector(...args);
     const lines = [];
-    const cmd = isWin ? spawn('cmd.exe', ['/c', 'bash', '-c', script], { encoding: 'utf-8' }) :
-        spawn('bash', ['-c', script], { encoding: 'utf-8' });
+    const cmd = spawn(script.shift(), [...script], { encoding: 'utf-8' });
     return new Promise(res => {
         let _out = '';
         cmd.stdout.on('data', data => {
@@ -150,6 +155,20 @@ global.jj.rl = function (question = '') {
         menu.readLine((_event, line) => {
             res(line);
         }, question);
+    });
+}
+
+global.jj.mkdir = function (path = '') {
+    return new Promise(res => {
+        if (!existsSync(path)) {
+            mkdir(path, { recursive: true }, (code) => res(code));
+        }
+    });
+}
+
+global.jj.rm = function (path = '') {
+    return new Promise(res => {
+        rm(path, { recursive: true, force: true }, (code) => res(code));
     });
 }
 

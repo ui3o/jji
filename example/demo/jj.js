@@ -70,22 +70,27 @@ module.exports.run_eval_and_readline = ["run simple javascript code and read lin
     console.log(`Hi ${name}!`);
 }, { __needInput })]
 module.exports.run_and_parse = ["run and echo and parse output", async () => {
-    const a = await __`sleep 3 && echo done && echo other done other`; console.log(a[0][0]);
+    const l = await __(`docker exec alpine sh -c`, [`ls -al`], { __splitByLine });
+    console.log(l);
 }]
-module.exports.parse_tester = ["run and echo and parse output", {
-    all_split: async () => {
-        const a = await __(`echo ${false} && echo other done other`, { __splitAll: true }); console.log(a[0][0]);
-        jj.stay();
-    },
-    line_split: async () => {
-        const a = await __(`echo ${false} && echo other done other`, { __splitByLine: true }, 'done'); console.log(a[1]);
-        jj.stay();
-    },
-    no_split: async () => {
-        const a = await __`echo ${false} && echo other done other`; console.log(a);
-        jj.stay();
-    }
-}]
+module.exports.parse_tester = ["run and echo and parse output", $$(async (res) => {
+    setTimeout(async () => {
+        res({
+            all_split: async () => {
+                const a = await __(`echo ${false} && echo other done other`, { __splitAll: true }); console.log(a[0][0]);
+                jj.stay();
+            },
+            line_split: async () => {
+                const a = await __(`echo ${false} && echo other done other`, { __splitByLine: true }, 'done'); console.log(a[1]);
+                jj.stay();
+            },
+            no_split: async () => {
+                const a = await __`echo ${false} && echo other done other`; console.log(a);
+                jj.home();
+            }
+        })
+    }, 1000);
+})]
 module.exports.simple_null = null;
 module.exports.null_with_desc = ["not selectable menu item", null];
 module.exports.lazy_clear = {

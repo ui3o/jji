@@ -7,13 +7,6 @@ This tool aims to make an easy menu system to organize your cli workflow.
 
 # Install 
 * ```npm i -g jji```
-* Install [Cygwin](https://www.cygwin.com/) on Windows! see [here](#Dependencies)
-
-# Motivation
-* cross platform (windows and linux) script in `jj.js` with Cygwin.
-* resolves
-    * environment variable, possible to use only process.env.ENV_VAR, no longer need on %ENV_VAR% on window
-    * possible to use same command on windows and linux with [Cygwin](https://www.cygwin.com/)
 
 # How menu structure works
 * every menu item has name: `module.export.test`
@@ -23,7 +16,7 @@ This tool aims to make an easy menu system to organize your cli workflow.
   * after description: `module.exports.run = ["run simple", {...}]`
   * after command: `module.exports.run = ["run simple", "echo hello", {...}]`
 * every group can have a group command which can be: `string`
-* when one item selected, all group command and item command going to concat into one string and executed in bash shell
+* when one item selected, all group command and item command going to concat into one string and executed in **node spawn** shell
 * there are 3 extra type of menu item:
   * **lazy** load menu, which means when you enter into the menu the Promise start after the select
   * **later** load menu, which means the Promise start after the program start
@@ -38,10 +31,10 @@ This tool aims to make an easy menu system to organize your cli workflow.
 * if the working folder contains *.jj.js possible to sort with number. ex. *.0.jj,js *.1.jj,js
 * prompt base sub menu system, please check the [example/demo/jj.js#L1](example/demo/jj.js#L1)
 * search in the menu (in the name and description)
-* all **script runs** inside a **bash** shell
+* all **script runs** inside a **node spawn**
 * provided **global functions**, which means you **do not need to import anything** for use in your jj.js file:
-  * '`_`': which run a simple script. The output simple printed:``_`echo hello wold` ``
-  * '`__`' which run a simple script, but output is not printed and parsed. Example:`` const a = await __`echo other done other`; console.log(a) ``. [default]: *no split*. Possible to add extra parameters (option object place in the arguments list no matter):
+  * '`_`': which run a simple script. The output simple printed:``_`echo hello wold` ``. possible to combine with fix parameter between array. `_(``docker exec alpine sh -c``, [``ls -al``]);` or `_(``docker exec alpine sh -c``, [``ls -al``], ``/usr``, [``/path with space``]);`
+  * '`__`' which run a simple script. same as `_`, but output is not printed and parsed. Example:`` const a = await __`echo other done other`; console.log(a) ``. [default]: *no split*. Possible to add extra parameters (option object place in the arguments list no matter):
     * **__splitByLine**: the output will not be split: `await __(``hi ${false}``, { __splitByLine: true }, 'other');` [example/demo/jj.js#L81](example/demo/jj.js#L81)
     * **__splitAll**: the output will be split by line and split lines by [space and tab]: `await __(``hi ${false}``, { __splitAll: true });` [example/demo/jj.js#L77](example/demo/jj.js#L77)
   * '`$`' for a later load menu, which means the Promise start after the program start. First parameter is a promise call back function, the second is  a description, the third is a command. Example:`$((res, rej)=>{}, {options})`
@@ -60,6 +53,8 @@ This tool aims to make an easy menu system to organize your cli workflow.
     * '`jj.stay()`' which will reopen the menu on the same level after the function finish
     * '`jj.rl`': `const rl = await jj.rl('Type your name')` which will read a line from stdin. One parameter is the question.
     * '`jj.err`': `jj.err('Something went wrong!')` this will print an error msg if exist and exit the program.
+    * '`jj.mkdir`': `await jj.mkdir('/path/to')` this will create a folder recursively.
+    * '`jj.rm`': `await jj.rm('/path/to')` this will remove a folder recursively.
   * all boolean property is available on global scope because of shorter definition. example: `await __(``hi ${false}``, { __splitByLine: true }, 'other');` ==> `await __(``hi ${false}``, { __splitByLine }, 'other');`
 
 * menu control keys:
@@ -73,13 +68,6 @@ This tool aims to make an easy menu system to organize your cli workflow.
 # Examples
 
 Examples are located in [example](example/demo/jj.js).
-
-# Dependencies
-
-* Install [Cygwin](https://www.cygwin.com/)
-* **IMPORTANT!! Add** Cygwin **path** to **Environment** variables to **top** level, which replace the default windows commands like find and etc.
-
-![Alt text](/docs/windows_settings.png?raw=true)
 
 # Usage
 
