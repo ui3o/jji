@@ -14,7 +14,7 @@ function scriptCollector(...args) {
     let script = [];
     let options = {};
     args = args.filter(o => {
-        if (o && typeof o === 'object' && (o.__splitAll || o.__splitByLine || o.__cwd)) { options = { ...options, ...o }; return false; }
+        if (o && typeof o === 'object' && (o.__splitAll || o.__splitByLine || o.__cwd || o.__eol)) { options = { ...options, ...o }; return false; }
         else return true;
     });
     if (Array.isArray(args[0])) {
@@ -54,6 +54,7 @@ function _(...args) {
  *   * __splitAll
  *   * __splitByLine
  *   * __cwd
+ *   * __eol
  * 
  * @param {*} script script to execute
  * @returns
@@ -74,7 +75,7 @@ function __(...args) {
         }
         cmd.on('close', (code) => {
             if (options.__splitAll || options.__splitByLine) {
-                const _lines = _out.split(os.EOL).filter(l => l);
+                const _lines = _out.split(options.__eol ? options.__eol : '\n').filter(l => l);
                 if (options.__splitByLine) res(_lines);
                 else {
                     _lines.forEach(l => lines.push(l.split(/[ \t]/)));

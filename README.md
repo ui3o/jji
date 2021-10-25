@@ -39,6 +39,7 @@ This tool aims to make an easy menu system to organize your cli workflow.
     * **__splitAll**: the output will be split by line and split lines by [space and tab]: `await __(``hi ${false}``, { __splitAll: true });` [example/demo/jj.js#L77](example/demo/jj.js#L77)
     * **__hideStdErr**: the output will not contains stderr output: `await __(``hi ${false}``, { __hideStdErr }, 'other');`. [default]: *include*
     * **__cwd**: set the current directory: `await __(``hi ${false}``, { __cwd:'/path to repo' }, 'other');`. [default]: *undefined*
+    * **__eol**: set end of line characters: `await __(``hi ${false}``, { __eol:'\r\n' }, 'other');`. [default]: *\n*
   * '`$`' for a later load menu, which means the Promise start after the program start. First parameter is a promise call back function, the second is  a description, the third is a command. Example:`$((res, rej)=>{}, {options})`
   * '`$$`' for a lazy load menu, which means when you enter into the menu the Promise start after the enter. First parameter is a promise call back function, the second is  a description, the third is a command. Example:`$$((res, rej)=>{}, {options})`
   * '`$$$`' for a option extend, which means only the extra options extends the original function. Example:`$$$((res, rej)=>{}, {options})`
