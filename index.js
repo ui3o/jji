@@ -66,9 +66,11 @@ function __(...args) {
         cmd.stdout.on('data', data => {
             _out += data;
         });
-        cmd.stderr.on('data', data => {
-            _out += data;
-        });
+        if (!options.__hideStdErr) {
+            cmd.stderr.on('data', data => {
+                _out += data;
+            });
+        }
         cmd.on('close', (code) => {
             if (options.__splitAll || options.__splitByLine) {
                 const _lines = _out.split(os.EOL).filter(l => l);
@@ -108,6 +110,7 @@ global.__needInput = true;
 global.__splitByLine = true;
 global.__splitAll = true;
 global.__resetMenuPos = true;
+global.__hideStdErr = true;
 
 global.$ = function (prom = (res, rej) => { }, options = {}) {
     Object.keys(options).forEach(k => {
