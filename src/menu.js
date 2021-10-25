@@ -295,12 +295,15 @@ const _refreshLoading = () => {
     Term.eraseDisplayBelow();
 }
 
-const showLoading = () => {
+const showLoading = (invisible) => {
     _stopLoading();
-    _refreshLoading();
-    menu.loadingHandler = setInterval(() => {
+    if (invisible) menu.loadingHandler = -1;
+    else {
         _refreshLoading();
-    }, 500);
+        menu.loadingHandler = setInterval(() => {
+            _refreshLoading();
+        }, 500);
+    }
 }
 
 const _reportExit = (eventType = event.EXITED) => {

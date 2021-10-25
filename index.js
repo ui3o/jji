@@ -228,6 +228,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
     }
 
     function showLoading(timeout = 100) {
+        menu.showLoading(true);
         showLoadingTimer = setTimeout(() => {
             menu.showLoading();
         }, timeout);
