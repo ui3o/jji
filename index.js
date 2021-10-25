@@ -14,7 +14,7 @@ function scriptCollector(...args) {
     let script = [];
     let options = {};
     args = args.filter(o => {
-        if (o && typeof o === 'object' && (o.__splitAll || o.__splitByLine)) { options = { ...options, ...o }; return false; }
+        if (o && typeof o === 'object' && (o.__splitAll || o.__splitByLine || o.__cwd)) { options = { ...options, ...o }; return false; }
         else return true;
     });
     if (Array.isArray(args[0])) {
@@ -35,7 +35,8 @@ function scriptCollector(...args) {
 
 /**
  * spawn a command
- *
+ * possible options:
+ *   * __cwd
  * @param {*} script script to execute
  * @returns
  */
@@ -52,6 +53,7 @@ function _(...args) {
  * possible options:
  *   * __splitAll
  *   * __splitByLine
+ *   * __cwd
  * 
  * @param {*} script script to execute
  * @returns
@@ -92,7 +94,7 @@ function __(...args) {
  * @returns
  */
 async function ___(script, onData = (data) => { }) {
-   // not implemented yet
+    // not implemented yet
 }
 
 // init globals
