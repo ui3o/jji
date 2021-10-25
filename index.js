@@ -40,7 +40,7 @@ function scriptCollector(...args) {
  * @returns
  */
 function _(...args) {
-    const { script } = scriptCollector(...args);
+    const { script, options } = scriptCollector(...args);
     const cmd = spawn(script.shift(), [...script], { stdio: 'inherit', cwd: options.__cwd });
     return new Promise((resolve) => {
         cmd.on('close', (code) => resolve(code));
