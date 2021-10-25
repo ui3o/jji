@@ -27,9 +27,12 @@ function scriptCollector(...args) {
     } else {
         args.forEach(e => {
             if (Array.isArray(e)) script = [...script, ...e];
-            else script = [...script, ...e.split(' ')];
+            else if (typeof e === 'string') script = [...script, ...e.split(' ')];
+            else script = [...script, e];
         });
     }
+    let _firstFound = false;
+    script = script.filter(p => { if (p || _firstFound) { _firstFound = true; return true; } return false; });
     return { script, options };
 }
 
@@ -42,7 +45,8 @@ function scriptCollector(...args) {
  */
 function _(...args) {
     const { script, options } = scriptCollector(...args);
-    const cmd = spawn(script.shift(), [...script], { stdio: 'inherit', cwd: options.__cwd });
+    const shell = process.env.__shell === 'true' ? true : process.env.__shell;
+    const cmd = spawn(script.shift(), [...script], { stdio: 'inherit', cwd: options.__cwd, env: process.env, shell });
     return new Promise((resolve) => {
         cmd.on('close', (code) => resolve(code));
     });
@@ -62,7 +66,8 @@ function _(...args) {
 function __(...args) {
     const { script, options } = scriptCollector(...args);
     const lines = [];
-    const cmd = spawn(script.shift(), [...script], { encoding: 'utf-8', cwd: options.__cwd });
+    const shell = process.env.__shell === 'true' ? true : process.env.__shell;
+    const cmd = spawn(script.shift(), [...script], { encoding: 'utf-8', cwd: options.__cwd, shell });
     return new Promise(res => {
         let _out = '';
         cmd.stdout.on('data', data => {
@@ -264,7 +269,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                 } else {
                     menu.jumpHome(); Term.eraseDisplayBelow();
                     if (typeof menuCmd[menuCmd.length - 1] !== 'function' || (typeof menuCmd[menuCmd.length - 1] === 'function' && !menuCmd[menuCmd.length - 1].__noPrintOnSelect)) {
-                        if (typeof menuCmd[menuCmd.length - 1] === 'function' && !menuCmd[menuCmd.length - 1].__header) {
+                        if ((typeof menuCmd[menuCmd.length - 1] === 'function' && !menuCmd[menuCmd.length - 1].__header) || typeof menuCmd[menuCmd.length - 1] !== 'function') {
                             Term.printf(`..::`).formatBold().formatBrightWhite().printf(` ${menuPath.join(`${Term.colorCodeStyleReset + Term.colorCodeBrightBlack} > ${Term.colorCodeBold + Term.colorCodeBrightWhite}`)}`).formatFormatReset();
                             Term.printf(` ::..\n`);
                         } else {

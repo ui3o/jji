@@ -1,10 +1,11 @@
 const { test_from_simple } = require('./simple.module');
 
+const env = process.env;
 process.env.HELLO = 'hello';
 process.env.WORLD = 'world';
 
 module.exports.prom = $$(async (res) => {
-    const a = await __`sleep 10`
+    await __`sleep 1`
     const menu = {
         a: ['a menu', $$$(async () => {
             const rl = await jj.rl('Type name: ');
@@ -15,7 +16,7 @@ module.exports.prom = $$(async (res) => {
 
     setTimeout(() => {
         res(menu)
-    }, 6000);
+    }, 1000);
 })
 module.exports.USE_require_in_jj_js = test_from_simple
 module.exports.sub_menu_test = [`sub menu test description`, {
@@ -27,12 +28,12 @@ module.exports.sub_menu_test = [`sub menu test description`, {
             setTimeout(() => {
                 res({
                     simple_echo: "echo lazy test",
-                    simple_eval_a_function: () => { console.log('simple eval'); _`sleep 3 && echo hello world`; },
+                    simple_eval_a_function: async () => { console.log('simple eval'); await _`sleep 3`; await _`echo hello world`; },
                     async_load: ['load async menu item', $((res) => {
                         setTimeout(() => {
                             res({
                                 echo_test: "echo lazy test",
-                                eval_test: () => { console.log('simple eval'); _`sleep 3 && echo hello world`; },
+                                eval_test: async () => { console.log('simple eval'); await _`sleep 3`; await _`echo hello world`; },
                             })
                         }, 3000);
                     })]
@@ -41,26 +42,27 @@ module.exports.sub_menu_test = [`sub menu test description`, {
         })]
     }],
     eval: ['description: eval a javascript code', () => { console.log('simple eval') }],
-    find: [`find files desc`, `find . -type f -exec echo file from jj.js: {} \\;`],
+    find: [`find files desc`, `find . -type f -exec echo file from jj.js: {} ;`],
     roo: "echo simple run an echo",
 }]
+
 module.exports.multiline = {
     var: {
-        echo_process_env: [`echo process env var`, () => {
+        echo_process_env: [`echo process env var`, async () => {
             console.log('console log env var and run echo');
-            process.env.HELLO = 'hello';
-            process.env.WORLD = 'world';
-            _`echo $HELLO && echo $WORLD`;
+            await _`echo ${env.HELLO} ${env.WORLD}`;
         }],
-        echo_with_echo_command: [`echo process env var`, `
-                echo $HELLO;
-                echo $WORLD`]
+        echo_with_echo_command: [`echo process env var`, async () => {
+            await _(`sh -c`, [`echo $HELLO $WORLD`])
+        }]
     },
     // possible to create multi line command which will compiled to single line
-    command: [`multiline description`, `for i in \`seq 1 10\`; 
-                do 
-                    echo s$i;
-                done`]
+    command: [`multiline description`, async () => {
+        await _(`sh -c`, [` for i in \`seq 1 10\`; 
+                            do 
+                                echo s$i;
+                            done`]);
+    }]
 }
 module.exports.run = ["run simple javascript code", () => { console.log('simple1 eval') }]
 module.exports.run_eval_and_stay = ["run simple javascript code and stay in the same level in the menu", () => { console.log('simple eval and reopen the menu'); jj.stay() }]
@@ -69,10 +71,12 @@ module.exports.run_eval_and_readline = ["run simple javascript code and read lin
     const name = await jj.rl('Please type your name: ');
     console.log(`Hi ${name}!`);
 }, { __needInput })]
+
 module.exports.run_and_parse = ["run and echo and parse output", async () => {
-    const l = await __(`docker exec alpine sh -c`, [`ls -al`], { __splitByLine });
+    const l = await __(`docker run alpine sh -c`, [`ls -al`], { __splitByLine });
     console.log(l);
 }]
+
 module.exports.parse_tester = ["run and echo and parse output", $$(async (res) => {
     setTimeout(async () => {
         res({
@@ -81,11 +85,11 @@ module.exports.parse_tester = ["run and echo and parse output", $$(async (res) =
                 jj.stay();
             },
             line_split: async () => {
-                const a = await __(`echo ${false} && echo other done other`, { __splitByLine: true }, 'done'); console.log(a[1]);
+                const a = await __(`sh -c`, { __splitByLine: true }, [`echo ${false} && echo other done other`]); console.log(a[0]);
                 jj.stay();
             },
             no_split: async () => {
-                const a = await __`echo ${false} && echo other done other`; console.log(a);
+                const a = await __(`sh -c`, [`echo ${false} && echo other done other`]); console.log(a);
                 jj.home();
             }
         })

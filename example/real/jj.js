@@ -1,17 +1,15 @@
 
 module.exports.less = ["less file from directory", $(async (res) => {
-    const ls = await __`find . -maxdepth 1 -type f`;
+    const ls = await __(`find . -maxdepth 1 -type f`, { __splitByLine });
     const menu = {};
     ls.forEach(line => {
-        line.forEach(item => {
-            menu[item] = async () => { await _`less ${item}`; jj.stay(); }
-        })
+        menu[line] = async () => { await _`less ${line}`; jj.stay(); }
     });
     res(menu);
 }, { __noPrintOnSelect: true })];
 
 module.exports.fileViewer = ["ls dir and less file from directory", $$(async (res) => {
-    const lsc = await __`ls -al`;
+    const lsc = await __(`ls -al`, { __splitAll });
     const ls = lsc.filter((_, index) => { return index > 1 });
     const menu = {};
     ls.forEach(line => {
@@ -33,7 +31,7 @@ module.exports.fileViewer = ["ls dir and less file from directory", $$(async (re
 }, { __noPrintOnSelect: true, __showLoadingAfter: 150 })];
 
 module.exports.fileViewer2 = ["ls dir and less file from directory", $$(async (res) => {
-    const lsc = await __`ls -al`;
+    const lsc = await __(`ls -al`, { __splitAll });
     const ls = lsc.filter((_, index) => { return index > 1 });
     const menu = {};
     ls.forEach(line => {

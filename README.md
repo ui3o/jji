@@ -51,7 +51,7 @@ This tool aims to make an easy menu system to organize your cli workflow.
     * **__header** [function] **returns string** print message before menu execute [example/real/jj.js#L27](example/real/jj.js#L27). you can use `jj.term.colorCode*` [src/term.js#L237](src/term.js#L237)
     * **__footer** [function] **returns string** print message after menu execute [example/real/jj.js#L28](example/real/jj.js#L28). you can use `jj.term.colorCode*` [src/term.js#L237](src/term.js#L237)
     * **__keyHandler** [function] when **returns true** menu can handle that key. [default]: *undefined*
-  * `jj` for a jj global function access. In your javascript code you van use the followings:
+  * `jj` for a jj global function access. In your javascript code you can use the followings:
     * '`jj.home()`' which will reopen the menu on the top (root) level after the function finish
     * '`jj.stay()`' which will reopen the menu on the same level after the function finish
     * '`jj.rl`': `const rl = await jj.rl('Type your name')` which will read a line from stdin. One parameter is the question.
@@ -59,6 +59,9 @@ This tool aims to make an easy menu system to organize your cli workflow.
     * '`jj.mkdir`': `await jj.mkdir('/path/to')` this will create a folder recursively.
     * '`jj.rm`': `await jj.rm('/path/to')` this will remove a folder recursively.
   * all boolean property is available on global scope because of shorter definition. example: `await __(``hi ${false}``, { __splitByLine: true }, 'other');` ==> `await __(``hi ${false}``, { __splitByLine }, 'other');`
+  * global control properties for jji workflow:
+    * **process.env.__shell** [boolean] **true** means all spawn command will be executed in shell.
+
 
 * menu control keys:
   * **arrow-up/down and tab**: up/down in the menu
