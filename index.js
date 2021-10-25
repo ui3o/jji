@@ -8,7 +8,6 @@ const menu = require('./src/menu');
 const { Term } = require('./src/term');
 const { fromDir } = require('./src/file.finder');
 
-const isWin = process.platform === "win32";
 const exitError = msg => { console.error(`\n[ERROR] ${msg}`) };
 
 function scriptCollector(...args) {
@@ -42,7 +41,7 @@ function scriptCollector(...args) {
  */
 function _(...args) {
     const { script } = scriptCollector(...args);
-    const cmd = spawn(script.shift(), [...script], { stdio: 'inherit' });
+    const cmd = spawn(script.shift(), [...script], { stdio: 'inherit', cwd: options.__cwd });
     return new Promise((resolve) => {
         cmd.on('close', (code) => resolve(code));
     });
@@ -60,7 +59,7 @@ function _(...args) {
 function __(...args) {
     const { script, options } = scriptCollector(...args);
     const lines = [];
-    const cmd = spawn(script.shift(), [...script], { encoding: 'utf-8' });
+    const cmd = spawn(script.shift(), [...script], { encoding: 'utf-8', cwd: options.__cwd });
     return new Promise(res => {
         let _out = '';
         cmd.stdout.on('data', data => {
@@ -93,13 +92,7 @@ function __(...args) {
  * @returns
  */
 async function ___(script, onData = (data) => { }) {
-    const lines = [];
-    const cmd = isWin ? spawn('cmd.exe', ['/c', 'bash', '-c', script]) : spawn('bash', ['-c', script]);
-    const rl = readline.createInterface({ input: cmd.stdout });
-    rl.on('line', line => { lines.push(line.split(/[ \t]/)); });
-    return new Promise((resolve) => {
-        cmd.on('close', (code) => { resolve(lines) });
-    });
+   // not implemented yet
 }
 
 // init globals
