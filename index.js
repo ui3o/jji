@@ -66,6 +66,9 @@ function __(...args) {
         cmd.stdout.on('data', data => {
             _out += data;
         });
+        cmd.stderr.on('data', data => {
+            _out += data;
+        });
         cmd.on('close', (code) => {
             if (options.__splitAll || options.__splitByLine) {
                 const _lines = _out.split(os.EOL).filter(l => l);
