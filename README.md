@@ -35,8 +35,8 @@ This tool aims to make an easy menu system to organize your cli workflow.
 * provided **global functions**, which means you **do not need to import anything** for use in your jj.js file:
   * '`_`': which run a simple script. The output simple printed:``_`echo hello wold` ``. possible to combine with fix parameter between array. `_(``docker exec alpine sh -c``, [``ls -al``]);` or `_(``docker exec alpine sh -c``, [``ls -al``], ``/usr``, [``/path with space``]);`
   * '`__`' which run a simple script. same as `_`, but output is not printed and parsed. Example:`` const a = await __`echo other done other`; console.log(a) ``. [default]: *no split*. Possible to add extra parameters (option object place in the arguments list no matter):
-    * **__splitByLine**: the output will not be split: `await __(``hi ${false}``, { __splitByLine: true }, 'other');` [example/demo/jj.js#L81](example/demo/jj.js#L81)
-    * **__splitAll**: the output will be split by line and split lines by [space and tab]: `await __(``hi ${false}``, { __splitAll: true });` [example/demo/jj.js#L77](example/demo/jj.js#L77)
+    * **__splitByLine**: the output will not be split: `await __(``hi ${false}``, { __splitByLine: true }, 'other');` [example/demo/jj.js#L76](example/demo/jj.js#L76)
+    * **__splitAll**: the output will be split by line and split lines by [space and tab]: `await __(``hi ${false}``, { __splitAll: true });` [example/demo/jj.js#L84](example/demo/jj.js#L84)
     * **__hideStdErr**: the output will not contains stderr output: `await __(``hi ${false}``, { __hideStdErr }, 'other');`. [default]: *include*
     * **__cwd**: set the current directory: `await __(``hi ${false}``, { __cwd:'/path to repo' }, 'other');`. [default]: *undefined*
     * **__eol**: set end of line characters: `await __(``hi ${false}``, { __eol:'\r\n' }, 'other');`. [default]: *\n*
@@ -44,14 +44,14 @@ This tool aims to make an easy menu system to organize your cli workflow.
   * '`$$`' for a lazy load menu, which means when you enter into the menu the Promise start after the enter. First parameter is a promise call back function, the second is  a description, the third is a command. Example:`$$((res, rej)=>{}, {options})`
   * '`$$$`' for a option extend, which means only the extra options extends the original function. Example:`$$$((res, rej)=>{}, {options})`
   * all command which are functions, can have options:
-    * **__noPrintOnSelect** [boolean] **true** means when execute the command no header will be printed after the selection. [example/real/jj.js#L33](example/real/jj.js#L33). [default]: *false*
-    * **__needInput** [boolean] **true** if you want to use '`jj.rl`' function. you can also manage manually inside yor function with `process.stdin.pause()` or `process.stdin.resume()`.  [example/demo/jj.js#L13](example/demo/jj.js#L13). [default]: *false*
-    * **__showLoadingAfter** [number] **ms** works only with lazy menu [example/real/jj.js#L33](example/real/jj.js#L33). [default]: *100*
-    * **__resetMenuPos** [boolean] **true** if you want a repositioned menu. if you print anything to screen during the menu build, the default work flow clears back last menu size. works only with lazy menu [example/demo/jj.js#L105](example/demo/jj.js#L105). [default]: *false*
+    * **__noPrintOnSelect** [boolean] **true** means when execute the command no header will be printed after the selection. [example/real/jj.js#L50](example/real/jj.js#L50). [default]: *false*
+    * **__needInput** [boolean] **true** if you want to use '`jj.rl`' function. you can also manage manually inside yor function with `process.stdin.pause()` or `process.stdin.resume()`.  [example/demo/jj.js#L14](example/demo/jj.js#L14). [default]: *false*
+    * **__showLoadingAfter** [number] **ms** works only with lazy menu [example/real/jj.js#L31](example/real/jj.js#L31). [default]: *100*
+    * **__resetMenuPos** [boolean] **true** if you want a repositioned menu. if you print anything to screen during the menu build, the default work flow clears back last menu size. works only with lazy menu [example/demo/jj.js#L114](example/demo/jj.js#L114). [default]: *false*
     * **__printSelect** [boolean] **true** if you want a selection on menu enter. works only with lazy menu [example/demo/jj.js#L20](example/demo/jj.js#L20). [default]: *false*
-    * **__header** [function] **returns string** print message before menu execute [example/real/jj.js#L27](example/real/jj.js#L27). you can use `jj.term.colorCode*` [src/term.js#L237](src/term.js#L237)
-    * **__footer** [function] **returns string** print message after menu execute [example/real/jj.js#L28](example/real/jj.js#L28). you can use `jj.term.colorCode*` [src/term.js#L237](src/term.js#L237)
-    * **__keyHandler** [function] when **returns true** menu can handle that key. [default]: *undefined*
+    * **__header** [function] **returns string** print message before menu execute [example/real/jj.js#L25](example/real/jj.js#L25). you can use `jj.term.colorCode*` [src/term.js#L237](src/term.js#L237)
+    * **__footer** [function] **returns string** print message after menu execute [example/real/jj.js#L26](example/real/jj.js#L26). you can use `jj.term.colorCode*` [src/term.js#L237](src/term.js#L237)
+    * **__keyHandler** [function] when **returns true** menu can handle that key. *not implemented yet* [default]: *undefined*
   * `jj` for a jj global function access. In your javascript code you can use the followings:
     * '`jj.home()`' which will reopen the menu on the top (root) level after the function finish
     * '`jj.stay()`' which will reopen the menu on the same level after the function finish
@@ -74,7 +74,7 @@ This tool aims to make an easy menu system to organize your cli workflow.
 
 # Examples
 
-Examples are located in [example](example/demo/jj.js).
+Examples are located in [example](example/).
 
 # Usage
 

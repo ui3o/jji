@@ -401,8 +401,10 @@ const _inputReadHandler = (key) => {
 
 const _windowResizeHandler = () => {
     if (config.mute) return;
-    Term.cursorHide();
-    _menuPrint();
+    if (menu.loadingHandler !== -1) {
+        Term.cursorHide();
+        _menuPrint();
+    }
 }
 
 let _eventListener = undefined;
