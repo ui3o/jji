@@ -112,12 +112,13 @@ global.__splitByLine = true;
 global.__splitAll = true;
 global.__resetMenuPos = true;
 global.__hideStdErr = true;
+global.__printSelect = true;
 
 global.$ = function (prom = (res, rej) => { }, options = {}) {
     Object.keys(options).forEach(k => {
         prom[k] = options[k];
-        if (k === '__showLoadingAfter' || k === '__resetMenuPos') {
-            exitError(`__showLoadingAfter only works with $$ (lazy load) menu item !`); menu.close(); process.exit(2);
+        if (k === '__showLoadingAfter' || k === '__resetMenuPos' || k === '__printSelect') {
+            exitError(`${k} only works with $$ (lazy load) menu item !`); menu.close(); process.exit(2);
         }
     });
     return { __menu_entry__: new Promise(prom) };
@@ -136,8 +137,8 @@ global.$$ = function (prom = (res, rej) => { }, options = {}) {
 global.$$$ = function (func = () => { }, options = {}) {
     Object.keys(options).forEach(k => {
         func[k] = options[k];
-        if (k === '__showLoadingAfter' || k === '__resetMenuPos') {
-            exitError(`__showLoadingAfter only works with $$ (lazy load) menu item !`); menu.close(); process.exit(2);
+        if (k === '__showLoadingAfter' || k === '__resetMenuPos' || k === '__printSelect') {
+            exitError(`${k} only works with $$ (lazy load) menu item !`); menu.close(); process.exit(2);
         }
     });
     return func;
@@ -178,6 +179,7 @@ global.jj.rm = function (path = '') {
         rm(path, { recursive: true, force: true }, (code) => res(code));
     });
 }
+
 
 module.exports.jji = async (argv = {}, rawMenu = {}) => {
 
@@ -258,6 +260,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                     });
                 } else if (_currentMenuRef.__onload_menu__ !== undefined) {
                     const __showLoadingTimeout = _currentMenuRef.__onload_menu__.__showLoadingAfter ? _currentMenuRef.__onload_menu__.__showLoadingAfter : 100;
+                    if (_currentMenuRef.__onload_menu__.__printSelect) printSelection();
                     showLoading(__showLoadingTimeout);
                     const __currentPath = menuPath.join(MENU_SEPARATOR);
                     new Promise(_currentMenuRef.__onload_menu__).then((_menu) => {
@@ -268,15 +271,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                         }
                     });
                 } else {
-                    menu.jumpHome(); Term.eraseDisplayBelow();
-                    if (typeof menuCmd[menuCmd.length - 1] !== 'function' || (typeof menuCmd[menuCmd.length - 1] === 'function' && !menuCmd[menuCmd.length - 1].__noPrintOnSelect)) {
-                        if ((typeof menuCmd[menuCmd.length - 1] === 'function' && !menuCmd[menuCmd.length - 1].__header) || typeof menuCmd[menuCmd.length - 1] !== 'function') {
-                            Term.printf(`..::`).formatBold().formatBrightWhite().printf(` ${menuPath.join(`${Term.colorCodeStyleReset + Term.colorCodeBrightBlack} > ${Term.colorCodeBold + Term.colorCodeBrightWhite}`)}`).formatFormatReset();
-                            Term.printf(` ::..\n`);
-                        } else {
-                            Term.printf(menuCmd[menuCmd.length - 1].__header());
-                        }
-                    }
+                    printSelection();
                     const __needInput = typeof menuCmd[menuCmd.length - 1] === 'function' && menuCmd[menuCmd.length - 1].__needInput ? menuCmd[menuCmd.length - 1].__needInput : false;
                     menu.mute(__needInput);
                     if (typeof menuCmd[menuCmd.length - 1] === 'function') await menuCmd[menuCmd.length - 1]();
@@ -462,6 +457,19 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
             return true;
         }
         return false;
+    }
+
+    function printSelection() {
+        menu.jumpHome(); Term.eraseDisplayBelow();
+        if (typeof menuCmd[menuCmd.length - 1] !== 'function' || (typeof menuCmd[menuCmd.length - 1] === 'function' && !menuCmd[menuCmd.length - 1].__noPrintOnSelect)) {
+            if ((typeof menuCmd[menuCmd.length - 1] === 'function' && !menuCmd[menuCmd.length - 1].__header) || typeof menuCmd[menuCmd.length - 1] !== 'function') {
+                Term.printf(`..::`).formatBold().formatBrightWhite().printf(` ${menuPath.join(`${Term.colorCodeStyleReset + Term.colorCodeBrightBlack} > ${Term.colorCodeBold + Term.colorCodeBrightWhite}`)}`).formatFormatReset();
+                Term.printf(` ::..\n`);
+            } else {
+                Term.printf(menuCmd[menuCmd.length - 1].__header());
+            }
+        }
+        menu.resetMenuPos();
     }
 
 }

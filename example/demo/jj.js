@@ -17,7 +17,7 @@ module.exports.prom = $$(async (res) => {
     setTimeout(() => {
         res(menu)
     }, 1000);
-})
+}, { __printSelect })
 module.exports.USE_require_in_jj_js = test_from_simple
 module.exports.sub_menu_test = [`sub menu test description`, {
     run: ['run comment', 'echo', {
