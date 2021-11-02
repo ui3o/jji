@@ -301,7 +301,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
         menu.jumpHome(); Term.eraseDisplayBelow();
         const _currentMenuRef = getPath(transformedMenu, menuPath.join(MENU_SEPARATOR));
         if (typeof menuCmd[menuCmd.length - 1] !== 'function' || (typeof menuCmd[menuCmd.length - 1] === 'function' && _currentMenuRef.__prop__ && !_currentMenuRef.__prop__.noPrintOnSelect)) {
-            if ((typeof menuCmd[menuCmd.length - 1] === 'function' && !_currentMenuRef.__prop__ && !_currentMenuRef.__prop__.header) || typeof menuCmd[menuCmd.length - 1] !== 'function') {
+            if ((typeof menuCmd[menuCmd.length - 1] === 'function' && _currentMenuRef.__prop__ && !_currentMenuRef.__prop__.header) || typeof menuCmd[menuCmd.length - 1] !== 'function') {
                 Term.printf(`..::`).formatBold().formatBrightWhite().printf(` ${menuPath.join(`${Term.colorCodeStyleReset + Term.colorCodeBrightBlack} > ${Term.colorCodeBold + Term.colorCodeBrightWhite}`)}`).formatFormatReset();
                 Term.printf(` ::..\n`);
             } else {
