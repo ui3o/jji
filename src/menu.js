@@ -269,7 +269,7 @@ const _startMenuItemBlinking = () => {
         menu.visible.menu.forEach((item) => {
             if (item.loading > -1) item.loading = item.loading === Term.progressBar.length - 1 ? 0 : item.loading + 1;
         });
-        _menuPrint();
+        if (!config.mute) _menuPrint();
     }, 500);
 }
 

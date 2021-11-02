@@ -4,36 +4,35 @@ const env = process.env;
 process.env.HELLO = 'hello';
 process.env.WORLD = 'world';
 
-module.exports.prom = $$(async (res) => {
-    await __`sleep 1`
+module.exports.prom = ff.lazy.printSelect.do(async (res) => {
+    await jj.cl.do`sleep 1`
     const menu = {
-        a: ['a menu', $$$(async () => {
+        a: ['a menu', ff.useIn.stay.do(async () => {
             const rl = await jj.rl('Type name: ');
             process.stdout.write(`Hello ${rl}!\n`);
-            jj.stay();
-        }, { __needInput: true })]
+        })]
     }
 
     setTimeout(() => {
         res(menu)
     }, 1000);
-}, { __printSelect })
+})
 module.exports.USE_require_in_jj_js = test_from_simple
 module.exports.sub_menu_test = [`sub menu test description`, {
     run: ['run comment', 'echo', {
         a: 'if only one string param exist that will be the command',
         b: 'if string is specified the program join them and run',
         c: ['if the command is null that means not selectable, just an information', null],
-        lazy_test: ['load lazy menu item', $$((res) => {
+        lazy_test: ['load lazy menu item', ff.lazy.do((res) => {
             setTimeout(() => {
                 res({
                     simple_echo: "echo lazy test",
-                    simple_eval_a_function: async () => { console.log('simple eval'); await _`sleep 3`; await _`echo hello world`; },
-                    async_load: ['load async menu item', $((res) => {
+                    simple_eval_a_function: ff.do(async () => { console.log('simple eval'); await jj.cl.do`sleep 3`; await jj.cl.do`echo hello world`; }),
+                    async_load: ['load async menu item', ff.menu.do((res) => {
                         setTimeout(() => {
                             res({
                                 echo_test: "echo lazy test",
-                                eval_test: async () => { console.log('simple eval'); await _`sleep 3`; await _`echo hello world`; },
+                                eval_test: ff.do(async () => { console.log('simple eval'); await jj.cl.do`sleep 3`; await jj.cl.do`echo hello world`; }),
                             })
                         }, 3000);
                     })]
@@ -41,75 +40,76 @@ module.exports.sub_menu_test = [`sub menu test description`, {
             }, 1411);
         })]
     }],
-    eval: ['description: eval a javascript code', () => { console.log('simple eval') }],
+    eval: ['description: eval a javascript code', ff.do(() => { console.log('simple eval') })],
     find: [`find files desc`, `find . -type f -exec echo file from jj.js: {} ;`],
     roo: "echo simple run an echo",
 }]
 
 module.exports.multiline = {
     var: {
-        echo_process_env: [`echo process env var`, async () => {
+        echo_process_env: [`echo process env var`, ff.do(async () => {
             console.log('console log env var and run echo');
-            await _`echo ${env.HELLO} ${env.WORLD}`;
-        }],
-        echo_with_echo_command: [`echo process env var`, async () => {
-            await _(`sh -c`, [`echo $HELLO $WORLD`])
-        }]
+            await jj.cl.do`echo ${env.HELLO} ${env.WORLD}`;
+        })],
+        echo_with_echo_command: [`echo process env var`, ff.do(async () => {
+            await jj.cl.do(`sh -c`, [`echo $HELLO $WORLD`])
+        })]
     },
     // possible to create multi line command which will compiled to single line
-    command: [`multiline description`, async () => {
-        await _(`sh -c`, [` for i in \`seq 1 10\`; 
+    command: [`multiline description`, ff.do(async () => {
+        await jj.cl.do(`sh -c`, [` for i in \`seq 1 10\`; 
                             do 
                                 echo s$i;
                             done`]);
-    }]
+    })]
 }
-module.exports.run = ["run simple javascript code", () => { console.log('simple1 eval') }]
-module.exports.run_eval_and_stay = ["run simple javascript code and stay in the same level in the menu", () => { console.log('simple eval and reopen the menu'); jj.stay() }]
-module.exports.run_eval_and_home = ["run simple javascript code and jump to root level in the menu", () => { console.log('simple eval and jump to root in the menu'); jj.home() }]
-module.exports.run_eval_and_readline = ["run simple javascript code and read line inside", $$$(async () => {
+module.exports.run = ["run simple javascript code", ff.do(() => { console.log('simple1 eval') })]
+module.exports.run_eval_and_stay = ["run simple javascript code and stay in the same level in the menu", ff.stay.do(() => { console.log('simple eval and reopen the menu'); })]
+module.exports.run_eval_and_home = ["run simple javascript code and jump to root level in the menu", ff.home.do(() => { console.log('simple eval and jump to root in the menu'); })]
+module.exports.run_eval_and_readline = ["run simple javascript code and read line inside", ff.useIn.stay.do(async () => {
     const name = await jj.rl('Please type your name: ');
     console.log(`Hi ${name}!`);
-}, { __needInput })]
+})]
 
-module.exports.run_and_parse = ["run and echo and parse output", async () => {
-    const l = await __(`docker run alpine sh -c`, [`ls -al`], { __splitByLine });
+module.exports.run_and_parse = ["run and echo and parse output", ff.do(async () => {
+    const l = await jj.cli.splitByLine.do(`docker run alpine sh -c`, [`ls -al`]);
     console.log(l);
-}]
+})]
 
-module.exports.parse_tester = ["run and echo and parse output", $$(async (res) => {
+module.exports.parse_tester = ["run and echo and parse output", ff.lazy.do(async (res) => {
     setTimeout(async () => {
         res({
-            all_split: async () => {
-                const a = await __(`echo ${false} && echo other done other`, { __splitAll: true }); console.log(a[0][0]);
-                jj.stay();
-            },
-            line_split: async () => {
-                const a = await __(`sh -c`, { __splitByLine: true }, [`echo ${false} && echo other done other`]); console.log(a[0]);
-                jj.stay();
-            },
-            no_split: async () => {
-                const a = await __(`sh -c`, [`echo ${false} && echo other done other`]); console.log(a);
-                jj.home();
-            }
+            all_split: ff.stay.do(async () => {
+                const a = await jj.cli.splitAll.do(`echo ${false} hi && echo other done other`);
+                console.log(a[0][0]);
+            }),
+            line_split: ff.stay.do(async () => {
+                const a = await jj.cli.splitByLine.do(`sh -c`, [`echo ${false} hi && echo other done other`]);
+                console.log(a[0]);
+            }),
+            no_split: ff.home.do(async () => {
+                const a = await jj.cli.do(`sh -c`, [`echo ${false} hi && echo other done other`]);
+                console.log(a);
+            })
         })
     }, 1000);
 })]
 module.exports.simple_null = null;
 module.exports.null_with_desc = ["not selectable menu item", null];
 module.exports.lazy_clear = {
-    show_with_clear: ['when the menu clear back the last menu size ', $$(async (res) => {
+    show_with_clear: ['when the menu clear back the last menu size ', ff.lazy.do(async (res) => {
         console.log('You have to see number 10 on screen. If you can not the menu clear back last menu size');
         for (let index = 0; index < 10; index++) {
             console.log(index + 1);
         }
         res({ do_nothing: null });
     })],
-    show_without_clear: ['when the menu NOT clear back the last menu size ', $$(async (res) => {
+    show_without_clear: ['when the menu NOT clear back the last menu size ', ff.lazy.resetMenu.do(async (res) => {
         console.log('You have to see number 10 on screen');
         for (let index = 0; index < 10; index++) {
             console.log(index + 1);
         }
         res({ do_nothing: null });
-    }, { __resetMenuPos })]
+    })]
 };
+
