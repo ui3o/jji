@@ -24,11 +24,11 @@ declare interface IFF {
    */
   menu: IFF;
   /**
-   * **noHeaderOnSelect** means when execute the command no header will be printed after the selection.
+   * **noHeader** means when execute the command no header will be printed after the selection.
    *
    * **default**: *false*
    */
-  noHeaderOnSelect: IFF;
+  noHeader: IFF;
   /**
    * **useIn** means if you want to use '`jj.rl`' function, input will be grabbed by node.
    * you can also manage manually inside yor function with `process.stdin.pause()` or `process.stdin.resume()`.
