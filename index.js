@@ -87,7 +87,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                     });
                 } else if (_currentMenuRef.__prop__.lazy_menu !== undefined) {
                     const __showLoadingTimeout = _currentMenuRef.__prop__.lazy_menu.__showLoadingAfter ? _currentMenuRef.__prop__.lazy_menu.__showLoadingAfter : 100;
-                    if (_currentMenuRef.__prop__.lazy_menu.__printSelect) printSelection();
+                    if (_currentMenuRef.__prop__.printSelect) printSelection();
                     showLoading(__showLoadingTimeout);
                     const __currentPath = menuPath.join(MENU_SEPARATOR);
                     new Promise(_currentMenuRef.__prop__.lazy_menu).then((_menu) => {
