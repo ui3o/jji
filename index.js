@@ -86,7 +86,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                         }
                     });
                 } else if (_currentMenuRef.__prop__.lazy_menu !== undefined) {
-                    const __showLoadingTimeout = _currentMenuRef.__prop__.lazy_menu.__showLoadingAfter ? _currentMenuRef.__prop__.lazy_menu.__showLoadingAfter : 100;
+                    const __showLoadingTimeout = _currentMenuRef.__prop__.showLoadingAfter ? _currentMenuRef.__prop__.showLoadingAfter : 100;
                     if (_currentMenuRef.__prop__.printSelect) printSelection();
                     showLoading(__showLoadingTimeout);
                     const __currentPath = menuPath.join(MENU_SEPARATOR);
@@ -153,7 +153,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                 if (_currentMenuRef.__prop__ && _currentMenuRef.__prop__.lazy_menu !== undefined) {
                     const _items = Object.keys(currentMenuRef).filter(e => e !== '__prop__');
                     _items.forEach(k => delete _currentMenuRef[k]);
-                    const __showLoadingTimeout = _currentMenuRef.__prop__.lazy_menu.__showLoadingAfter ? _currentMenuRef.__prop__.lazy_menu.__showLoadingAfter : 100;
+                    const __showLoadingTimeout = _currentMenuRef.__prop__.showLoadingAfter ? _currentMenuRef.__prop__.showLoadingAfter : 100;
                     showLoading(__showLoadingTimeout);
                     const __currentPath = menuPath.join(MENU_SEPARATOR);
                     new Promise(_currentMenuRef.__prop__.lazy_menu).then((_menu) => {
