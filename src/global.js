@@ -67,6 +67,7 @@ global.jj = {
 }
 
 global.jj.cli = {
+    get hideErr() { global.jj.__prop__.hideErr = true; return global.jj.cli; },
     get noErr() { global.jj.__prop__.noErr = true; return global.jj.cli; },
     get splitByLine() { global.jj.__prop__.splitByLine = true; return global.jj.cli; },
     get splitAll() { global.jj.__prop__.splitAll = true; return global.jj.cli; },
@@ -74,6 +75,7 @@ global.jj.cli = {
     eol: (eol = '') => { global.jj.__prop__.eol = eol; return global.jj.cli; },
 }
 global.jj.cl = {
+    get hideErr() { global.jj.__prop__.hideErr = true; return global.jj.cl; },
     get noErr() { global.jj.__prop__.noErr = true; return global.jj.cl; },
     get splitByLine() { global.jj.__prop__.splitByLine = true; return global.jj.cl; },
     get splitAll() { global.jj.__prop__.splitAll = true; return global.jj.cl; },
@@ -125,11 +127,10 @@ function spawnCommand(...args) {
             cmd.stdout.on('data', data => {
                 _out += data;
             });
-            if (!options.noErr) {
-                cmd.stderr.on('data', data => {
-                    _out += data;
-                });
-            }
+            cmd.stderr.on('data', data => {
+                if (!options.noErr) _out += data;
+                else if (!options.hideErr) process.stdout.write(data.toString())
+            });
             cmd.on('close', (code) => {
                 if (options.splitAll || options.splitByLine) {
                     const _lines = _out.split(options.eol ? options.eol : '\n').filter(l => l);

@@ -136,6 +136,10 @@ declare interface IJJ {
 
 declare interface ICL {
   /**
+   * **hideErr** means the error output will not printed to stdout
+   */
+  hideErr: ICL;
+  /**
    * **noErr** means the output will not contains stderr output
    */
   noErr: ICL;
