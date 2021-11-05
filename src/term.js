@@ -245,7 +245,7 @@ const Term = {
     },
 
     // Foreground color
-    cc: {
+    fc: {
         defaultColor: '\x1b[39m',
         black: '\x1b[30m',
         red: '\x1b[31m',
