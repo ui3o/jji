@@ -132,9 +132,13 @@ declare interface IJJ {
    *
    */
   cli: ICLI;
+  /**
+   * **term code and format** global access
+   */
   term: {
     /**
-     * modifier codes
+     * **modifier** codes
+     * 
      */
     mc: {
       clearLine: `\x1b[2K`;
@@ -146,7 +150,7 @@ declare interface IJJ {
       strike: "\x1b[9m";
     };
     /**
-     * foreground colors
+     * **foreground** colors
      */
     fc: {
       defaultColor: "\x1b[39m";
@@ -169,7 +173,7 @@ declare interface IJJ {
       customColor(code): string;
     };
     /**
-     * background colors
+     * **background** colors
      */
     bc: {
       defaultColor: "\x1b[49m";
