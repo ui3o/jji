@@ -51,7 +51,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                 return 0;
             }).map(
                 e => { return [currentMenuRef[e].__prop__.name, currentMenuRef[e].__prop__.desc, currentMenuRef[e].__prop__.menu_entry ? 1 : currentMenuRef[e].__prop__.lazy_menu ? 2 : currentMenuRef[e].__prop__.cmd === null ? 3 : 0] });
-        let mp = []; menuPath.forEach(p => { mp = [...mp, Term.colorCodeBold, Term.colorCodeBrightWhite, ...p.split(''), Term.colorCodeStyleReset, Term.colorCodeBrightBlack, ' ', '>', ' '] })
+        let mp = []; menuPath.forEach(p => { mp = [...mp, Term.mc.bold, Term.fc.brightWhite, ...p.split(''), Term.mc.styleReset, Term.fc.brightBlack, ' ', '>', ' '] })
         if (update) menu.updateMenu(currentMenuList);
         else menu.setMenu(currentMenuList, mp);
     }
@@ -302,7 +302,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
         const _currentMenuRef = getPath(transformedMenu, menuPath.join(MENU_SEPARATOR));
         if (typeof menuCmd[menuCmd.length - 1] !== 'function' || (typeof menuCmd[menuCmd.length - 1] === 'function' && _currentMenuRef.__prop__ && !_currentMenuRef.__prop__.noPrintOnSelect)) {
             if ((typeof menuCmd[menuCmd.length - 1] === 'function' && _currentMenuRef.__prop__ && !_currentMenuRef.__prop__.header) || typeof menuCmd[menuCmd.length - 1] !== 'function') {
-                Term.printf(`..::`).formatBold().formatBrightWhite().printf(` ${menuPath.join(`${Term.colorCodeStyleReset + Term.colorCodeBrightBlack} > ${Term.colorCodeBold + Term.colorCodeBrightWhite}`)}`).formatFormatReset();
+                Term.printf(`..::`).formatBold().formatBrightWhite().printf(` ${menuPath.join(`${Term.mc.styleReset + Term.fc.brightBlack} > ${Term.mc.bold + Term.fc.brightWhite}`)}`).formatFormatReset();
                 Term.printf(` ::..\n`);
             } else {
                 Term.printf(_currentMenuRef.__prop__.header());

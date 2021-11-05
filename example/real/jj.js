@@ -19,8 +19,8 @@ module.exports.fileViewer = ["ls dir and less file from directory", ff.lazy.noHe
             ff.stay.noHeader.do(async () => { await jj.cl.do`less ${file}`; })]
         else {
             menu[`${file}/`] = ff.stay
-                .header(() => `changing directory from ${jj.term.colorCodeYellow + process.cwd() + jj.term.colorCodeDefaultColor}\n`)
-                .footer(() => `to ${jj.term.colorCodeGreen + process.cwd() + jj.term.colorCodeDefaultColor}\n`)
+                .header(() => `changing directory from ${jj.term.fc.yellow + process.cwd() + jj.term.fc.defaultColor}\n`)
+                .footer(() => `to ${jj.term.fc.green + process.cwd() + jj.term.fc.defaultColor}\n`)
                 .do(() => {
                     process.chdir(file);
                 });

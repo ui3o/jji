@@ -190,7 +190,7 @@ const _findHighlights = (str = "", searchFor = "", splitted = [], offset = 0) =>
         _findHighlights(str.substring(index + searchFor.length, str.length), searchFor, splitted, offset + index + searchFor.length);
 }
 
-const _highlightFiltered = (str = "", defaultColor = Term.colorCodeDefaultColor, highlightColor = Term.colorCodeYellow) => {
+const _highlightFiltered = (str = "", defaultColor = Term.fc.defaultColor, highlightColor = Term.fc.yellow) => {
     const splitted = str.split('').map(c => { return { c, h: false } });
     if (!prompt.inputString.length) return splitted.map(char => { return char.c });
     const input = prompt.inputString.join('').toLowerCase().split(' ');
@@ -246,11 +246,11 @@ const _menuPrint = ({ inputChar, add } = {}) => {
             else Term.customColor(39);
             Term.putStr(menu.prefix(index));
             if (item.loading > -1 || item.readonly)
-                Term.brightBlack().putArr(_highlightFiltered(item.title, Term.colorCodeBrightBlack, Term.colorCodeCustomColor(180)));
+                Term.brightBlack().putArr(_highlightFiltered(item.title, Term.fc.brightBlack, Term.fc.customColor(180)));
             else
-                Term.putArr(_highlightFiltered(item.title, menu.visible.poi === index ? Term.colorCodeCustomColor(81) : Term.colorCodeCustomColor(39), Term.colorCodeCustomColor(180)));
+                Term.putArr(_highlightFiltered(item.title, menu.visible.poi === index ? Term.fc.customColor(81) : Term.fc.customColor(39), Term.fc.customColor(180)));
             Term.formatReset();
-            if (item.desc.length) Term.brightBlack().putStr(menu.separator).putArr(_highlightFiltered(item.desc, Term.colorCodeBrightBlack, Term.colorCodeCustomColor(180)));
+            if (item.desc.length) Term.brightBlack().putStr(menu.separator).putArr(_highlightFiltered(item.desc, Term.fc.brightBlack, Term.fc.customColor(180)));
             if (item.lazy) Term.brightMagenta().putStr(` [${menu.lazyTitle}]`).formatReset();
             if (item.loading > -1) Term.brightCyan().putStr(` [${Term.progressBar[item.loading]}]`).formatReset();
             if (item.loading > -1 && !menu.blinkHandler) _startMenuItemBlinking();
