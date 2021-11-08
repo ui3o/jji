@@ -16,6 +16,30 @@ module.exports.prom = ff.lazy.printSelect.do(async (res) => {
     setTimeout(() => {
         res(menu)
     }, 1000);
+});
+module.exports.lazy_in_lazy = ff.lazy.printSelect.do(async (res) => {
+    await jj.cl.do`sleep 1`
+    const menu = {
+        a: ['a menu', ff.lazy.stay.do(async (r) => {
+            setTimeout(() => {
+                r({
+                    c: ff.lazy.do(async (re) => {
+                        setTimeout(() => {
+                            re({ nothing: null });
+                        }, 1000);
+                    })
+                })
+            }, 1000);
+        })],
+        b: ['b menu', ff.lazy.stay.do(async (r) => {
+            setTimeout(() => {
+                r({ nothing: null })
+            }, 1000);
+        })]
+    }
+    setTimeout(() => {
+        res(menu)
+    }, 1000);
 })
 module.exports.USE_require_in_jj_js = test_from_simple
 module.exports.sub_menu_test = [`sub menu test description`, {

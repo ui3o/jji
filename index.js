@@ -78,10 +78,24 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                 const _name = currentMenuList[pos][0].replace('+ ', '').replace('- ', '');
                 if (flyMode) {
                     flyMode = false;
+                    _oldMenuPath = [...menuPath];
                     menuPath = [];
                     _name.split(MENU_SEPARATOR).forEach(n => {
                         menuPath.push(n);
                     });
+                    // if absolute diff remove all lazy up to the root 
+                    if (_oldMenuPath[0] !== menuPath[0]) freeLazyItemsFromPath(_oldMenuPath);
+                    else {
+                        // find diff remove all lazy up to same level 
+                        const diff = [];
+                        const dl = _oldMenuPath.length;
+                        for (let index = 0; index < dl; index++) {
+                            if (menuPath[index] === _oldMenuPath[index]) diff.push(menuPath[index]);
+                            else diff.push(undefined);
+                        }
+                        const backLen = diff.filter(v => v === undefined).length;
+                        freeLazyItemsFromPath(_oldMenuPath, backLen);
+                    }
                     currentMenuRef = getPath(transformedMenu, menuPath.join(MENU_SEPARATOR));
                 } else {
                     menuPath.push(_name);
@@ -170,10 +184,10 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
     transform(rawMenu, transformedMenu);
     menuWalker();
 
-    const freeLazyItemsFromPath = () => {
-        if (menuPath.length < 2) return;
-        menuPath.pop();
-        const _currentMenuRef = getPath(transformedMenu, menuPath.join(MENU_SEPARATOR));
+    const freeLazyItemsFromPath = (mPath = menuPath, times) => {
+        times = times === undefined ? mPath.length : times;
+        if (!times) return;
+        const _currentMenuRef = getPath(transformedMenu, mPath.join(MENU_SEPARATOR));
         if (_currentMenuRef.__prop__.lazy_menu !== undefined) {
             const _items = Object.keys(_currentMenuRef).filter(e => e !== '__prop__');
             _items.forEach(k => {
@@ -181,7 +195,8 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                 delete _currentMenuRef[k];
             })
         }
-        freeLazyItemsFromPath();
+        mPath.pop(); times--;
+        freeLazyItemsFromPath(mPath, times);
     }
 
     function exit(code) {
