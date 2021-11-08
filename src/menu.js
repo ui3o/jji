@@ -336,8 +336,13 @@ const _keyHandler = (key) => {
             break;
         case keymap.ESCAPE:
             if (menu.readInputMode.enabled || config.mute) break;
-            _reportExit(event.EXITED);
-            if (!config.disableProcessExitOnExit) { Term.cursorShow(); process.exit(1); }
+            if (prompt.inputString.length) {
+                _eventListener(event.INPUT_DROP, prompt.inputString);
+                _menuPrint({ add: null });
+            } else {
+                _reportExit(event.EXITED);
+                if (!config.disableProcessExitOnExit) { Term.cursorShow(); process.exit(1); }
+            }
             break;
         case keymap.CTRL_C:
             _reportExit(event.ABORTED);
@@ -486,6 +491,7 @@ const event = {
     LINE: 'LINE', // one string followed
     KE_Y: 'KEY', // one keymap event followed
     INPUT_STR: 'INPUT_STR', // one input string followed
+    INPUT_DROP: 'INPUT_DROP', // one input string reference followed, possible to modify
     SELECT: 'SELECT', // one poi number followed 
     ABORTED: 'ABORTED', // no param - on CTRL-C  
     EXITED: 'EXITED', // no param - on ESCAPE

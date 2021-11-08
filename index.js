@@ -151,6 +151,18 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                 }
                 menuWalker(true);
                 break;
+            case menu.event.INPUT_DROP:
+                const _ins = arg;
+                const len = _ins.length;
+                const onlyFlyModeActive = flyMode && len === 1 && _ins[0] === ' ' ? true : false;
+                for (let index = 0; index < len; index++) {
+                    _ins.pop();
+                }
+                if (onlyFlyModeActive) {
+                    flyMode = false;
+                    menuWalker(true);
+                } else if (flyMode) _ins.push(' ');
+                break;
             default:
                 break;
         }
@@ -195,7 +207,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                         }
                     });
                 } else {
-                    if (hasSubMenu()) menuWalker(true);
+                    if (hasSubMenu()) menuWalker();
                 }
                 return;
             } else if (_currMenuRef.__prop__.home) {
