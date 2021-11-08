@@ -62,7 +62,10 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
         let mp = flyMode ? [Term.fc.brightWhite, '>', '>', '>', Term.fc.defaultColor] : [];
         if (!flyMode) menuPath.forEach(p => { mp = [...mp, Term.mc.bold, Term.fc.brightWhite, ...p.split(''), Term.mc.styleReset, Term.fc.brightBlack, ' ', '>', ' '] })
         if (update) menu.updateMenu(currentMenuList, mp, !flyMode ? undefined : '');
-        else menu.setMenu(currentMenuList, mp);
+        else {
+            menuInputString = '';
+            menu.setMenu(currentMenuList, mp);
+        }
     }
 
     function showLoading(timeout = 100) {
