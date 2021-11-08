@@ -10,12 +10,13 @@ const exitError = msg => { console.log(`\n[ERROR] ${msg}`) };
 
 module.exports.jji = async (argv = {}, rawMenu = {}) => {
 
-    const MENU_SEPARATOR = '<<>>';
+    const MENU_SEPARATOR = ' > ';
     const error = msg => { if (argv.x) console.error(`[ERROR] ${msg}`) };
     if (argv.x) console.log = console.error;
 
     let jjFiles = argv._ && argv._.length ? argv._ : [];
     let transformedMenu = {};
+    let flyMenu = {};
     let showLoadingTimer = 0;
 
     if (!jjFiles.length) {
@@ -36,23 +37,29 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
         rawMenu = { ...rawMenu, ...require(f) };
     });
 
+    let flyMode = false;
     let menuPath = [];
-    let menuCmd = [];
     let currentMenuRef = {};
     let currentMenuList = {};
 
     function menuWalker(update) {
         clearTimeout(showLoadingTimer);
-        currentMenuRef = getPath(transformedMenu, menuPath.join(MENU_SEPARATOR));
+        currentMenuRef = flyMode ? flyMenu : getPath(transformedMenu, menuPath.join(MENU_SEPARATOR));
         currentMenuList = Object.keys(currentMenuRef).filter(e => e !== '__prop__')
             .sort((a, b) => {
                 if (currentMenuRef[a].__prop__.index > currentMenuRef[b].__prop__.index) return 1;
                 if (currentMenuRef[a].__prop__.index < currentMenuRef[b].__prop__.index) return -1;
                 return 0;
             }).map(
-                e => { return [currentMenuRef[e].__prop__.name, currentMenuRef[e].__prop__.desc, currentMenuRef[e].__prop__.menu_entry ? 1 : currentMenuRef[e].__prop__.lazy_menu ? 2 : currentMenuRef[e].__prop__.cmd === null ? 3 : 0] });
-        let mp = []; menuPath.forEach(p => { mp = [...mp, Term.mc.bold, Term.fc.brightWhite, ...p.split(''), Term.mc.styleReset, Term.fc.brightBlack, ' ', '>', ' '] })
-        if (update) menu.updateMenu(currentMenuList);
+                e => {
+                    const _n = flyMode ? e : currentMenuRef[e].__prop__.name;
+                    const _name = currentMenuRef[e].__prop__.group ? `+ ${_n}` : `- ${_n}`;
+                    return [_name, currentMenuRef[e].__prop__.desc,
+                        currentMenuRef[e].__prop__.menu_entry ? 1 : currentMenuRef[e].__prop__.lazy_menu ? 2 : currentMenuRef[e].__prop__.cmd === null ? 3 : 0]
+                });
+        let mp = flyMode ? [Term.fc.brightWhite, '>', '>', '>', Term.fc.defaultColor] : [];
+        if (!flyMode) menuPath.forEach(p => { mp = [...mp, Term.mc.bold, Term.fc.brightWhite, ...p.split(''), Term.mc.styleReset, Term.fc.brightBlack, ' ', '>', ' '] })
+        if (update) menu.updateMenu(currentMenuList, mp, !flyMode ? undefined : '');
         else menu.setMenu(currentMenuList, mp);
     }
 
@@ -68,13 +75,20 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
         switch (event) {
             case menu.event.SELECT:
                 const pos = arg;
-                const _name = currentMenuList[pos][0];
-                menuPath.push(_name);
-                menuCmd.push(currentMenuRef[_name].__prop__.cmd);
+                const _name = currentMenuList[pos][0].replace('+ ', '').replace('- ', '');
+                if (flyMode) {
+                    flyMode = false;
+                    menuPath = [];
+                    _name.split(MENU_SEPARATOR).forEach(n => {
+                        menuPath.push(n);
+                    });
+                    currentMenuRef = getPath(transformedMenu, menuPath.join(MENU_SEPARATOR));
+                } else {
+                    menuPath.push(_name);
+                }
                 const _currentMenuRef = getPath(transformedMenu, menuPath.join(MENU_SEPARATOR));
                 if (_currentMenuRef.__prop__.cmd === null) {
                     menuPath.pop();
-                    menuCmd.pop();
                 } else if (hasSubMenu()) {
                     menuWalker();
                 } else if (_currentMenuRef.__prop__.menu_entry !== undefined) {
@@ -93,7 +107,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                     new Promise(_currentMenuRef.__prop__.lazy_menu).then((_menu) => {
                         if (_currentMenuRef.__prop__.resetMenuPos) menu.resetMenuPos();
                         if (__currentPath === menuPath.join(MENU_SEPARATOR)) {
-                            transform(_menu, _currentMenuRef, '', _currentMenuRef.__prop__.cmd ? [_currentMenuRef.__prop__.cmd] : []);
+                            transform(_menu, _currentMenuRef, '', _currentMenuRef.__prop__.index, _currentMenuRef.__prop__.cmd ? [_currentMenuRef.__prop__.cmd] : []);
                             if (hasSubMenu()) menuWalker();
                         }
                     });
@@ -101,6 +115,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                     printSelection();
                     const __needInput = _currentMenuRef.__prop__ && _currentMenuRef.__prop__.needInput ? _currentMenuRef.__prop__.needInput : false;
                     menu.mute(__needInput);
+                    const menuCmd = _currentMenuRef.__prop__.cmdList;
                     if (typeof menuCmd[menuCmd.length - 1] === 'function') await menuCmd[menuCmd.length - 1]();
                     else await jj.cl.do(menuCmd.join(' '));
                     if (typeof menuCmd[menuCmd.length - 1] === 'function' && _currentMenuRef.__prop__ && _currentMenuRef.__prop__.footer)
@@ -110,6 +125,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                 }
                 break;
             case menu.event.EXITED:
+                if (flyMode) { flyMode = false; menuWalker(); break; }
                 if (!menuPath.length) {
                     menu.jumpHome(); Term.eraseDisplayBelow();
                     exit(1);
@@ -119,12 +135,21 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                 if (__currentMenuRef.__prop__.lazy_menu !== undefined) {
                     const _currentMenuList = Object.keys(__currentMenuRef).filter(e => e !== '__prop__');
                     _currentMenuList.forEach(m => {
+                        delete flyMenu[__currentMenuRef[m].__prop__.fullPath]
                         delete __currentMenuRef[m];
                     });
                 }
                 menuPath.pop();
-                menuCmd.pop();
                 menuWalker();
+                break;
+            case menu.event.INPUT_STR:
+                const str = arg;
+                if (str.charAt(0) === ' ' && !flyMode) {
+                    flyMode = true;
+                } else if (str.length === 0 && flyMode) {
+                    flyMode = false;
+                }
+                menuWalker(true);
                 break;
             default:
                 break;
@@ -135,11 +160,14 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
 
     const freeLazyItemsFromPath = () => {
         if (menuPath.length < 2) return;
-        menuPath.pop(); menuCmd.pop();
+        menuPath.pop();
         const _currentMenuRef = getPath(transformedMenu, menuPath.join(MENU_SEPARATOR));
         if (_currentMenuRef.__prop__.lazy_menu !== undefined) {
             const _items = Object.keys(_currentMenuRef).filter(e => e !== '__prop__');
-            _items.forEach(k => delete _currentMenuRef[k])
+            _items.forEach(k => {
+                delete flyMenu[_currentMenuRef[k].__prop__.fullPath]
+                delete _currentMenuRef[k];
+            })
         }
         freeLazyItemsFromPath();
     }
@@ -148,18 +176,21 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
         if (code === 0) {
             const _currMenuRef = getPath(transformedMenu, menuPath.join(MENU_SEPARATOR));
             if (_currMenuRef.__prop__.stay) {
-                if (menuPath.length) { menuPath.pop(); menuCmd.pop(); }
+                if (menuPath.length) menuPath.pop();
                 const _currentMenuRef = getPath(transformedMenu, menuPath.join(MENU_SEPARATOR));
                 if (_currentMenuRef.__prop__ && _currentMenuRef.__prop__.lazy_menu !== undefined) {
-                    const _items = Object.keys(currentMenuRef).filter(e => e !== '__prop__');
-                    _items.forEach(k => delete _currentMenuRef[k]);
+                    const _items = Object.keys(_currentMenuRef).filter(e => e !== '__prop__');
+                    _items.forEach(k => {
+                        delete flyMenu[_currentMenuRef[k].__prop__.fullPath]
+                        delete _currentMenuRef[k];
+                    });
                     const __showLoadingTimeout = _currentMenuRef.__prop__.showLoadingAfter ? _currentMenuRef.__prop__.showLoadingAfter : 100;
                     showLoading(__showLoadingTimeout);
                     const __currentPath = menuPath.join(MENU_SEPARATOR);
                     new Promise(_currentMenuRef.__prop__.lazy_menu).then((_menu) => {
                         if (_currentMenuRef.__prop__.resetMenuPos) menu.resetMenuPos();
                         if (__currentPath === menuPath.join(MENU_SEPARATOR)) {
-                            transform(_menu, _currentMenuRef, '', _currentMenuRef.__prop__.cmd ? [_currentMenuRef.__prop__.cmd] : []);
+                            transform(_menu, _currentMenuRef, '', _currentMenuRef.__prop__.index, _currentMenuRef.__prop__.cmd ? [_currentMenuRef.__prop__.cmd] : []);
                             if (hasSubMenu()) menuWalker();
                         }
                     });
@@ -169,7 +200,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                 return;
             } else if (_currMenuRef.__prop__.home) {
                 freeLazyItemsFromPath();
-                menuPath = []; menuCmd = [];
+                menuPath = [];
                 menuWalker();
                 return;
             }
@@ -207,14 +238,20 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
         return obj;
     };
 
-    function transform(src, dest, path = '', cmdList = []) {
-        Object.keys(src).forEach((key, index) => {
+    function transform(src, dest, path = '', index = '', cmdList = []) {
+        // calculate max prefix
+        const numberFillLength = !index ? Object.keys(src).length.toString().length : undefined;
+        Object.keys(src).forEach((key, indx) => {
             const _path = path.length ? `${path + MENU_SEPARATOR + key}` : key;
+            const _fullPath = dest.__prop__ ? `${dest.__prop__.fullPath + MENU_SEPARATOR + key}` : _path;
+            const _index = numberFillLength ? '0'.repeat(numberFillLength - (index + indx).length) + index + indx : index + indx;
             const transformedObj = getPath(dest, path);
             let _cmdList = [...cmdList];
             transformedObj[key] = { __prop__: {} };
             transformedObj[key].__prop__.name = key;
-            transformedObj[key].__prop__.index = index;
+            transformedObj[key].__prop__.group = false;
+            transformedObj[key].__prop__.fullPath = _fullPath;
+            transformedObj[key].__prop__.index = _index;
             if (typeof src[key] === 'object' && Array.isArray(src[key])) {
                 const _entry = src[key];
                 if (_entry.length === 1) {
@@ -223,7 +260,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                 } else if (_entry.length === 2) {
                     transformedObj[key].__prop__.desc = _entry[0];
                     if (!delayedTransform(_entry[1], transformedObj[key], _cmdList)) {
-                        if (typeof _entry[1] === 'object' && _entry[1] !== null && !_entry[1].__prop__) transform(_entry[1], dest, _path, _cmdList);
+                        if (typeof _entry[1] === 'object' && _entry[1] !== null && !_entry[1].__prop__) { transformedObj[key].__prop__.group = true; transform(_entry[1], dest, _path, _index, _cmdList); }
                         else {
                             if (_entry[1] === null) transformedObj[key].__prop__.cmd = null;
                             else {
@@ -238,7 +275,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                     transformedObj[key].__prop__.cmd = typeTransform(_entry[1], _path);
                     if (_entry[1].__prop__) transformedObj[key].__prop__ = { ...transformedObj[key].__prop__, ..._entry[1].__prop__ };
                     _cmdList = [..._cmdList, transformedObj[key].__prop__.cmd];
-                    if (!delayedTransform(_entry[2], transformedObj[key], _cmdList)) transform(_entry[2], dest, _path, _cmdList);
+                    if (!delayedTransform(_entry[2], transformedObj[key], _cmdList)) { transformedObj[key].__prop__.group = true; transform(_entry[2], dest, _path, _index, _cmdList); }
                     else {
                         exitError(`Wrong format on ".${_path}"! The third (3) item has to be an object!`);
                         exit(2);
@@ -261,8 +298,13 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                     transformedObj[key].__prop__ = { ...transformedObj[key].__prop__, ...src[key].__prop__ };
                     transformedObj[key].__prop__.cmd = typeTransform(src[key], _path);
                     _cmdList = [..._cmdList, transformedObj[key].__prop__.cmd];
-                } else transform(src[key], dest, _path, [..._cmdList]);
+                } else {
+                    transformedObj[key].__prop__.group = true;
+                    transform(src[key], dest, _path, _index, [..._cmdList]);
+                }
             }
+            transformedObj[key].__prop__.cmdList = [..._cmdList];
+            flyMenu[_fullPath] = { ...transformedObj[key] };
             // check cmd equals
             const allCmd = _cmdList.map(c => { return typeof c !== 'string' });
             if (!allCmd.every(c => c === false) && !allCmd.every(c => c === true) && _cmdList[_cmdList.length - 1] !== null) {
@@ -274,6 +316,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
 
     function delayedTransform(src, transformedObj, _cmdList = []) {
         if (typeof src === 'object' && src && src.__prop__ && src.__prop__.menu) {
+            transformedObj.__prop__.group = true;
             transformedObj.__prop__.desc = src.__prop__.desc ? src.__prop__.desc : transformedObj.__prop__.desc ? transformedObj.__prop__.desc : '';
             if (src.__prop__) transformedObj.__prop__ = { ...transformedObj.__prop__, ...src.__prop__ };
             transformedObj.__prop__.menu_entry = new Promise(src.__prop__.fn);
@@ -282,11 +325,12 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
             const _currentMenuRef = transformedObj;
             _currentMenuRef.__prop__.menu_entry.then((_menu) => {
                 delete _currentMenuRef.__prop__.menu_entry;
-                transform(_menu, _currentMenuRef, '', _currentMenuRef.__prop__.cmd ? [_currentMenuRef.__prop__.cmd] : []);
+                transform(_menu, _currentMenuRef, '', transformedObj.__prop__.index, _currentMenuRef.__prop__.cmd ? [_currentMenuRef.__prop__.cmd] : []);
                 if (hasSubMenu()) menuWalker(true);
             });
             return true;
         } else if (typeof src === 'object' && src && src.__prop__ && src.__prop__.lazy_menu !== undefined) {
+            transformedObj.__prop__.group = true;
             transformedObj.__prop__.desc = src.__prop__.desc ? src.__prop__.desc : transformedObj.__prop__.desc ? transformedObj.__prop__.desc : '';
             if (src.__prop__) transformedObj.__prop__ = { ...transformedObj.__prop__, ...src.__prop__ };
             transformedObj.__prop__.lazy_menu = src.__prop__.fn;
@@ -300,6 +344,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
     function printSelection() {
         menu.jumpHome(); Term.eraseDisplayBelow();
         const _currentMenuRef = getPath(transformedMenu, menuPath.join(MENU_SEPARATOR));
+        const menuCmd = _currentMenuRef.__prop__.cmdList;
         if (typeof menuCmd[menuCmd.length - 1] !== 'function' || (typeof menuCmd[menuCmd.length - 1] === 'function' && _currentMenuRef.__prop__ && !_currentMenuRef.__prop__.noPrintOnSelect)) {
             if ((typeof menuCmd[menuCmd.length - 1] === 'function' && _currentMenuRef.__prop__ && !_currentMenuRef.__prop__.header) || typeof menuCmd[menuCmd.length - 1] !== 'function') {
                 Term.printf(`..::`).formatBold().formatBrightWhite().printf(` ${menuPath.join(`${Term.mc.styleReset + Term.fc.brightBlack} > ${Term.mc.bold + Term.fc.brightWhite}`)}`).formatFormatReset();

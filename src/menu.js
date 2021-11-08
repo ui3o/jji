@@ -131,9 +131,11 @@ const setMenu = (_menu = [], promptPrefix = [], title = '?') => {
  * ]);
  * @param {*} _menu 
  */
-const updateMenu = (_menu = []) => {
+const updateMenu = (_menu = [], promptPrefix = [], title = '?') => {
     _stopMenuItemBlinking();
     const formattedMenu = [];
+    prompt.promptPrefix = promptPrefix;
+    menu.title = title;
     _menu.forEach((m, index) => {
         const fm = {
             title: m[0] !== undefined ? m[0] : '',
@@ -237,7 +239,9 @@ const _menuPrint = ({ inputChar, add } = {}) => {
     else {
         jumpHome();
         Term.newScreen();
-        Term.newLine().cyan().putStr(menu.title).formatReset().brightBlack().putStr(prompt.cursor.in).formatReset().putArr(prompt.promptPrefix)
+        Term.newLine();
+        if (menu.title) Term.cyan().putStr(menu.title).formatReset().brightBlack().putStr(prompt.cursor.in);
+        Term.formatReset().putArr(prompt.promptPrefix)
             .formatReset().putStr(prompt.inputString.join('') + prompt.cursor.promptChar).flush();
         // printedLinesCount += _newLine(menu.titleHeight); 
         menu.visible.menu.forEach((item, index) => {
@@ -355,12 +359,14 @@ const _keyHandler = (key) => {
         case keymap.BACKSPACE:
             if (menu.loadingHandler || menu.readInputMode.enabled || config.mute) break;
             _menuPrint({ add: false });
+            _eventListener(event.INPUT_STR, prompt.inputString.join(''));
             break;
         default:
             if (menu.loadingHandler || menu.readInputMode.enabled || config.mute) break;
             const visibleKey = getVisibleCharacters(key);
             if (visibleKey) _menuPrint({ add: true, inputChar: key });
             _eventListener(event.KEY, keyEvent);
+            _eventListener(event.INPUT_STR, prompt.inputString.join(''));
             break;
     }
 }
@@ -478,7 +484,8 @@ const configure = {
 
 const event = {
     LINE: 'LINE', // one string followed
-    KEY: 'KEY', // one keymap event followed
+    KE_Y: 'KEY', // one keymap event followed
+    INPUT_STR: 'INPUT_STR', // one input string followed
     SELECT: 'SELECT', // one poi number followed 
     ABORTED: 'ABORTED', // no param - on CTRL-C  
     EXITED: 'EXITED', // no param - on ESCAPE

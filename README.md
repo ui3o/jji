@@ -86,4 +86,4 @@ Examples are located in [example](example/).
 # Status
 
 * [x] support menu for select a script
-* [ ] support excluded mode
+* [x] fly mode
