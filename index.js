@@ -1,4 +1,5 @@
 const { existsSync } = require('fs');
+const { keymap } = require("./src/keymap");
 const path = require('path');
 
 require('./src/global');
@@ -37,6 +38,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
         rawMenu = { ...rawMenu, ...require(f) };
     });
 
+    let menuInputString = '';
     let flyMode = false;
     let menuPath = [];
     let currentMenuRef = {};
@@ -163,6 +165,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                 } else if (str.length === 0 && flyMode) {
                     flyMode = false;
                 }
+                menuInputString = str;
                 menuWalker(true);
                 break;
             case menu.event.INPUT_DROP:
@@ -176,6 +179,17 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                     flyMode = false;
                     menuWalker(true);
                 } else if (flyMode) _ins.push(' ');
+                break;
+            case menu.event.KEY:
+                const keyEvent = arg;
+                switch (keyEvent) {
+                    case keymap.NUL: // same as keymap.CTRL_SPACE
+                        const inString = flyMode ? menuInputString.slice(1) : ' ' + menuInputString;
+                        flyMode = !flyMode;
+                        menu.setInputString(inString);
+                        menuWalker(true);
+                        break;
+                }
                 break;
             default:
                 break;

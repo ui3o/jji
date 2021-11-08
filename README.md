@@ -70,6 +70,7 @@ This tool aims to make an easy menu system to organize your cli workflow.
   * **on top level**: esc equals exit
   * **terminate**: ctrl+c
   * **clear screen**: ctrl+l
+  * **fly mode start**: ctrl+space or text start with space
 
 # Examples
 

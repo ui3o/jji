@@ -376,6 +376,11 @@ const _keyHandler = (key) => {
     }
 }
 
+const setInputString = (input = '') => {
+    prompt.inputString = input.split('');
+    _menuPrint({ add: null });
+}
+
 const _refreshInputReader = (useEOL = false) => {
     jumpHome();
     Term.newScreen();
@@ -489,7 +494,7 @@ const configure = {
 
 const event = {
     LINE: 'LINE', // one string followed
-    KE_Y: 'KEY', // one keymap event followed
+    KEY: 'KEY', // one keymap event followed
     INPUT_STR: 'INPUT_STR', // one input string followed
     INPUT_DROP: 'INPUT_DROP', // one input string reference followed, possible to modify
     SELECT: 'SELECT', // one poi number followed 
@@ -498,5 +503,5 @@ const event = {
 };
 
 module.exports = {
-    open, close, showLoading, setMenu, updateMenu, event, configure, jumpHome, mute, unmute, readLine, resetMenuPos
+    open, close, showLoading, setMenu, updateMenu, event, configure, jumpHome, mute, unmute, readLine, resetMenuPos, setInputString
 }
