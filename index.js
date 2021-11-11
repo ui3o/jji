@@ -188,6 +188,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                 const keyEvent = arg;
                 switch (keyEvent) {
                     case keymap.NUL: // same as keymap.CTRL_SPACE
+                    case keymap.CTRL_F:
                         const inString = flyMode ? menuInputString.slice(1) : ' ' + menuInputString;
                         flyMode = !flyMode;
                         menu.setInputString(inString);

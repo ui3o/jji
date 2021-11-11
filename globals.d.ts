@@ -96,7 +96,7 @@ declare interface IJJ {
    *
    * @param question - string
    */
-  rl(question: string): string;
+  rl(question: string): Promise<string>;
 
   /**
    * **err** will print an error msg if exist and exit the program.
@@ -109,13 +109,13 @@ declare interface IJJ {
    *
    * @param path - string
    */
-  mkdir(path: string): any;
+  mkdir(path: string): Promise<any>;
   /**
    * **rm** will remove a folder recursively.
    *
    * @param path - string
    */
-  rm(path: string): any;
+  rm(path: string): Promise<any>;
   /**
    * **command line:** execute external **script**, inside spawn.
    * **cl** means start spawn with inherited stdio.

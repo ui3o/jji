@@ -398,6 +398,11 @@ const _inputReadHandler = (key) => {
                 _refreshInputReader(true);
                 _readLineListener(event.LINE, menu.readInputMode.line.join(''));
                 break;
+            case keymap.ESCAPE:
+                menu.readInputMode.enabled = false;
+                _refreshInputReader(true);
+                _readLineListener(event.LINE, undefined);
+                break;
             case keymap.BACKSPACE:
                 menu.readInputMode.line.pop();
                 _refreshInputReader();
