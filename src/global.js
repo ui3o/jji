@@ -67,6 +67,7 @@ global.jj = {
 }
 
 global.jj.cli = {
+    get printStd() { global.jj.__prop__.printStd = true; return global.jj.cli; },
     get hideErr() { global.jj.__prop__.hideErr = true; return global.jj.cli; },
     get noErr() { global.jj.__prop__.noErr = true; return global.jj.cli; },
     get splitByLine() { global.jj.__prop__.splitByLine = true; return global.jj.cli; },
@@ -75,12 +76,7 @@ global.jj.cli = {
     eol: (eol = '') => { global.jj.__prop__.eol = eol; return global.jj.cli; },
 }
 global.jj.cl = {
-    get hideErr() { global.jj.__prop__.hideErr = true; return global.jj.cl; },
-    get noErr() { global.jj.__prop__.noErr = true; return global.jj.cl; },
-    get splitByLine() { global.jj.__prop__.splitByLine = true; return global.jj.cl; },
-    get splitAll() { global.jj.__prop__.splitAll = true; return global.jj.cl; },
     wd: (wd = '') => { global.jj.__prop__.cwd = wd; return global.jj.cl; },
-    eol: (eol = '') => { global.jj.__prop__.eol = eol; return global.jj.cl; },
 }
 global.jj.cl.do = async (...args) => { return await spawnCommand(...args); }
 global.jj.cli.do = async (...args) => { global.jj.__prop__.cli = true; return await spawnCommand(...args); }
@@ -132,6 +128,7 @@ function spawnCommand(...args) {
                 else if (!options.hideErr) process.stdout.write(data.toString())
             });
             cmd.on('close', (code) => {
+                if (options.printStd) console.log(_out);
                 if (options.splitAll || options.splitByLine) {
                     const _lines = _out.split(options.eol ? options.eol : '\n').filter(l => l);
                     if (options.splitByLine) res(_lines);

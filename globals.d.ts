@@ -138,7 +138,7 @@ declare interface IJJ {
   term: {
     /**
      * **modifier** codes
-     * 
+     *
      */
     mc: {
       clearLine: `\x1b[2K`;
@@ -212,6 +212,11 @@ declare interface ICL {
 
 declare interface ICLI extends ICL {
   /**
+   * **wd** means set the process working directory
+   * @param wd path to working directory
+   */
+  wd(wd: string): ICLI;
+  /**
    * **hideErr** means the error output will not printed to stdout
    */
   hideErr: ICL;
@@ -234,4 +239,8 @@ declare interface ICLI extends ICL {
    * **splitAll** means the output will be split by line and split lines by [space || tab]
    */
   splitAll: ICLI;
+  /**
+   * **printStd** means the stdio and stderr will be printed to console.log
+   */
+   printStd: ICLI;
 }
