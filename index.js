@@ -120,7 +120,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                     });
                 } else if (_currentMenuRef.__prop__.lazy_menu !== undefined) {
                     const __showLoadingTimeout = _currentMenuRef.__prop__.showLoadingAfter ? _currentMenuRef.__prop__.showLoadingAfter : 100;
-                    if (_currentMenuRef.__prop__.printSelect) printSelection();
+                    if (_currentMenuRef.__prop__.printSelect || _currentMenuRef.__prop__.noPrintOnSelect) printSelection();
                     showLoading(__showLoadingTimeout);
                     const __currentPath = menuPath.join(MENU_SEPARATOR);
                     new Promise(_currentMenuRef.__prop__.lazy_menu).then((_menu) => {
@@ -366,7 +366,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
             transformedObj.__prop__.desc = src.__prop__.desc ? src.__prop__.desc : transformedObj.__prop__.desc ? transformedObj.__prop__.desc : '';
             if (src.__prop__) transformedObj.__prop__ = { ...transformedObj.__prop__, ...src.__prop__ };
             transformedObj.__prop__.menu_entry = new Promise(src.__prop__.fn);
-            transformedObj.__prop__.cmd = src.__prop__.cmd ? src.__prop__.cmd : '';
+            transformedObj.__prop__.cmd = src.__prop__.cmd ? src.__prop__.cmd : undefined;
             _cmdList.push(transformedObj.__prop__.cmd);
             const _currentMenuRef = transformedObj;
             _currentMenuRef.__prop__.menu_entry.then((_menu) => {
@@ -380,7 +380,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
             transformedObj.__prop__.desc = src.__prop__.desc ? src.__prop__.desc : transformedObj.__prop__.desc ? transformedObj.__prop__.desc : '';
             if (src.__prop__) transformedObj.__prop__ = { ...transformedObj.__prop__, ...src.__prop__ };
             transformedObj.__prop__.lazy_menu = src.__prop__.fn;
-            transformedObj.__prop__.cmd = src.__prop__.cmd ? src.__prop__.cmd : '';
+            transformedObj.__prop__.cmd = src.__prop__.cmd ? src.__prop__.cmd : undefined;
             _cmdList.push(transformedObj.__prop__.cmd);
             return true;
         }
@@ -391,7 +391,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
         menu.jumpHome(); Term.eraseDisplayBelow();
         const _currentMenuRef = getPath(transformedMenu, menuPath.join(MENU_SEPARATOR));
         const menuCmd = _currentMenuRef.__prop__.cmdList;
-        if (typeof menuCmd[menuCmd.length - 1] !== 'function' || (typeof menuCmd[menuCmd.length - 1] === 'function' && _currentMenuRef.__prop__ && !_currentMenuRef.__prop__.noPrintOnSelect)) {
+        if (typeof menuCmd[menuCmd.length - 1] === 'string' || (typeof menuCmd[menuCmd.length - 1] === 'function' && _currentMenuRef.__prop__ && !_currentMenuRef.__prop__.noPrintOnSelect)) {
             if ((typeof menuCmd[menuCmd.length - 1] === 'function' && _currentMenuRef.__prop__ && !_currentMenuRef.__prop__.header) || typeof menuCmd[menuCmd.length - 1] !== 'function') {
                 Term.printf(`..::`).formatBold().formatBrightWhite().printf(` ${menuPath.join(`${Term.mc.styleReset + Term.fc.brightBlack} > ${Term.mc.bold + Term.fc.brightWhite}`)}`).formatFormatReset();
                 Term.printf(` ::..\n`);
