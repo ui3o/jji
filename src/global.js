@@ -132,14 +132,14 @@ function spawnCommand(...args) {
                 if (options.printStd) console.log(_out);
                 if (options.splitAll || options.splitByLine) {
                     const _lines = _out.split(options.eol ? options.eol : '\n').filter(l => l);
-                    if (options.splitByLine) res(_lines);
+                    if (options.splitByLine) res({ out: _lines, code });
                     else {
                         _lines.forEach(l => lines.push(l.split(/[ \t]/)));
-                        res(lines);
+                        res({ out: lines, code });
                     }
                 }
                 else
-                    res(_out);
+                    res({ out: _out, code });
             });
         });
     }

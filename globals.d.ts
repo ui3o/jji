@@ -142,7 +142,6 @@ declare interface IJJ {
   term: {
     /**
      * **modifier** codes
-     *
      */
     mc: {
       clearLine: `\x1b[2K`;
@@ -210,8 +209,11 @@ declare interface ICL {
   wd(wd: string): ICL;
   /**
    * **do** means spawn the command
+   * 
+   * @param commandLine string or string combined with array
+   * @returns command result code
    */
-  do(commandLine: string);
+  do(commandLine: string): Promise<number>;
 }
 
 declare interface ICLI extends ICL {
@@ -247,4 +249,15 @@ declare interface ICLI extends ICL {
    * **printStd** means the stdio and stderr will be printed to console.log
    */
   printStd: ICLI;
+  /**
+   * **do** means spawn the command
+   * 
+   * examples:
+   * - `const {out, code} = await jj.cli.splitByLine.do(ls -al)`
+   * - `const {files: out, code} = await jj.cli.splitByLine.do(ls -al)`
+   * 
+   * @param commandLine string or string combined with array
+   * @returns command result code and output
+   */
+  do(commandLine: string): Promise<{ out: string | Array<string> | Array<Array<string>>; code: number }>;
 }
