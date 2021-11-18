@@ -286,11 +286,12 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
 
     function transform(src, dest, path = '', index = '', cmdList = []) {
         // calculate max prefix
-        const numberFillLength = !index ? Object.keys(src).length.toString().length : undefined;
+        const keyLength = Object.keys(src).length.toString().length;
+        const numberFillLength = !index ? keyLength : index.length + keyLength;
         Object.keys(src).forEach((key, indx) => {
             const _path = path.length ? `${path + MENU_SEPARATOR + key}` : key;
             const _fullPath = dest.__prop__ ? `${dest.__prop__.fullPath + MENU_SEPARATOR + key}` : _path;
-            const _index = numberFillLength ? '0'.repeat(numberFillLength - (index + indx).length) + index + indx : index + indx;
+            const _index = '0'.repeat(numberFillLength - (index + indx).length) + index + indx;
             const transformedObj = getPath(dest, path);
             let _cmdList = [...cmdList];
             transformedObj[key] = { __prop__: {} };
