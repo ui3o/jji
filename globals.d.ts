@@ -60,10 +60,14 @@ declare interface IFF {
   /**
    * **showLoadingAfter** means lazy menu will not print the loading immediately.
    * [default]: *100*
-  
-   * @param ms number ms 
+   *
+   * @param ms number ms
    */
   showLoadingAfter(ms: number): IFF;
+  /**
+   * **longLoading** means lazy menu will not print the loading immediately just after **180000** ms (**3** min)
+   */
+  longLoading: IFF;
   /**
    * **footer** means print message after menu execute [example/real/jj.js#L26](example/real/jj.js#L26).
    * you can use `jj.term.colorCode*` [src/term.js#L237](src/term.js#L237)
@@ -242,5 +246,5 @@ declare interface ICLI extends ICL {
   /**
    * **printStd** means the stdio and stderr will be printed to console.log
    */
-   printStd: ICLI;
+  printStd: ICLI;
 }
