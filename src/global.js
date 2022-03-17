@@ -128,18 +128,18 @@ function spawnCommand(...args) {
                 if (!options.noErr) _out += data;
                 else if (!options.hideErr) process.stdout.write(data.toString())
             });
-            cmd.on('close', (code) => {
+            cmd.on('close', (c) => {
                 if (options.printStd) console.log(_out);
                 if (options.splitAll || options.splitByLine) {
                     const _lines = _out.split(options.eol ? options.eol : '\n').filter(l => l);
-                    if (options.splitByLine) res({ out: _lines, code });
+                    if (options.splitByLine) res({ o: _lines, c });
                     else {
                         _lines.forEach(l => lines.push(l.split(/[ \t]/)));
-                        res({ out: lines, code });
+                        res({ o: lines, c });
                     }
                 }
                 else
-                    res({ out: _out, code });
+                    res({ o: _out, c });
             });
         });
     }

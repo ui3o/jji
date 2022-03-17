@@ -253,11 +253,11 @@ declare interface ICLI extends ICL {
    * **do** means spawn the command
    * 
    * examples:
-   * - `const {out, code} = await jj.cli.splitByLine.do(ls -al)`
-   * - `const {files: out, code} = await jj.cli.splitByLine.do(ls -al)`
+   * - `const {o, c} = await jj.cli.splitByLine.do(ls -al)`
+   * - `const {files: o, c} = await jj.cli.splitByLine.do(ls -al)`
    * 
    * @param commandLine string or string combined with array
-   * @returns command result code and output
+   * @returns command result c(code) and o(output)
    */
-  do(commandLine: string): Promise<{ out: string | Array<string> | Array<Array<string>>; code: number }>;
+  do(commandLine: string): Promise<{ o: string | Array<string> | Array<Array<string>>; c: number }>;
 }

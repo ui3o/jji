@@ -1,4 +1,8 @@
 
+module.exports.git = ["git clone test", ff.resetMenu.printSelect.do(async () => {
+    await jj.cli.printStd.wd('/tmp/aa/b/a').do(`git pull`);
+})];
+
 module.exports.less = ["less file from directory", ff.menu.noHeader.do(async (res) => {
     const ls = await jj.cli.splitByLine.do(`find . -maxdepth 1 -type f`);
     const menu = {};

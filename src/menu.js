@@ -20,20 +20,20 @@ const menu = {
     loadingHandler: undefined,
     blinkHandler: undefined,
     // const variables
-    maxVisibleCount: 5,
+    maxVisibleCount: 6,
     prefix: (index) => menu.visible.poi === index ? ` ${prompt.cursor.sel}  ` : `    `,
     separator: ' - ',
     title: 'Please select:',
-    lazyTitle: 'lazy',
+    lazyTitle: '±',
     titleHeight: 0, // space between menu and title
     footerHeight: 0 // space between last prompt and last menu
 };
 
 const prompt = {
     inputString: [],
-    promptPrefix: [],
+    promptPrefix: undefined,
     // const variables
-    _: () => `[${menu.full.menu.length}|${menu.filtered.menu.length}|${menu.filtered.menu.length ? menu.filtered.poi + 1 : menu.filtered.poi}]`,
+    _: () => ` ${menu.full.menu.length}|${menu.filtered.menu.length}|${menu.filtered.menu.length ? menu.filtered.poi + 1 : menu.filtered.poi}  « 1 »`,
     cursor: { sel: os.platform() === 'win32' ? '>' : '➜', in: " > ", promptChar: '_' }
 };
 
@@ -94,10 +94,10 @@ const _moveSelection = down => {
  *   * 2 - lazy menu, every menu enter the menu sub menu reloading
  *   * 3 - readonly - not selectable menu item
  * @param {*} _menu 
- * @param {*} promptPrefix 
+ * @param {*} promptPrefix - callback function
  * @param {*} title 
  */
-const setMenu = (_menu = [], promptPrefix = [], title = '?') => {
+const setMenu = (_menu = [], promptPrefix, title = '?') => {
     _stopMenuItemBlinking();
     _stopLoading();
     prompt.inputString = [];
@@ -106,11 +106,12 @@ const setMenu = (_menu = [], promptPrefix = [], title = '?') => {
     menu.title = title;
     _menu.forEach((m, index) => {
         const fm = {
+            prefix: m[2] !== undefined ? m[2].prefix : '',
             title: m[0] !== undefined ? m[0] : '',
             desc: m[1] !== undefined ? m[1] : '',
-            loading: m[2] !== undefined && m[2] === 0 ? -1 : m[2] !== undefined && m[2] === 1 ? 0 : -1,
-            lazy: m[2] !== undefined && m[2] === 2 ? true : false,
-            readonly: m[2] !== undefined && m[2] === 3 ? true : false,
+            loading: m[2] !== undefined && m[2].loading ? 0 : -1,
+            lazy: m[2] !== undefined && m[2].lazy ? true : false,
+            readonly: m[2] !== undefined && m[2].readonly ? true : false,
             index,
         };
         formattedMenu.push(fm);
@@ -130,19 +131,22 @@ const setMenu = (_menu = [], promptPrefix = [], title = '?') => {
  *     ['test2', 'menu for test x item'],
  * ]);
  * @param {*} _menu 
+ * @param {*} promptPrefix - callback function
+ * @param {*} title 
  */
-const updateMenu = (_menu = [], promptPrefix = [], title = '?') => {
+const updateMenu = (_menu = [], promptPrefix, title = '?') => {
     _stopMenuItemBlinking();
     const formattedMenu = [];
     prompt.promptPrefix = promptPrefix;
     menu.title = title;
     _menu.forEach((m, index) => {
         const fm = {
+            prefix: m[2] !== undefined ? m[2].prefix : '',
             title: m[0] !== undefined ? m[0] : '',
             desc: m[1] !== undefined ? m[1] : '',
-            loading: m[2] !== undefined && m[2] === 0 ? -1 : m[2] !== undefined && m[2] === 1 ? 0 : -1,
-            lazy: m[2] !== undefined && m[2] === 2 ? true : false,
-            readonly: m[2] !== undefined && m[2] === 3 ? true : false,
+            loading: m[2] !== undefined && m[2].loading ? 0 : -1,
+            lazy: m[2] !== undefined && m[2].lazy ? true : false,
+            readonly: m[2] !== undefined && m[2].readonly ? true : false,
             index,
         };
         formattedMenu.push(fm);
@@ -158,7 +162,7 @@ const _setFilteredMenu = (update) => {
         menu.full.menu.forEach(m => {
             let includes = true;
             input.forEach(inp => {
-                if (includes && !(m.title.toLowerCase().includes(inp) || m.desc.toLowerCase().includes(inp)))
+                if (includes && !(m.prefix.toLowerCase().includes(inp) || m.title.toLowerCase().includes(inp) || m.desc.toLowerCase().includes(inp)))
                     includes = false;
             });
             if (includes) menu.filtered.menu.push(m);
@@ -194,41 +198,23 @@ const _findHighlights = (str = "", searchFor = "", splitted = [], offset = 0) =>
 
 const _highlightFiltered = (str = "", defaultColor = Term.fc.defaultColor, highlightColor = Term.fc.yellow) => {
     const splitted = str.split('').map(c => { return { c, h: false } });
-    if (!prompt.inputString.length) return splitted.map(char => { return char.c });
-    const input = prompt.inputString.join('').toLowerCase().split(' ');
-    input.forEach(inp => {
-        if (inp.length && str.toLowerCase().includes(inp)) _findHighlights(str, inp, splitted);
-    });
-    // group highlights
-    let started = false;
-    const highlighted = [];
+    if (prompt.inputString.length) {
+        const input = prompt.inputString.join('').toLowerCase().split(' ');
+        input.forEach(inp => {
+            if (inp.length && str.toLowerCase().includes(inp)) _findHighlights(str, inp, splitted);
+        });
+    }
     splitted.forEach(char => {
-        if (char.h && !started) { highlighted.push(highlightColor); started = true; }
-        if (!char.h && started) { highlighted.push(defaultColor); started = false; }
-        highlighted.push(char.c);
+        if (char.h) Term.customColor(highlightColor, char.c);
+        else Term.customColor(defaultColor, char.c);
     });
-    return highlighted;
 }
 
 const jumpHome = () => {
-    if (Term.screen.count) {
-        const columns = Term.stdout.columns;
-        const extra = Term.screen.count % columns;
-        const toAdd = extra ? columns - extra : extra;
-        const lines = (toAdd + Term.screen.count) / columns;
-        if (lines === 1) Term.left(columns);
-        else Term.previousLine(lines - 1);
-    }
+    Term.newScreen();
 }
 
-// generate new line
-const _newLine = (line = 0) => {
-    for (let index = 0; index < line; index++)
-        Term.newLine();
-    return line;
-}
-
-const _menuPrint = ({ inputChar, add } = {}) => {
+const _menuPrint = async ({ inputChar, add } = {}) => {
     if (menu.loadingHandler) { _refreshLoading(); return; }
     if (add !== undefined) {
         _stopMenuItemBlinking();
@@ -238,31 +224,31 @@ const _menuPrint = ({ inputChar, add } = {}) => {
     }
     else {
         jumpHome();
-        Term.newScreen();
-        Term.newLine();
-        if (menu.title) Term.cyan().putStr(menu.title).formatReset().brightBlack().putStr(prompt.cursor.in);
-        Term.formatReset().putArr(prompt.promptPrefix)
-            .formatReset().putStr(prompt.inputString.join('') + prompt.cursor.promptChar).flush();
+        if (menu.title) Term.cyan(menu.title).defaultColor(prompt.cursor.in);
+        prompt.promptPrefix();
+        Term.defaultColor(prompt.inputString.join('') + prompt.cursor.promptChar)
+        Term.flush();
         // printedLinesCount += _newLine(menu.titleHeight); 
         menu.visible.menu.forEach((item, index) => {
-            Term.newLine();
-            if (menu.visible.poi === index) Term.customColor(81);
-            else Term.customColor(39);
-            Term.putStr(menu.prefix(index));
-            if (item.loading > -1 || item.readonly)
-                Term.brightBlack().putArr(_highlightFiltered(item.title, Term.fc.brightBlack, Term.fc.customColor(180)));
-            else
-                Term.putArr(_highlightFiltered(item.title, menu.visible.poi === index ? Term.fc.customColor(81) : Term.fc.customColor(39), Term.fc.customColor(180)));
-            Term.formatReset();
-            if (item.desc.length) Term.brightBlack().putStr(menu.separator).putArr(_highlightFiltered(item.desc, Term.fc.brightBlack, Term.fc.customColor(180)));
-            if (item.lazy) Term.brightMagenta().putStr(` [${menu.lazyTitle}]`).formatReset();
-            if (item.loading > -1) Term.brightCyan().putStr(` [${Term.progressBar[item.loading]}]`).formatReset();
+            if (menu.visible.poi === index) Term.customColor(81, menu.prefix(index));
+            else Term.customColor(39, menu.prefix(index));
+            if (item.lazy) Term.brightMagenta(item.prefix);
+            else if (item.loading > -1) Term.brightCyan(`${Term.oneCharLoading[item.loading]} `);
+            else Term.defaultColor(item.prefix);
             if (item.loading > -1 && !menu.blinkHandler) _startMenuItemBlinking();
-            Term.flush();
+            if (item.loading > -1 || item.readonly)
+                _highlightFiltered(item.title, Term.fc.brightBlack, 180);
+            else
+                _highlightFiltered(item.title, menu.visible.poi === index ? 81 : 39, 180);
+            if (item.desc.length) {
+                Term.brightBlack(menu.separator);
+                _highlightFiltered(item.desc, Term.fc.brightBlack, 180);
+            }
+            Term.flush(true);
         });
         // printedLinesCount += _newLine(menu.footerHeight);
-        Term.newLine().customColor(136).putStr(prompt._()).flush();
-        Term.refresh();
+        Term.customColor(136, prompt._())
+        Term.flush();
         // clear last printed lines
         Term.eraseDisplayBelow();
     }
@@ -271,7 +257,7 @@ const _menuPrint = ({ inputChar, add } = {}) => {
 const _startMenuItemBlinking = () => {
     menu.blinkHandler = setInterval(() => {
         menu.visible.menu.forEach((item) => {
-            if (item.loading > -1) item.loading = item.loading === Term.progressBar.length - 1 ? 0 : item.loading + 1;
+            if (item.loading > -1) item.loading = item.loading === Term.oneCharLoading.length - 1 ? 0 : item.loading + 1;
         });
         if (!config.mute) _menuPrint();
     }, 500);
@@ -289,12 +275,11 @@ const _stopLoading = () => {
 }
 
 
-const _refreshLoading = () => {
+const _refreshLoading = async () => {
     jumpHome();
-    Term.newScreen();
-    Term.newLine().brightCyan().putStr(Term.progressBar[menu.loadingPoi])
-        .formatReset().putStr(' you can return back[ESC] or quit[CTRL+C].').flush();
-    Term.refresh();
+    Term.brightCyan(Term.progressBar[menu.loadingPoi])
+        .defaultColor(' [ESC|CTRL+C] to return.')
+    Term.flush();
     menu.loadingPoi = menu.loadingPoi === Term.progressBar.length - 1 ? 0 : menu.loadingPoi + 1;
     Term.eraseDisplayBelow();
 }
@@ -313,11 +298,11 @@ const showLoading = (invisible) => {
 const _reportExit = (eventType = event.EXITED) => {
     if (eventType === event.EXITED) {
         if (!config.disableSelectedOutputPrint) { jumpHome(); Term.eraseDisplayBelow(); }
-        if (!config.disableSelectedOutputPrint) Term.printf(`[selected] = [none]\n`);
+        if (!config.disableSelectedOutputPrint) Term.print(`[selected] = [none]\n`);
         _eventListener(eventType);
     } else {
         jumpHome(); Term.eraseDisplayBelow();
-        if (!config.disableSelectedOutputPrint) Term.printf(`[selected] = [none]\n`);
+        if (!config.disableSelectedOutputPrint) Term.print(`[selected] = [none]\n`);
     }
 }
 
@@ -329,7 +314,7 @@ const _keyHandler = (key) => {
             if (menu.loadingHandler || menu.readInputMode.enabled || config.mute) break;
             if (!config.disableSelectedOutputPrint) { jumpHome(); Term.eraseDisplayBelow(); }
             if (menu.filtered.menu.length) {
-                if (!config.disableSelectedOutputPrint) Term.printf(`[selected] = ${menu.filtered.menu[menu.filtered.poi].title}\n`);
+                if (!config.disableSelectedOutputPrint) Term.print(`[selected] = ${menu.filtered.menu[menu.filtered.poi].title}\n`);
                 if (!config.disableProcessExitOnSelect) { Term.cursorShow(); process.exit(); }
                 _eventListener(event.SELECT, menu.filtered.menu[menu.filtered.poi].index);
             }
@@ -381,12 +366,13 @@ const setInputString = (input = '') => {
     _menuPrint({ add: null });
 }
 
-const _refreshInputReader = (useEOL = false) => {
+const _refreshInputReader = async (useEOL = false) => {
     jumpHome();
-    Term.newScreen();
-    Term.newLine().putStr(menu.readInputMode.question).putStr(menu.readInputMode.line.join('')).putStr(prompt.cursor.promptChar).flush(useEOL);
+    Term.defaultColor(menu.readInputMode.question)
+        .defaultColor(menu.readInputMode.line.join(''))
+        .defaultColor(prompt.cursor.promptChar)
+    Term.flush();
     Term.eraseDisplayBelow();
-    Term.refresh();
 }
 
 const _inputReadHandler = (key) => {
