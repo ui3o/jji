@@ -23,6 +23,20 @@ const t = {
         });
     },
     /**
+     * print message
+     */
+    printMessage: function () {
+        if (t.message) {
+            console.log();
+            t.stdout.write(t.message);
+            t.stdout.write(os.EOL);
+            t.stdout.write(t.mc.resetAll);
+            t.message = '';
+        }
+        return t;
+    },
+
+    /**
      * print format
      */
     print: function (str = "") { t.stdout.write(str); return t; },
@@ -38,13 +52,6 @@ const t = {
             });
             if (lines === 0) t.left(t.stdout.columns);
             else t.previousLine(lines);
-        }
-        if (t.message) {
-            console.log();
-            t.stdout.write(t.message);
-            t.stdout.write(os.EOL);
-            t.stdout.write(t.mc.resetAll);
-            t.message = '';
         }
         if (t.sc.lines) t.print(t.mc.clearLineCursorRight);
         t.sc.lines = [];

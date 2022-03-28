@@ -15,7 +15,7 @@ module.exports.messenger = ff.menu.do(async (res) => {
     setTimeout(() => {
         jj.message(`Update ${jj.term.fc.red}need again!`);
     }, 1500);
-    res({ submenu: undefined })
+    res({ submenu: null })
 });
 
 module.exports.prom = ff.lazy.printSelect.do(async (res) => {

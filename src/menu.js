@@ -176,7 +176,6 @@ const _setFilteredMenu = (update) => {
     }
 }
 
-
 const _setNewMenu = (_menu, end, update) => {
     if (!update) menu.visible.poi = end ? menu.visible.menu.length - 1 : 0;
     menu.visible.menu = _menu;
@@ -462,7 +461,8 @@ const open = async (eventListener = (event, key) => { }) => {
     process.stdout.on('resize', _windowResizeHandler);
     global.jj.messageHandler = (msg) => {
         Term.message += msg;
-        _menuPrint();
+        if (config.mute) Term.printMessage();
+        else _menuPrint();
     };
 }
 
