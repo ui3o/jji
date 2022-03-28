@@ -53,7 +53,7 @@ declare interface IFF {
   printSelect: IFF;
   /**
    * **header** means print message before menu execute [example/real/jj.js#L26](example/real/jj.js#L26).
-   * you can use `jj.term.colorCode*` [src/term.js#L237](src/term.js#L237)
+   * you can use `jj.term.fc.* | jj.term.mc.* | jj.term.bc.*` [src/term.js#L237](src/term.js#L237)
    * @param fn return **string**
    */
   header(fn: () => any): IFF;
@@ -70,7 +70,7 @@ declare interface IFF {
   longLoading: IFF;
   /**
    * **footer** means print message after menu execute [example/real/jj.js#L26](example/real/jj.js#L26).
-   * you can use `jj.term.colorCode*` [src/term.js#L237](src/term.js#L237)
+   * you can use `jj.term.fc.* | jj.term.mc.* | jj.term.bc.*` [src/term.js#L237](src/term.js#L237)
    * @param fn return **string**
    */
   footer(fn: () => any): IFF;
@@ -128,6 +128,21 @@ declare interface IJJ {
    *
    */
   cl: ICL;
+  /**
+   * **command line:** execute external **script**, inside spawn.
+   * **clf** means start spawn with **fixed inherited stdio**.
+   * Some program like `docker logs -f` not handle *CTRL+C* inside spawn with
+   * inherited stdio. `clf` fix it.
+   *
+   * In other hand with `clf` possible to control all data through handler,
+   * only *CTRL+C*, *CTRL+L* and `ENTER` handled by default. But is the handler
+   * returns `true` that means ignore the keys from normal workflow. When spawn
+   * starts it is going to call the handler without data for command object handle.
+   *
+   * finalize the script call the **do** function at *last* position.
+   *
+   */
+  clf: ICLF;
   /**
    * **interpreted command line:** execute external **script** which is **interpreted** into **string**, inside spawn.
    * **cli** means start spawn, stdout and stderr will be parsed.
@@ -209,7 +224,34 @@ declare interface ICL {
   wd(wd: string): ICL;
   /**
    * **do** means spawn the command
+   *
+   * @param commandLine string or string combined with array
+   * @returns command result code
+   */
+  do(commandLine: string): Promise<number>;
+}
+
+declare interface ICLF {
+  /**
+   * **wd** means set the process working directory
+   * @param wd path to working directory
+   */
+  wd(wd: string): ICL;
+  /**
+   * **handler** means control the spawn command in|out|err
    * 
+   * Only *CTRL+C*, *CTRL+L* and `ENTER` handled by default. But is the handler
+   * returns `true` that means ignore the keys from normal workflow. When spawn
+   * starts it is going to call the handler without data for command object handle.
+   * @param handler handler callback
+   *  - c: spawn command object
+   *  - t: data type [0=in, 1=out, 2=err]
+   *  - d: data string
+   */
+  handler(handler: (c: object, t: number, d: string) => boolean): ICL;
+  /**
+   * **do** means spawn the command
+   *
    * @param commandLine string or string combined with array
    * @returns command result code
    */
@@ -251,11 +293,11 @@ declare interface ICLI extends ICL {
   printStd: ICLI;
   /**
    * **do** means spawn the command
-   * 
+   *
    * examples:
    * - `const {o, c} = await jj.cli.splitByLine.do(ls -al)`
    * - `const {files: o, c} = await jj.cli.splitByLine.do(ls -al)`
-   * 
+   *
    * @param commandLine string or string combined with array
    * @returns command result c(code) and o(output)
    */

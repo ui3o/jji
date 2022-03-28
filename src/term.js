@@ -9,6 +9,7 @@ const t = {
     previousLine: function (lines) { t.print(`\x1b[${lines}F`); return t; },
     eraseDisplayBelow: function () { t.print(`\x1b[0J`); return t; },
     cursorHide: function () { t.print(`\x1b[?25l`); return t; },
+    // cursorHide: function () { return t; },
     cursorShow: function () { t.print(`\x1b[?25h`); return t; },
     requestCursorLocation: function () {
         return new Promise((res) => {
@@ -27,19 +28,21 @@ const t = {
      * start new sc build
      */
     newScreen: function () {
-        let lines = t.sc.lines.length;
-        t.sc.lines.forEach(cs => {
-            const l = cs / t.stdout.columns;
-            if (l > 1) lines += Math.floor(l);
-        });
-        if (lines === 0) t.left(t.stdout.columns);
-        else t.previousLine(lines);
+        if (t.sc.lines) {
+            let lines = t.sc.lines.length;
+            t.sc.lines.forEach(cs => {
+                const l = cs / t.stdout.columns;
+                if (l > 1) lines += Math.floor(l);
+            });
+            if (lines === 0) t.left(t.stdout.columns);
+            else t.previousLine(lines);
+            t.print(t.mc.clearLineCursorRight);
+        }
         t.sc.lines = [];
         t.chars = [];
         // insert header
         console.log();
         t.sc.lines.push(0);
-        t.print(t.mc.clearLineCursorRight);
         return t;
     },
 
@@ -133,6 +136,7 @@ const t = {
 
     // modifier codes
     mc: {
+        resetAll: '\x1b[0m\x1b[39m\x1b[49m',
         clearLineCursorRight: `\x1b[K`,
         clearLine: `\x1b[2K`,
         styleReset: '\x1b[0m',

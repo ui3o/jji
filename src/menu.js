@@ -330,21 +330,31 @@ const _keyHandler = (key) => {
             }
             break;
         case keymap.CTRL_C:
-            _reportExit(event.ABORTED);
-            if (!config.disableProcessExitOnAbort) { Term.cursorShow(); process.exit(1); }
-            break;
+            if (global.jj.cmd && global.jj.cmdOpts.clf) {
+                if (!global.jj.cmdOpts.handler(global.jj.cmd, 0, key)) {
+                    global.jj.cmd.stdout.destroy();
+                    global.jj.cmd.stderr.destroy();
+                    global.jj.cmd.kill('SIGTERM');
+                }
+            } else {
+                _reportExit(event.ABORTED);
+                if (!config.disableProcessExitOnAbort) { Term.cursorShow(); process.exit(1); }
+                break;
+            }
         case keymap.UP:
             if (menu.loadingHandler || menu.readInputMode.enabled || config.mute) break;
             _moveSelection(false)
             break;
         case keymap.CTRL_L:
-            Term.clear();
+            if (!global.jj.cmd || (global.jj.cmdOpts.clf && !global.jj.cmdOpts.handler(global.jj.cmd, 0, key)))
+                Term.clear();
+            if (config.mute) break;
             _menuPrint();
             break;
         case keymap.DOWN:
         case keymap.TAB:
             if (menu.loadingHandler || menu.readInputMode.enabled || config.mute) break;
-            _moveSelection(true)
+            _moveSelection(true);
             break;
         case keymap.BACKSPACE:
             if (menu.loadingHandler || menu.readInputMode.enabled || config.mute) break;
@@ -376,6 +386,13 @@ const _refreshInputReader = async (useEOL = false) => {
 }
 
 const _inputReadHandler = (key) => {
+    if (global.jj.cmd && global.jj.cmdOpts.clf) {
+        if (!global.jj.cmdOpts.handler(global.jj.cmd, 0, key)) {
+            if (key === '\r') key = '\r\n';
+            process.stdout.write(key);
+        }
+        return;
+    }
     if (menu.readInputMode.enabled) {
         const keyEvent = detectKey(key);
         switch (keyEvent) {
@@ -461,7 +478,7 @@ const unmute = () => {
 }
 
 const resetMenuPos = () => {
-    Term.newScreen();
+    Term.sc.lines = undefined;
 }
 
 const configure = {

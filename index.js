@@ -405,7 +405,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
         const menuCmd = _currentMenuRef.__prop__.cmdList;
         if (typeof menuCmd[menuCmd.length - 1] === 'string' || (typeof menuCmd[menuCmd.length - 1] === 'function' && _currentMenuRef.__prop__ && !_currentMenuRef.__prop__.noPrintOnSelect)) {
             if ((typeof menuCmd[menuCmd.length - 1] === 'function' && _currentMenuRef.__prop__ && !_currentMenuRef.__prop__.header) || typeof menuCmd[menuCmd.length - 1] !== 'function') {
-                Term.print(`..::`).formatBold().formatBrightWhite().printf(` ${menuPath.join(`${Term.mc.styleReset + Term.fc.brightBlack} > ${Term.mc.bold + Term.fc.brightWhite}`)}`).formatFormatReset();
+                Term.print(`..:: ${Term.mc.bold + Term.fc.brightWhite}${menuPath.join(`${Term.mc.resetAll} > ${Term.mc.bold + Term.fc.brightWhite}`)}${Term.mc.resetAll}`);
                 Term.print(` ::..\n`);
             } else {
                 Term.print(_currentMenuRef.__prop__.header());

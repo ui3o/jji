@@ -36,7 +36,6 @@ global.ff = {
     }
 }
 
-
 global.jj = {
     __prop__: {},
     rl: (question = '') => {
@@ -63,7 +62,10 @@ global.jj = {
         });
     },
     term: Term,
+    cmd: Term,
+    cmdOpts: {},
     cl: {},
+    clf: {},
     cli: {}
 }
 
@@ -79,9 +81,13 @@ global.jj.cli = {
 global.jj.cl = {
     wd: (wd = '') => { global.jj.__prop__.cwd = wd; return global.jj.cl; },
 }
+global.jj.clf = {
+    handler: (handler = () => { }) => { global.jj.__prop__.handler = handler; return global.jj.clf; },
+    wd: (wd = '') => { global.jj.__prop__.cwd = wd; return global.jj.clf; },
+}
 global.jj.cl.do = async (...args) => { return await spawnCommand(...args); }
+global.jj.clf.do = async (...args) => { global.jj.__prop__.clf = true; return await spawnCommand(...args); }
 global.jj.cli.do = async (...args) => { global.jj.__prop__.cli = true; return await spawnCommand(...args); }
-
 
 function scriptCollector(...args) {
     let script = [];
@@ -107,28 +113,55 @@ function scriptCollector(...args) {
 }
 
 function spawnCommand(...args) {
-    if (!global.jj.__prop__.cli) {
+    if (!global.jj.__prop__.cli && !global.jj.__prop__.clf) {
         const { script, options } = scriptCollector(...args);
         const shell = process.env.__shell === 'true' ? true : process.env.__shell;
-        const cmd = spawn(script.shift(), [...script], { stdio: 'inherit', cwd: options.cwd, env: process.env, shell });
+        global.jj.cmdOpts = { cl: true };
+        global.jj.cmd = spawn(script.shift(), [...script], { stdio: 'inherit', cwd: options.cwd, env: process.env, shell });
         return new Promise((resolve) => {
-            cmd.on('close', (code) => resolve(code));
+            global.jj.cmd.on('close', (code) => {
+                global.jj.cmd = undefined;
+                resolve(code)
+            });
+        });
+    } else if (!global.jj.__prop__.cli && global.jj.__prop__.clf) {
+        const { script, options } = scriptCollector(...args);
+        const isPaused = process.stdin.isPaused();
+        process.stdin.resume();
+        const shell = process.env.__shell === 'true' ? true : process.env.__shell;
+        global.jj.cmdOpts = { clf: true, handler: options.handler };
+        global.jj.cmd = spawn(script.shift(), [...script], { encoding: 'utf-8', cwd: options.cwd, shell });
+        global.jj.cmdOpts.handler(global.jj.cmd);
+        return new Promise(res => {
+            global.jj.cmd.stdout.on('data', data => {
+                if (!global.jj.cmdOpts.handler(global.jj.cmd, 1, data)) process.stdout.write(data);
+            });
+            global.jj.cmd.stderr.on('data', data => {
+                if (!global.jj.cmdOpts.handler(global.jj.cmd, 2, data)) process.stdout.write(data);
+            });
+            global.jj.cmd.on('close', (c) => {
+                global.jj.cmd = undefined;
+                if (isPaused) process.stdin.pause();
+                res({ o: undefined, c });
+            });
         });
     } else {
         const { script, options } = scriptCollector(...args);
         const lines = [];
         const shell = process.env.__shell === 'true' ? true : process.env.__shell;
-        const cmd = spawn(script.shift(), [...script], { encoding: 'utf-8', cwd: options.cwd, shell });
+        global.jj.cmdOpts = { cli: true };
+        global.jj.cmd = spawn(script.shift(), [...script], { encoding: 'utf-8', cwd: options.cwd, shell });
         return new Promise(res => {
             let _out = '';
-            cmd.stdout.on('data', data => {
+            global.jj.cmd.stdout.on('data', data => {
                 _out += data;
             });
-            cmd.stderr.on('data', data => {
+            global.jj.cmd.stderr.on('data', data => {
                 if (!options.noErr) _out += data;
                 else if (!options.hideErr) process.stdout.write(data.toString())
             });
-            cmd.on('close', (c) => {
+            global.jj.cmd.on('close', (c) => {
+                global.jj.cmd = undefined;
                 if (options.printStd) console.log(_out);
                 if (options.splitAll || options.splitByLine) {
                     const _lines = _out.split(options.eol ? options.eol : '\n').filter(l => l);
