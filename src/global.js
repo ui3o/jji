@@ -131,6 +131,7 @@ function spawnCommand(...args) {
     } else if (!global.jj.__prop__.cli && global.jj.__prop__.cle) {
         const { script, options } = scriptCollector(...args);
         const isPaused = process.stdin.isPaused();
+        global.jj.cmdOpts.handler = global.jj.cmdOpts.handler === undefined ? () => { } : global.jj.cmdOpts.handler;
         process.stdin.resume();
         const shell = process.env.__shell === 'true' ? true : process.env.__shell;
         global.jj.cmdOpts = { cle: true, handler: options.handler };
