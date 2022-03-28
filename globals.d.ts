@@ -165,6 +165,8 @@ declare interface IJJ {
      * **modifier** codes
      */
     mc: {
+      resetAll: "\x1b[0m\x1b[39m\x1b[49m";
+      clearLineCursorRight: `\x1b[K`,
       clearLine: `\x1b[2K`;
       styleReset: "\x1b[0m";
       bold: "\x1b[1m";
