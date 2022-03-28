@@ -69,7 +69,7 @@ global.jj = {
     cmd: Term,
     cmdOpts: {},
     cl: {},
-    clf: {},
+    cle: {},
     cli: {}
 }
 
@@ -85,12 +85,12 @@ global.jj.cli = {
 global.jj.cl = {
     wd: (wd = '') => { global.jj.__prop__.cwd = wd; return global.jj.cl; },
 }
-global.jj.clf = {
-    handler: (handler = () => { }) => { global.jj.__prop__.handler = handler; return global.jj.clf; },
-    wd: (wd = '') => { global.jj.__prop__.cwd = wd; return global.jj.clf; },
+global.jj.cle = {
+    handler: (handler = () => { }) => { global.jj.__prop__.handler = handler; return global.jj.cle; },
+    wd: (wd = '') => { global.jj.__prop__.cwd = wd; return global.jj.cle; },
 }
 global.jj.cl.do = async (...args) => { return await spawnCommand(...args); }
-global.jj.clf.do = async (...args) => { global.jj.__prop__.clf = true; return await spawnCommand(...args); }
+global.jj.cle.do = async (...args) => { global.jj.__prop__.cle = true; return await spawnCommand(...args); }
 global.jj.cli.do = async (...args) => { global.jj.__prop__.cli = true; return await spawnCommand(...args); }
 
 function scriptCollector(...args) {
@@ -117,7 +117,7 @@ function scriptCollector(...args) {
 }
 
 function spawnCommand(...args) {
-    if (!global.jj.__prop__.cli && !global.jj.__prop__.clf) {
+    if (!global.jj.__prop__.cli && !global.jj.__prop__.cle) {
         const { script, options } = scriptCollector(...args);
         const shell = process.env.__shell === 'true' ? true : process.env.__shell;
         global.jj.cmdOpts = { cl: true };
@@ -128,12 +128,12 @@ function spawnCommand(...args) {
                 resolve(code)
             });
         });
-    } else if (!global.jj.__prop__.cli && global.jj.__prop__.clf) {
+    } else if (!global.jj.__prop__.cli && global.jj.__prop__.cle) {
         const { script, options } = scriptCollector(...args);
         const isPaused = process.stdin.isPaused();
         process.stdin.resume();
         const shell = process.env.__shell === 'true' ? true : process.env.__shell;
-        global.jj.cmdOpts = { clf: true, handler: options.handler };
+        global.jj.cmdOpts = { cle: true, handler: options.handler };
         global.jj.cmd = spawn(script.shift(), [...script], { encoding: 'utf-8', cwd: options.cwd, shell });
         global.jj.cmdOpts.handler(global.jj.cmd);
         return new Promise(res => {

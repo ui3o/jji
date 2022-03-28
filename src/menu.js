@@ -329,7 +329,7 @@ const _keyHandler = (key) => {
             }
             break;
         case keymap.CTRL_C:
-            if (global.jj.cmd && global.jj.cmdOpts.clf) {
+            if (global.jj.cmd && global.jj.cmdOpts.cle) {
                 if (!global.jj.cmdOpts.handler(global.jj.cmd, 0, key)) {
                     global.jj.cmd.stdout.destroy();
                     global.jj.cmd.stderr.destroy();
@@ -345,7 +345,7 @@ const _keyHandler = (key) => {
             _moveSelection(false)
             break;
         case keymap.CTRL_L:
-            if (!global.jj.cmd || (global.jj.cmdOpts.clf && !global.jj.cmdOpts.handler(global.jj.cmd, 0, key)))
+            if (!global.jj.cmd || (global.jj.cmdOpts.cle && !global.jj.cmdOpts.handler(global.jj.cmd, 0, key)))
                 Term.clear();
             if (config.mute) break;
             _menuPrint();
@@ -385,7 +385,7 @@ const _refreshInputReader = async (useEOL = false) => {
 }
 
 const _inputReadHandler = (key) => {
-    if (global.jj.cmd && global.jj.cmdOpts.clf) {
+    if (global.jj.cmd && global.jj.cmdOpts.cle) {
         if (!global.jj.cmdOpts.handler(global.jj.cmd, 0, key)) {
             if (key === '\r') key = '\r\n';
             process.stdout.write(key);

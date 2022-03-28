@@ -136,11 +136,11 @@ declare interface IJJ {
   cl: ICL;
   /**
    * **command line:** execute external **script**, inside spawn.
-   * **clf** means start spawn with **fixed inherited stdio**.
+   * **cle** means start **extended command line** spawn with fixed inherited stdio.
    * Some program like `docker logs -f` not handle *CTRL+C* inside spawn with
-   * inherited stdio. `clf` fix it.
+   * inherited stdio. `cle` fix it.
    *
-   * In other hand with `clf` possible to control all data through handler,
+   * In other hand with `cle` possible to control all data through handler,
    * only *CTRL+C*, *CTRL+L* and `ENTER` handled by default. But is the handler
    * returns `true` that means ignore the keys from normal workflow. When spawn
    * starts it is going to call the handler without data for command object handle.
@@ -148,7 +148,7 @@ declare interface IJJ {
    * finalize the script call the **do** function at *last* position.
    *
    */
-  clf: ICLF;
+  cle: ICLE;
   /**
    * **interpreted command line:** execute external **script** which is **interpreted** into **string**, inside spawn.
    * **cli** means start spawn, stdout and stderr will be parsed.
@@ -237,7 +237,7 @@ declare interface ICL {
   do(commandLine: string): Promise<number>;
 }
 
-declare interface ICLF {
+declare interface ICLE {
   /**
    * **wd** means set the process working directory
    * @param wd path to working directory

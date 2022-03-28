@@ -5,7 +5,7 @@ process.env.HELLO = 'hello';
 process.env.WORLD = 'world';
 
 module.exports.log = ff.stay.do(async () => {
-    await jj.clf.handler((c, t, d) => {
+    await jj.cle.handler((c, t, d) => {
         if (t === 0 && d === '\r') return false;
     }).do`docker logs -f --tail 5000 redis`;
 });
