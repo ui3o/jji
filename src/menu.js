@@ -20,7 +20,7 @@ const menu = {
     loadingHandler: undefined,
     blinkHandler: undefined,
     // const variables
-    maxVisibleCount: 6,
+    maxVisibleCount: parseInt(process.stdout.rows * 0.5),
     prefix: (index) => menu.visible.poi === index ? ` ${prompt.cursor.sel}  ` : `    `,
     separator: ' - ',
     title: 'Please select:',
@@ -76,7 +76,7 @@ const _moveSelection = down => {
     }
     // set new cursor position
     if (down)
-        menu.visible.poi = menu.visible.poi === menu.visible.menu.length - 1 ? 0 : menu.visible.poi + 1;
+        menu.visible.poi = menu.visible.poi >= menu.visible.menu.length - 1 ? 0 : menu.visible.poi + 1;
     else
         menu.visible.poi = menu.visible.poi === 0 ? menu.visible.menu.length - 1 : menu.visible.poi - 1;
     _menuPrint();
@@ -426,7 +426,14 @@ const _inputReadHandler = (key) => {
 const _windowResizeHandler = () => {
     if (config.mute) return;
     if (menu.loadingHandler !== -1) {
-        _menuPrint();
+        const maxVisibleCount = parseInt(process.stdout.rows * 0.5);
+        if (maxVisibleCount !== menu.maxVisibleCount) {
+            menu.maxVisibleCount = maxVisibleCount;
+            menu.visible.poi = menu.filtered.poi = 0;
+            _setNewFilteredMenu({ start: menu.filtered.poi, end: menu.maxVisibleCount, update: true });
+        } else {
+            _menuPrint();
+        }
     }
 }
 
