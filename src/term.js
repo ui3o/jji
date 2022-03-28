@@ -1,3 +1,4 @@
+const os = require('os');
 // terminal definition
 const t = {
     sc: { lines: [], justifyToRight: 0 },
@@ -9,8 +10,8 @@ const t = {
     left: function (lines) { t.print(`\x1b[${lines}D`); return t; },
     previousLine: function (lines) { t.print(`\x1b[${lines}F`); return t; },
     eraseDisplayBelow: function () { t.print(`\x1b[0J`); return t; },
-    cursorHide: function () { t.print(`\x1b[?25l`); return t; },
-    // cursorHide: function () { return t; },
+    // cursorHide: function () { t.print(`\x1b[?25l`); return t; },
+    cursorHide: function () { return t; },
     cursorShow: function () { t.print(`\x1b[?25h`); return t; },
     requestCursorLocation: function () {
         return new Promise((res) => {
@@ -37,15 +38,15 @@ const t = {
             });
             if (lines === 0) t.left(t.stdout.columns);
             else t.previousLine(lines);
-            t.print(t.mc.clearLineCursorRight);
         }
         if (t.message) {
             console.log();
             t.stdout.write(t.message);
+            t.stdout.write(os.EOL);
             t.stdout.write(t.mc.resetAll);
             t.message = '';
-            console.log();
         }
+        if (t.sc.lines) t.print(t.mc.clearLineCursorRight);
         t.sc.lines = [];
         t.chars = [];
         // insert header
