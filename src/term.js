@@ -1,7 +1,7 @@
 const os = require('os');
 // terminal definition
 const t = {
-    sc: { lines: [], justifyToRight: 0 },
+    sc: { lines: [], justifyToRight: 0, outCharCount: 0 },
     message: '',
     chars: [],
     stdout: process.stdout,
@@ -57,6 +57,7 @@ const t = {
         if (t.sc.lines) t.print(t.mc.clearLineCursorRight);
         t.sc.lines = [];
         t.chars = [];
+        t.sc.outCharCount = 0;
         // insert header
         console.log();
         t.sc.lines.push(0);
@@ -66,6 +67,8 @@ const t = {
     flush: async function (menuItem = false) {
         const col = t.stdout.columns - 1;
         if (t.chars.length > col) {
+            const outCharsCount = t.chars.length - col;
+            if (t.sc.outCharCount < outCharsCount) t.sc.outCharCount = outCharsCount;
             const contChar = '…';
             if (t.sc.justifyToRight && menuItem) {
                 const head = t.chars.slice(0, 7);

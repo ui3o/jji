@@ -33,7 +33,7 @@ const prompt = {
     inputString: [],
     promptPrefix: () => { },
     // const variables
-    _: () => ` ${menu.full.menu.length}|${menu.filtered.menu.length}|${menu.filtered.menu.length ? menu.filtered.poi + 1 : menu.filtered.poi}  « 1 »`,
+    _: () => ` ${menu.full.menu.length}|${menu.filtered.menu.length}|${menu.filtered.menu.length ? menu.filtered.poi + 1 : menu.filtered.poi}  ${outInfo()}`,
     cursor: { sel: os.platform() === 'win32' ? '>' : '➜', in: " > ", promptChar: '_' }
 };
 
@@ -44,6 +44,11 @@ const config = {
     disableProcessExitOnAbort: false,
     mute: false,
 };
+
+const outInfo = () => {
+    if (!Term.sc.outCharCount) return '';
+    return `${Term.sc.justifyToRight ? '«' : ''} ${Term.sc.outCharCount} ${!Term.sc.justifyToRight ? '»' : ''}`
+}
 
 const _setNewFilteredMenu = ({ start, end, cursorToEnd, update } = {}) => {
     if (start !== undefined) menu.filtered.slice.start = start;
@@ -343,6 +348,20 @@ const _keyHandler = (key) => {
         case keymap.UP:
             if (menu.loadingHandler || menu.readInputMode.enabled || config.mute) break;
             _moveSelection(false)
+            break;
+        case keymap.LEFT:
+            if (menu.loadingHandler || menu.readInputMode.enabled || config.mute) break;
+            if (Term.sc.justifyToRight) {
+                Term.sc.justifyToRight = false;
+                _menuPrint();
+            }
+            break;
+        case keymap.RIGHT:
+            if (menu.loadingHandler || menu.readInputMode.enabled || config.mute) break;
+            if (!Term.sc.justifyToRight) {
+                Term.sc.justifyToRight = true;
+                _menuPrint();
+            }
             break;
         case keymap.CTRL_L:
             if (!global.jj.cmd || (global.jj.cmdOpts.cle && !global.jj.cmdOpts.handler(global.jj.cmd, 0, key)))
