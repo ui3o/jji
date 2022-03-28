@@ -50,9 +50,10 @@ const t = {
                 const l = cs / t.stdout.columns;
                 if (l > 1) lines += Math.floor(l);
             });
-            if (lines === 0) t.left(t.stdout.columns);
+            if (lines <= 1) t.left(t.stdout.columns);
             else t.previousLine(lines);
         }
+        t.printMessage();
         if (t.sc.lines) t.print(t.mc.clearLineCursorRight);
         t.sc.lines = [];
         t.chars = [];
