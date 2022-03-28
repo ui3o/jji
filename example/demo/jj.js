@@ -8,21 +8,29 @@ module.exports.log = ff.stay.do(async () => {
     await jj.clf.handler((c, t, d) => {
         if (t === 0 && d === '\r') return false;
     }).do`docker logs -f --tail 5000 redis`;
-}),
+});
 
-    module.exports.prom = ff.lazy.printSelect.do(async (res) => {
-        await jj.cl.do`sleep 1`
-        const menu = {
-            a: ['a menu', ff.useIn.stay.do(async () => {
-                const rl = await jj.rl('Type name: ');
-                process.stdout.write(`Hello ${rl}!\n`);
-            })]
-        }
+module.exports.messenger = ff.menu.do(async (res) => {
+    jj.message(`Update ${jj.term.fc.red}need!`);
+    setTimeout(() => {
+        jj.message(`Update ${jj.term.fc.red}need again!`);
+    }, 1500);
+    res({ submenu: undefined })
+});
 
-        setTimeout(() => {
-            res(menu)
-        }, 1000);
-    });
+module.exports.prom = ff.lazy.printSelect.do(async (res) => {
+    await jj.cl.do`sleep 1`
+    const menu = {
+        a: ['a menu', ff.useIn.stay.do(async () => {
+            const rl = await jj.rl('Type name: ');
+            process.stdout.write(`Hello ${rl}!\n`);
+        })]
+    }
+
+    setTimeout(() => {
+        res(menu)
+    }, 1000);
+});
 module.exports.lazy_in_lazy = ff.lazy.printSelect.do(async (res) => {
     await jj.cl.do`sleep 1`
     const menu = {

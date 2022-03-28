@@ -109,6 +109,12 @@ declare interface IJJ {
    */
   err(msg: string): any;
   /**
+   * **message** will print given string to top of the menu.
+   *
+   * @param msg - message string
+   */
+  message(msg: string): any;
+  /**
    * **mkdir** will create a folder recursively.
    *
    * @param path - string
@@ -239,7 +245,7 @@ declare interface ICLF {
   wd(wd: string): ICL;
   /**
    * **handler** means control the spawn command in|out|err
-   * 
+   *
    * Only *CTRL+C*, *CTRL+L* and `ENTER` handled by default. But is the handler
    * returns `true` that means ignore the keys from normal workflow. When spawn
    * starts it is going to call the handler without data for command object handle.

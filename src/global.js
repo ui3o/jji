@@ -61,6 +61,10 @@ global.jj = {
             rm(path, { recursive: true, force: true }, (code) => res(code));
         });
     },
+    message: (msg = '') => {
+        global.jj.messageHandler(msg);
+    },
+    messageHandler: () => { },
     term: Term,
     cmd: Term,
     cmdOpts: {},

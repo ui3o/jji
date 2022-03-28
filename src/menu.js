@@ -31,7 +31,7 @@ const menu = {
 
 const prompt = {
     inputString: [],
-    promptPrefix: undefined,
+    promptPrefix: () => { },
     // const variables
     _: () => ` ${menu.full.menu.length}|${menu.filtered.menu.length}|${menu.filtered.menu.length ? menu.filtered.poi + 1 : menu.filtered.poi}  « 1 »`,
     cursor: { sel: os.platform() === 'win32' ? '>' : '➜', in: " > ", promptChar: '_' }
@@ -426,7 +426,6 @@ const _inputReadHandler = (key) => {
 const _windowResizeHandler = () => {
     if (config.mute) return;
     if (menu.loadingHandler !== -1) {
-        Term.cursorHide();
         _menuPrint();
     }
 }
@@ -454,9 +453,14 @@ const open = async (eventListener = (event, key) => { }) => {
     process.stdin.on('data', _inputReadHandler);
     process.stdin.on('data', _keyHandler);
     process.stdout.on('resize', _windowResizeHandler);
+    global.jj.messageHandler = (msg) => {
+        Term.message += msg;
+        _menuPrint();
+    };
 }
 
 const close = () => {
+    global.jj.messageHandler = () => { };
     Term.cursorShow();
     process.stdin.removeListener('data', _inputReadHandler);
     process.stdin.removeListener('data', _keyHandler);

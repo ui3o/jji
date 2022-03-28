@@ -1,6 +1,7 @@
 // terminal definition
 const t = {
     sc: { lines: [], justifyToRight: 0 },
+    message: '',
     chars: [],
     stdout: process.stdout,
     clear: function () { t.print(`\x1b[${t.stdout.rows}F\x1b[0J`); return t; },
@@ -37,6 +38,13 @@ const t = {
             if (lines === 0) t.left(t.stdout.columns);
             else t.previousLine(lines);
             t.print(t.mc.clearLineCursorRight);
+        }
+        if (t.message) {
+            console.log();
+            t.stdout.write(t.message);
+            t.stdout.write(t.mc.resetAll);
+            t.message = '';
+            console.log();
         }
         t.sc.lines = [];
         t.chars = [];
