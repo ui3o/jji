@@ -10,8 +10,8 @@ const t = {
     left: function (lines) { t.print(`\x1b[${lines}D`); return t; },
     previousLine: function (lines) { t.print(`\x1b[${lines}F`); return t; },
     eraseDisplayBelow: function () { t.print(`\x1b[0J`); return t; },
-    // cursorHide: function () { t.print(`\x1b[?25l`); return t; },
-    cursorHide: function () { return t; },
+    cursorHide: function () { t.print(`\x1b[?25l`); return t; },
+    // cursorHide: function () { return t; },
     cursorShow: function () { t.print(`\x1b[?25h`); return t; },
     requestCursorLocation: function () {
         return new Promise((res) => {
