@@ -103,8 +103,9 @@ declare interface IJJ {
    * **rl** means read a line from stdin: `const rl = await jj.rl('Type your name')`.
    *
    * @param question - string
+   * @param disableMenuClearBack - boolean
    */
-  rl(question: string): Promise<string>;
+  rl(question: string, disableMenuClearBack: boolean): Promise<string>;
 
   /**
    * **err** will print an error msg if exist and exit the program.

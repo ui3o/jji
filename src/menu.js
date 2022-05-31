@@ -458,13 +458,13 @@ const _windowResizeHandler = () => {
 let _eventListener = undefined;
 let _readLineListener = undefined;
 
-const readLine = async (eventListener = (event, key) => { }, question = '') => {
+const readLine = async (eventListener = (event, key) => { }, question = '', disableMenuClearBack = false) => {
     _readLineListener = eventListener;
-    Term.newScreen();
+    if (!disableMenuClearBack) Term.newScreen();
     menu.readInputMode.line = [];
     menu.readInputMode.question = question;
     menu.readInputMode.enabled = true;
-    _refreshInputReader();
+    if (!disableMenuClearBack) _refreshInputReader();
 }
 
 const open = async (eventListener = (event, key) => { }) => {

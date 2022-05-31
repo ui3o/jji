@@ -39,11 +39,11 @@ global.ff = {
 
 global.jj = {
     __prop__: {},
-    rl: (question = '') => {
+    rl: (question = '', disableMenuClearBack = false) => {
         return new Promise(res => {
             menu.readLine((_event, line) => {
                 res(line);
-            }, question);
+            }, question, disableMenuClearBack);
         })
     },
     err: (msg = "") => {
