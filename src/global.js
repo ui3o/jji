@@ -10,6 +10,7 @@ global.ff = {
     get lazy() { this.__prop__.lazy_menu = true; return this; },
     get menu() { this.__prop__.menu = true; return this; },
     get longLoading() { this.__prop__.showLoadingAfter = 180000; return this; },
+    get noLoading() { this.__prop__.showLoadingAfter = -1; return this; },
     get noHeader() { this.__prop__.noPrintOnSelect = true; return this; },
     get useIn() { this.__prop__.needInput = true; return this; },
     showLoadingAfter(ms = 100) {

@@ -81,9 +81,11 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
 
     function showLoading(timeout = 100) {
         menu.showLoading(true);
-        showLoadingTimer = setTimeout(() => {
-            menu.showLoading();
-        }, timeout);
+        if (timeout > 0) {
+            showLoadingTimer = setTimeout(() => {
+                menu.showLoading();
+            }, timeout);
+        }
     }
 
     menu.configure.disableProcessExitOnSelect().disableSelectedPrint().disableProcessExitOnExit();

@@ -69,6 +69,10 @@ declare interface IFF {
    */
   longLoading: IFF;
   /**
+   * **noLoading** means lazy menu will **never** print the loading.
+   */
+  noLoading: IFF;
+  /**
    * **footer** means print message after menu execute [example/real/jj.js#L26](example/real/jj.js#L26).
    * you can use `jj.term.fc.* | jj.term.mc.* | jj.term.bc.*` [src/term.js#L237](src/term.js#L237)
    * @param fn return **string**
@@ -166,7 +170,7 @@ declare interface IJJ {
      */
     mc: {
       resetAll: "\x1b[0m\x1b[39m\x1b[49m";
-      clearLineCursorRight: `\x1b[K`,
+      clearLineCursorRight: `\x1b[K`;
       clearLine: `\x1b[2K`;
       styleReset: "\x1b[0m";
       bold: "\x1b[1m";
