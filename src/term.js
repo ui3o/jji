@@ -40,6 +40,18 @@ const t = {
      * print format
      */
     print: function (str = "") { t.stdout.write(str); return t; },
+    
+    /**
+    * reset terminal buffer
+    */
+    reset: function () {
+        t.sc.lines = [];
+        t.chars = [];
+        t.sc.outCharCount = 0;
+        // insert header
+        t.sc.lines.push(0);
+        return t;
+    },
     /**
      * start new sc build
      */
@@ -55,12 +67,9 @@ const t = {
         }
         t.printMessage();
         if (t.sc.lines) t.print(t.mc.clearLineCursorRight);
-        t.sc.lines = [];
-        t.chars = [];
-        t.sc.outCharCount = 0;
+        t.reset();
         // insert header
         console.log();
-        t.sc.lines.push(0);
         return t;
     },
 

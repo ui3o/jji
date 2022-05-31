@@ -460,11 +460,12 @@ let _readLineListener = undefined;
 
 const readLine = async (eventListener = (event, key) => { }, question = '', disableMenuClearBack = false) => {
     _readLineListener = eventListener;
+    if (disableMenuClearBack) Term.reset();
     if (!disableMenuClearBack) Term.newScreen();
     menu.readInputMode.line = [];
     menu.readInputMode.question = question;
     menu.readInputMode.enabled = true;
-    if (!disableMenuClearBack) _refreshInputReader();
+    _refreshInputReader();
 }
 
 const open = async (eventListener = (event, key) => { }) => {
