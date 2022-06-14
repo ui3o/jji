@@ -55,6 +55,8 @@ global.jj = {
             if (!existsSync(path)) {
                 mkdir(path, { recursive: true }, (code) => res(code));
             }
+            else
+                res();
         });
     },
     rm: (path = '') => {

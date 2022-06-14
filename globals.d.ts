@@ -179,6 +179,8 @@ declare interface IJJ {
       underline: "\x1b[4m";
       inverse: "\x1b[7m";
       strike: "\x1b[9m";
+      cursorHide: `\x1b[?25l`;
+      cursorShow: `\x1b[?25h`;
     };
     /**
      * **foreground** colors
