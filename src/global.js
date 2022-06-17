@@ -185,6 +185,3 @@ function spawnCommand(...args) {
         });
     }
 }
-
-//is menu item allowed to view
-global.JJS_IsMA = (menuRefProp) => { return true };
