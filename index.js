@@ -119,6 +119,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                     menuPath.push(_name);
                 }
                 const _currentMenuRef = getPath(transformedMenu, menuPath.join(MENU_SEPARATOR));
+                JJS_IsMA(_currentMenuRef.__prop__)
                 if (_currentMenuRef.__prop__.cmd === null) {
                     menuPath.pop();
                 } else if (hasSubMenu()) {
@@ -351,7 +352,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                 transformedObj[key].__prop__.cmd = src[key];
                 _cmdList = [..._cmdList, transformedObj[key].__prop__.cmd];
             } else if (typeof src[key] === 'function') {
-                exitError(`Wrong format on ".${_path}"! use ff. simple function is not allowed!`);
+                exitError(`Wrong format on ".${_path}"! Use ff! Simple function is not allowed!`);
                 exit(2);
             } else if (typeof src[key] === 'object' && !delayedTransform(src[key], transformedObj[key], _cmdList)) {
                 if (typeof src[key] === 'object' && src[key] !== null && src[key].__prop__ && src[key].__prop__.__ff_instance__) {

@@ -3,7 +3,7 @@ const { existsSync, mkdir, rm } = require('fs');
 const { spawn } = require('child_process');
 const menu = require('./menu');
 
-const exitError = msg => { console.log(`\n[ERROR] ${msg}`) };
+const exitError = msg => { console.log(`\n[ERROR] ${msg}${Term.mc.cursorShow}`) };
 
 global.ff = {
     __prop__: { __ff_instance__: true },
@@ -185,3 +185,6 @@ function spawnCommand(...args) {
         });
     }
 }
+
+//is menu item allowed to view
+global.JJS_IsMA = (menuRefProp) => { return true };
