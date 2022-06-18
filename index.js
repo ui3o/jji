@@ -1,6 +1,7 @@
 const { existsSync } = require('fs');
 const { keymap } = require("./src/keymap");
 const path = require('path');
+global.JJ = {};
 
 require('./src/global');
 const menu = require('./src/menu');
@@ -12,7 +13,7 @@ const exitError = msg => { console.log(`\n[ERROR] ${msg}`) };
 module.exports.jji = async (argv = {}, rawMenu = {}) => {
 
     const MENU_SEPARATOR = ' > ';
-    global.JJS_MENU_SEPARATOR = MENU_SEPARATOR;
+    global.JJ.MENU_SEPARATOR = MENU_SEPARATOR;
     const error = msg => { if (argv.x) console.error(`[ERROR] ${msg}`) };
     if (argv.x) console.log = console.error;
 
@@ -120,7 +121,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                     menuPath.push(_name);
                 }
                 const _currentMenuRef = getPath(transformedMenu, menuPath.join(MENU_SEPARATOR));
-                global.JJSCurrentMenu = _currentMenuRef.__prop__;
+                global.JJ.currentMenu = _currentMenuRef.__prop__;
                 if (_currentMenuRef.__prop__.cmd === null) {
                     menuPath.pop();
                 } else if (hasSubMenu()) {

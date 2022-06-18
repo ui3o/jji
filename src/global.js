@@ -2,6 +2,7 @@ const { Term } = require("./term");
 const { existsSync, mkdir, rm } = require('fs');
 const { spawn } = require('child_process');
 const menu = require('./menu');
+global.JJ.jji = require('../index');
 
 const exitError = msg => { console.log(`\n[ERROR] ${msg}${Term.mc.cursorShow}`) };
 
