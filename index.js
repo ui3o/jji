@@ -12,6 +12,7 @@ const exitError = msg => { console.log(`\n[ERROR] ${msg}`) };
 module.exports.jji = async (argv = {}, rawMenu = {}) => {
 
     const MENU_SEPARATOR = ' > ';
+    global.JJS_MENU_SEPARATOR = MENU_SEPARATOR;
     const error = msg => { if (argv.x) console.error(`[ERROR] ${msg}`) };
     if (argv.x) console.log = console.error;
 
