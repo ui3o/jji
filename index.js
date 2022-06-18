@@ -119,7 +119,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                     menuPath.push(_name);
                 }
                 const _currentMenuRef = getPath(transformedMenu, menuPath.join(MENU_SEPARATOR));
-                if (global.JJS_IsMA) global.JJS_IsMA(_currentMenuRef.__prop__)
+                global.JJSCurrentMenu = _currentMenuRef.__prop__;
                 if (_currentMenuRef.__prop__.cmd === null) {
                     menuPath.pop();
                 } else if (hasSubMenu()) {

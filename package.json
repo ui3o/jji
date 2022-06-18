@@ -1,6 +1,6 @@
 {
   "name": "jji",
-  "version": "4.0.9",
+  "version": "4.0.10",
   "description": "Just a simple Jumper clI tool. This tool aims to make an easy menu system to organize your cli workflow.",
   "scripts": {
     "test": "echo test"
