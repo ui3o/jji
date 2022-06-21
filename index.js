@@ -155,6 +155,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                     else await jj.cl.do(menuCmd.join(' '));
                     if (typeof menuCmd[menuCmd.length - 1] === 'function' && _currentMenuRef.__prop__ && _currentMenuRef.__prop__.footer)
                         Term.print(_currentMenuRef.__prop__.footer());
+                    if (_currentMenuRef.__prop__.resetMenuPos) menu.resetMenuPos();
                     menu.unmute();
                     exit(0);
                 }

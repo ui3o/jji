@@ -46,7 +46,6 @@ declare interface IFF {
   resetMenu: IFF;
   /**
    * **printSelect** means if you want to print the selection header on menu enter.
-   * works only with lazy menu.
    *
    * **default**: *no header print*
    */
