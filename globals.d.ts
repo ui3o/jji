@@ -131,6 +131,11 @@ declare interface IJJ {
    */
   rm(path: string): Promise<any>;
   /**
+   * **resetMenu:** reset menu means jji will not clear back the screen with
+   * the menu size.
+   */
+  resetMenu();
+  /**
    * **command line:** execute external **script**, inside spawn.
    * **cl** means start spawn with inherited stdio.
    *

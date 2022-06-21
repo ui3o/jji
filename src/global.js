@@ -68,6 +68,9 @@ global.jj = {
     message: (msg = '') => {
         global.jj.messageHandler(msg);
     },
+    resetMenu() {
+        menu.resetMenuPos();
+    },
     messageHandler: () => { },
     term: Term,
     cmd: Term,
