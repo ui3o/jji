@@ -21,7 +21,7 @@ module.exports.messenger = ff.menu.do(async (res) => {
 module.exports.prom = ff.lazy.printSelect.do(async (res) => {
     await jj.cl.do`sleep 1`
     const menu = {
-        a: ['a menu', ff.useIn.stay.do(async () => {
+        a: ['a menu', ff.useIn.resetMenu.stay.do(async () => {
             const rl = await jj.rl('Type name: ');
             process.stdout.write(`Hello ${rl}!\n`);
         })]

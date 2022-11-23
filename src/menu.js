@@ -128,7 +128,7 @@ const setMenu = (_menu = [], promptPrefix, title = '?') => {
 }
 
 /**
- * update existing menu status, specially loading remove
+ * update existing menu status, specially loading remove, it does not move the selected cursor to top 
  * 
  * Example:
  *  updateMenu ([
@@ -403,6 +403,13 @@ const _refreshInputReader = async (useEOL = false) => {
     Term.eraseDisplayBelow();
 }
 
+const setReadlineString = (input) => {
+    menu.readInputMode.enabled = false;
+    _refreshInputReader(true);
+    _readLineListener(event.LINE, input);
+}
+
+
 const _inputReadHandler = (key) => {
     if (global.jj.cmd && global.jj.cmdOpts.cle) {
         if (!global.jj.cmdOpts.handler(global.jj.cmd, 0, key)) {
@@ -415,14 +422,10 @@ const _inputReadHandler = (key) => {
         const keyEvent = detectKey(key);
         switch (keyEvent) {
             case keymap.ENTER:
-                menu.readInputMode.enabled = false;
-                _refreshInputReader(true);
-                _readLineListener(event.LINE, menu.readInputMode.line.join(''));
+                setReadlineString(menu.readInputMode.line.join(''));
                 break;
             case keymap.ESCAPE:
-                menu.readInputMode.enabled = false;
-                _refreshInputReader(true);
-                _readLineListener(event.LINE, undefined);
+                setReadlineString(undefined);
                 break;
             case keymap.BACKSPACE:
                 menu.readInputMode.line.pop();
@@ -466,6 +469,7 @@ const readLine = async (eventListener = (event, key) => { }, question = '', disa
     menu.readInputMode.question = question;
     menu.readInputMode.enabled = true;
     _refreshInputReader();
+    _eventListener(event.INPUT_READ_START, eventListener);
 }
 
 const open = async (eventListener = (event, key) => { }) => {
@@ -536,11 +540,15 @@ const event = {
     KEY: 'KEY', // one keymap event followed
     INPUT_STR: 'INPUT_STR', // one input string followed
     INPUT_DROP: 'INPUT_DROP', // one input string reference followed, possible to modify
+    INPUT_READ_START: 'INPUT_READ_START', // no param
     SELECT: 'SELECT', // one poi number followed 
     ABORTED: 'ABORTED', // no param - on CTRL-C  
     EXITED: 'EXITED', // no param - on ESCAPE
 };
 
 module.exports = {
-    open, close, showLoading, setMenu, updateMenu, event, configure, jumpHome, mute, unmute, readLine, resetMenuPos, setInputString
-}
+    open, close, showLoading,
+    setMenu, updateMenu, event, configure,
+    jumpHome, mute, unmute, readLine, resetMenuPos,
+    setInputString, setReadlineString
+};

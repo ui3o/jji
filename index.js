@@ -18,6 +18,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
     if (argv.x) console.log = console.error;
 
     let jjFiles = argv._ && argv._.length ? argv._ : [];
+    const autoTypeParams = argv['--'] && argv['--'].length ? argv['--'] : [];
     let transformedMenu = {};
     let flyMenu = {};
     let showLoadingTimer = 0;
@@ -78,6 +79,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
         else {
             menuInputString = '';
             menu.setMenu(currentMenuList, mp);
+            autoParamSetter();
         }
     }
 
@@ -90,8 +92,24 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
         }
     }
 
+    function autoParamSetter() {
+        const autoParam = autoTypeParams.shift();
+        if (autoParam) {
+            const menuPos = currentMenuList.findIndex(p => p[0] === autoParam);
+            if (menuPos > -1) {
+                eventHandler(menu.event.SELECT, menuPos);
+            } else {
+                // something wrong with the menu list
+                menu.jumpHome(); Term.eraseDisplayBelow();
+                menu.close();
+                exitError("Menu path definition was wrong!")
+                process.exit(1);
+            }
+        }
+    }
+
     menu.configure.disableProcessExitOnSelect().disableSelectedPrint().disableProcessExitOnExit();
-    await menu.open(async (event, arg) => {
+    async function eventHandler(event, arg) {
         switch (event) {
             case menu.event.SELECT:
                 const pos = arg;
@@ -213,10 +231,15 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                         break;
                 }
                 break;
+            case menu.event.INPUT_READ_START:
+                const autoParam = autoTypeParams.shift();
+                if (autoParam) menu.setReadlineString(autoParam);
+                break;
             default:
                 break;
         }
-    });
+    };
+    await menu.open(eventHandler);
     transform(rawMenu, transformedMenu);
     menuWalker();
 

@@ -3,7 +3,7 @@
 "use strict"
 const { printUsage } = require("../src/usage");
 const packageJson = require("../package.json");
-const argv = require('minimist')(process.argv.slice(2));
+const argv = require('minimist')(process.argv.slice(2), { "--": true });
 
 if (argv.h || argv.help) {
     printUsage({
