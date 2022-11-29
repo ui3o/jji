@@ -19,6 +19,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
 
     let jjFiles = argv._ && argv._.length ? argv._ : [];
     const autoTypeParams = argv['--'] && argv['--'].length ? argv['--'] : [];
+    global.JJ.startedWithAutoTypeParams = argv['--'] && argv['--'].length ? true : false;
     let transformedMenu = {};
     let flyMenu = {};
     let showLoadingTimer = 0;
@@ -93,6 +94,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
     }
 
     function autoParamSetter() {
+        global.JJ.autoTypeParams = [...autoTypeParams];
         const autoParam = autoTypeParams.shift();
         if (autoParam) {
             const menuPos = currentMenuList.findIndex(p => p[0] === autoParam);

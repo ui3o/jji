@@ -51,6 +51,12 @@ global.jj = {
         if (msg.length) exitError(msg);
         process.exit(2);
     },
+    exitWithPrompt: (code = 0, msg = "") => {
+        menu.jumpHome(); Term.eraseDisplayBelow();
+        menu.close();
+        if (msg.length)  console.log(`\n${msg}${Term.mc.cursorShow}`);
+        process.exit(code);
+    },
     mkdir: (path = '') => {
         return new Promise(res => {
             if (!existsSync(path)) {

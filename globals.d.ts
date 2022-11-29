@@ -113,6 +113,13 @@ declare interface IJJ {
    */
   err(msg: string): any;
   /**
+   * **exitWithPrompt** will print an exit msg and exit normally without print the menu.
+   * 
+   * @param exitCode 
+   * @param exitMessage 
+   */
+  exitWithPrompt(exitCode:number, exitMessage:string);
+  /**
    * **message** will print given string to top of the menu.
    *
    * @param msg - message string
