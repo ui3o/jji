@@ -14,17 +14,23 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
 
     const MENU_SEPARATOR = ' > ';
     global.JJ.MENU_SEPARATOR = MENU_SEPARATOR;
-    const error = msg => { if (argv.x) console.error(`[ERROR] ${msg}`) };
     if (argv.x) console.log = console.error;
 
-    let jjFiles = argv._ && argv._.length ? argv._ : [];
-    const autoTypeParams = argv['--'] && argv['--'].length ? argv['--'] : [];
-    global.JJ.startedWithAutoTypeParams = argv['--'] && argv['--'].length ? true : false;
+    let jjFiles = [];
+    const jjFile = argv.f ? argv.f : "";
+    const autoTypeParams = argv._ && argv._.length ? argv._ : [];
+    global.JJ.startedWithAutoTypeParams = argv._ && argv._.length ? true : false;
     let transformedMenu = {};
     let flyMenu = {};
     let showLoadingTimer = 0;
 
-    if (!jjFiles.length) {
+    if (jjFile.length) {
+        if (typeof jjFile === 'string' && existsSync(jjFile)) jjFiles.push(path.resolve(jjFile));
+        if (typeof jjFile === 'object' && Array.isArray(jjFile))
+            jjFile.forEach(f => { jjFiles.push(path.resolve(f)) })
+    }
+
+    if (!jjFiles.length && !jjFile.length) {
         const lookupPath = argv.d ? argv.d : process.cwd();
         const _jjFile = `${lookupPath}/jj.js`;
         if (existsSync(_jjFile)) jjFiles.push(path.resolve(_jjFile));
@@ -172,7 +178,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                     menu.mute(__needInput);
                     const menuCmd = _currentMenuRef.__prop__.cmdList;
                     if (typeof menuCmd[menuCmd.length - 1] === 'function') await menuCmd[menuCmd.length - 1]();
-                    else await jj.cl.do(menuCmd.join(' '));
+                    else await jj.cl.do(...menuCmd.map(m => m.cmd).flat(1));
                     if (typeof menuCmd[menuCmd.length - 1] === 'function' && _currentMenuRef.__prop__ && _currentMenuRef.__prop__.footer)
                         Term.print(_currentMenuRef.__prop__.footer());
                     if (_currentMenuRef.__prop__.resetMenuPos) menu.resetMenuPos();
@@ -304,13 +310,13 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
     }
 
     function typeTransform(entry, path) {
-        if (typeof entry === 'string') {
+        if (typeof entry === 'object' && entry.__prop__ && entry.__prop__.__ss_instance__) {
             return entry;
         }
         if (typeof entry === 'object' && entry.__prop__ && entry.__prop__.__ff_instance__) {
             return entry.__prop__.fn;
         } else {
-            exitError(`Wrong format on ".${path}"! use ff or string in declaration!`);
+            exitError(`Wrong format on ".${path}"! use ff or ss in declaration!`);
             exit(2);
         }
         return undefined;
@@ -345,11 +351,12 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                 const _entry = src[key];
                 if (_entry.length === 1) {
                     exitError(`Wrong format on "${_path}"! Use equals and not use one array with one element!`);
+                    console.trace()
                     exit(2);
                 } else if (_entry.length === 2) {
                     transformedObj[key].__prop__.desc = _entry[0];
                     if (!delayedTransform(_entry[1], transformedObj[key], _cmdList)) {
-                        if (typeof _entry[1] === 'object' && _entry[1] !== null && !_entry[1].__prop__) { transformedObj[key].__prop__.group = true; transform(_entry[1], dest, _path, _index, _cmdList); }
+                        if (!isSimpleScript(_entry[1]) && typeof _entry[1] === 'object' && _entry[1] !== null && !_entry[1].__prop__) { transformedObj[key].__prop__.group = true; transform(_entry[1], dest, _path, _index, _cmdList); }
                         else {
                             if (_entry[1] === null) transformedObj[key].__prop__.cmd = null;
                             else {
@@ -364,7 +371,7 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                     transformedObj[key].__prop__.cmd = typeTransform(_entry[1], _path);
                     if (_entry[1].__prop__) transformedObj[key].__prop__ = { ...transformedObj[key].__prop__, ..._entry[1].__prop__ };
                     _cmdList = [..._cmdList, transformedObj[key].__prop__.cmd];
-                    if (!delayedTransform(_entry[2], transformedObj[key], _cmdList)) { transformedObj[key].__prop__.group = true; transform(_entry[2], dest, _path, _index, _cmdList); }
+                    if (!delayedTransform(_entry[2], transformedObj[key], _cmdList) && !isSimpleScript(_entry[2])) { transformedObj[key].__prop__.group = true; transform(_entry[2], dest, _path, _index, _cmdList); }
                     else {
                         exitError(`Wrong format on ".${_path}"! The third (3) item has to be an object!`);
                         exit(2);
@@ -374,16 +381,21 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
                     exit(2);
                 }
             } else if (typeof src[key] === 'object' && src[key] === null) {
+                // read only menu item
                 transformedObj[key].__prop__.cmd = null;
                 _cmdList = [..._cmdList, transformedObj[key].__prop__.cmd];
             } else if (typeof src[key] === 'string') {
+                exitError(`Wrong format on ".${_path}"! Use ss! String is not allowed!`);
+                exit(2);
+            } else if (typeof entry === 'object' && entry.__prop__ && entry.__prop__.__ss_instance__) {
+                // only command without description
                 transformedObj[key].__prop__.cmd = src[key];
                 _cmdList = [..._cmdList, transformedObj[key].__prop__.cmd];
             } else if (typeof src[key] === 'function') {
                 exitError(`Wrong format on ".${_path}"! Use ff! Simple function is not allowed!`);
                 exit(2);
             } else if (typeof src[key] === 'object' && !delayedTransform(src[key], transformedObj[key], _cmdList)) {
-                if (typeof src[key] === 'object' && src[key] !== null && src[key].__prop__ && src[key].__prop__.__ff_instance__) {
+                if (isSimpleScript(src[key]) || (typeof src[key] === 'object' && src[key] !== null && src[key].__prop__ && src[key].__prop__.__ff_instance__)) {
                     transformedObj[key].__prop__ = { ...transformedObj[key].__prop__, ...src[key].__prop__ };
                     transformedObj[key].__prop__.cmd = typeTransform(src[key], _path);
                     _cmdList = [..._cmdList, transformedObj[key].__prop__.cmd];
@@ -395,12 +407,17 @@ module.exports.jji = async (argv = {}, rawMenu = {}) => {
             transformedObj[key].__prop__.cmdList = [..._cmdList];
             flyMenu[_fullPath] = { ...transformedObj[key] };
             // check cmd equals
-            const allCmd = _cmdList.map(c => { return typeof c !== 'string' || c !== undefined });
+            const allCmd = _cmdList.flat(Infinity).map(c => { return typeof c !== 'string' || c !== undefined });
             if (!allCmd.every(c => c === false) && !allCmd.every(c => c === true) && _cmdList[_cmdList.length - 1] !== null) {
                 exitError(`Wrong format on ".${_path}"! On the path not all cmd is same type! Use just string or just function!`);
                 exit(2);
             }
         });
+    }
+
+    function isSimpleScript(entry) {
+        if (typeof entry === 'object' && entry && entry.__prop__ && entry.__prop__.__ss_instance__) return true;
+        return false;
     }
 
     function delayedTransform(src, transformedObj, _cmdList = []) {

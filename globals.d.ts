@@ -1,4 +1,19 @@
 /**
+ * Define a **s**imple **sh**ell script.
+ * **Only** possible to use on **item** or **group command definitions**.
+ *
+ * **String** items are **splitted** by **space**. If **no split** need add items inside an **array**.
+ * 
+ * **First item** need to be the **program** name.
+ *
+ * ### Examples:
+ *
+ * * ```module.exports.example1 = ss("bash -c", ["echo hello"])```
+ * * ```module.exports.example2 = ["example description", ss("bash -c", ["echo hello"])]```
+ * * ```module.exports.example3 = ["example description", ss("bash -c", ["echo hello", {done: null}])```
+ */
+declare function ss(...args: string | number | boolean | undefined | null);
+/**
  * Define a **f**eatured **f**unction inside the menu system.
  * Function definitions only allowed with this **ff** global variable.
  */
@@ -104,7 +119,7 @@ declare interface IJJ {
    * @param question - string
    * @param disableMenuClearBack - boolean
    */
-  rl(question: string, disableMenuClearBack: boolean): Promise<string>;
+  rl(question: string, { disableMenuClearBack: boolean, password: boolean }): Promise<string>;
 
   /**
    * **err** will print an error msg if exist and exit the program.
@@ -114,11 +129,11 @@ declare interface IJJ {
   err(msg: string): any;
   /**
    * **exitWithPrompt** will print an exit msg and exit normally without print the menu.
-   * 
-   * @param exitCode 
-   * @param exitMessage 
+   *
+   * @param exitCode
+   * @param exitMessage
    */
-  exitWithPrompt(exitCode:number, exitMessage:string);
+  exitWithPrompt(exitCode: number, exitMessage: string);
   /**
    * **message** will print given string to top of the menu.
    *
@@ -250,11 +265,18 @@ declare interface ICL {
   wd(wd: string): ICL;
   /**
    * **do** means spawn the command
+   * 
+   * **String** items are **splitted** by **space**. If **no split** need add items inside an **array**.
+   * 
+   * **First item** need to be the **program** name.
+   * examples:
+   * * ```const code = await jj.cl.do('ls', '-al')```
+   * * ```module.exports.example1 = ss("bash -c", ["echo hello"])```
    *
-   * @param commandLine string or string combined with array
+   * @param commandLine string list the first parameter is the program name
    * @returns command result code
    */
-  do(commandLine: string): Promise<number>;
+  do(...commandLineArgs: string | number | boolean | undefined | null): Promise<number>;
 }
 
 declare interface ICLE {
@@ -277,11 +299,19 @@ declare interface ICLE {
   handler(handler: (c: object, t: number, d: string) => boolean): ICL;
   /**
    * **do** means spawn the command
+   * 
+   * **String** items are **splitted** by **space**. If **no split** need add items inside an **array**.
+   * 
+   * **First item** need to be the **program** name.
+   * 
+   * examples:
+   * * ```const code = await jj.cle.do('ls', '-al')```
+   * * ```const code = await jj.cle.do("bash -c", ["echo hello"])```
    *
-   * @param commandLine string or string combined with array
+   * @param commandLine string list the first parameter is the program name
    * @returns command result code
    */
-  do(commandLine: string): Promise<number>;
+  do(...commandLineArgs: string | number | boolean | undefined | null): Promise<number>;
 }
 
 declare interface ICLI extends ICL {
@@ -319,13 +349,20 @@ declare interface ICLI extends ICL {
   printStd: ICLI;
   /**
    * **do** means spawn the command
+   * 
+   * **String** items are **splitted** by **space**. If **no split** need add items inside an **array**.
+   * 
+   * **First item** need to be the **program** name.
    *
    * examples:
-   * - `const {o, c} = await jj.cli.splitByLine.do(ls -al)`
-   * - `const {files: o, c} = await jj.cli.splitByLine.do(ls -al)`
+   * * `const {o, c} = await jj.cli.splitByLine.do('ls', '-al')`
+   * * `const {o: files, c: result} = await jj.cli.splitByLine.do('ls', '-al')`
+   * * `const {o, c} = await jj.cli.splitByLine.do("bash -c", ["echo hello"])`
    *
-   * @param commandLine string or string combined with array
+   * @param commandLine string list the first parameter is the program name
    * @returns command result c(code) and o(output)
    */
-  do(commandLine: string): Promise<{ o: string | Array<string> | Array<Array<string>>; c: number }>;
+  do(
+    ...commandLineArgs: string | number | boolean | undefined | null
+  ): Promise<{ o: string | Array<string> | Array<Array<string>>; c: number }>;
 }

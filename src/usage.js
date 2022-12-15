@@ -17,24 +17,19 @@ const _get = (prop = '') => {
 
 const _printTitles = (title, info = [], bold) => {
     if (info.length && _get(info[0].name)) {
-        Term.formatBold().printf(USAGE.header + title);
-        let longestDescLength = 0;
+        Term.print(Term.mc.bold + USAGE.header + title);
+
         info.forEach(i => {
-            if (i.name && i.name.length && longestDescLength < i.name.length && i.name.length < USAGE.maxSwitchLength) {
-                longestDescLength = i.name.length;
-            }
-        });
-        longestDescLength += USAGE.optionIndent;
-        info.forEach(i => {
-            Term.formatFormatReset();
-            if(bold)Term.formatBrightWhite().formatBold();
-            Term.printf(`${USAGE.indent + i.name}`);
+            Term.print(Term.mc.resetAll);
+
+            if (bold) Term.print(Term.fc.brightWhite + Term.mc.bold);
+            Term.print(`${USAGE.indent + i.name}`);
             const desc = _get(i.desc);
             if (desc) {
-                Term.formatFormatReset().printf('\n');
-                Term.newLine().formatBrightBlack().putStr(`${desc}`).flushJustifyToRight(2 * USAGE.optionIndent);
+                Term.print(Term.mc.resetAll).print(`\n`);
+                Term.print(`${USAGE.indent}${USAGE.indent}${desc}`);
             }
-            Term.formatFormatReset().printf(`\n`);
+            Term.print(Term.mc.resetAll).print(`\n`);
         });
     }
 }
@@ -48,29 +43,22 @@ module.exports.printUsage = (u = {
     _printTitles(USAGE.usage, u.usage, true);
     if (u.options && u.options.length) {
         let optionTitlePrinted = false;
-        let longestSwitchLength = 0;
-        u.options.forEach(o => {
-            if (o.switch.length && longestSwitchLength < o.switch.length && o.switch.length < USAGE.maxSwitchLength) {
-                longestSwitchLength = o.switch.length;
-            }
-        });
-        longestSwitchLength += USAGE.optionIndent;
         u.options.forEach(o => {
             if (o.switch.length) {
-                if (!optionTitlePrinted) { optionTitlePrinted = true; Term.formatBold().printf(USAGE.header + USAGE.options).formatFormatReset(); }
-                Term.formatBrightWhite().formatBold().printf(`${USAGE.indent + o.switch}\n`);
-                Term.newLine().formatBrightBlack().putStr(`${o.desc}`);
-                if (o.type) Term.cyan().putStr(` [${o.type}]`);
-                Term.flushJustifyToRight(2 * USAGE.optionIndent).printf('\n');
+                if (!optionTitlePrinted) { optionTitlePrinted = true; Term.print(Term.mc.bold + USAGE.header + USAGE.options + Term.mc.resetAll); }
+                Term.print(`${Term.fc.brightWhite + Term.mc.bold}${USAGE.indent + o.switch}\n`);
+                Term.print(`${Term.mc.resetAll}${USAGE.indent}${USAGE.indent}${o.desc}`);
+                if (o.type) Term.print(`${Term.fc.cyan} [${o.type}]`);
+                Term.print(`\n`);
             }
         });
     }
-    Term.printf(USAGE.header);
-    if ((u.version && u.version.length) || (u.copyright && u.copyright.length)) Term.printf('== ');
-    if (u.version && u.version.length) Term.printf(`v${u.version}`);
+    Term.print(USAGE.header);
+    if ((u.version && u.version.length) || (u.copyright && u.copyright.length)) Term.print('== ');
+    if (u.version && u.version.length) Term.print(`v${u.version}`);
     if (u.copyright && u.copyright.length) {
-        if (u.version && u.version.length) Term.printf(` - `);
-        Term.printf(u.copyright);
+        if (u.version && u.version.length) Term.print(` - `);
+        Term.print(u.copyright);
     };
-    if ((u.version && u.version.length) || (u.copyright && u.copyright.length)) Term.printf(' ==\n\n');
+    if ((u.version && u.version.length) || (u.copyright && u.copyright.length)) Term.print(' ==\n\n');
 }

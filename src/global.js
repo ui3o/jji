@@ -6,6 +6,13 @@ global.JJ.jji = require('../index');
 
 const exitError = msg => { console.log(`\n[ERROR] ${msg}${Term.mc.cursorShow}`) };
 
+global.ss = (...args) => {
+    return {
+        cmd: args,
+        __prop__: { __ss_instance__: true }
+    };
+}
+
 global.ff = {
     __prop__: { __ff_instance__: true },
     get lazy() { this.__prop__.lazy_menu = true; return this; },
@@ -40,11 +47,11 @@ global.ff = {
 
 global.jj = {
     __prop__: {},
-    rl: (question = '', disableMenuClearBack = false) => {
+    rl: (question = '', { disableMenuClearBack, password } = { disableMenuClearBack: false, password: false }) => {
         return new Promise(res => {
             menu.readLine((_event, line) => {
                 res(line);
-            }, question, disableMenuClearBack);
+            }, question, disableMenuClearBack, password);
         })
     },
     err: (msg = "") => {
@@ -54,7 +61,7 @@ global.jj = {
     exitWithPrompt: (code = 0, msg = "") => {
         menu.jumpHome(); Term.eraseDisplayBelow();
         menu.close();
-        if (msg.length)  console.log(`\n${msg}${Term.mc.cursorShow}`);
+        if (msg.length) console.log(`\n${msg}${Term.mc.cursorShow}`);
         process.exit(code);
     },
     mkdir: (path = '') => {
@@ -110,22 +117,12 @@ function scriptCollector(...args) {
     let script = [];
     let options = { ...global.jj.__prop__ };
     global.jj.__prop__ = {};
-    if (Array.isArray(args[0])) {
-        const out = [];
-        args[0].forEach((element, index) => {
-            if (index > 0) out.push(args[index]);
-            out.push(element);
-        });
-        script = out.join('').split(' ');
-    } else {
-        args.forEach(e => {
-            if (Array.isArray(e)) script = [...script, ...e];
-            else if (typeof e === 'string') script = [...script, ...e.split(' ')];
-            else script = [...script, e];
-        });
-    }
-    let _firstFound = false;
-    script = script.filter(p => { if (p || _firstFound) { _firstFound = true; return true; } return false; });
+    args.forEach(e => {
+        if (Array.isArray(e)) script = [...script, ...e];
+        else if (typeof e === 'string') script = [...script, ...e.split(' ')];
+        else script = [...script, e];
+    });
+    console.log('scriptCollector', script);
     return { script, options };
 }
 

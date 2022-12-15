@@ -15,7 +15,7 @@ const menu = {
         menu: [],
         poi: 0
     },
-    readInputMode: { enabled: false, line: [], question: '' },
+    readInputMode: { enabled: false, line: [], question: '', password: false },
     loadingPoi: 0,
     loadingHandler: undefined,
     blinkHandler: undefined,
@@ -396,8 +396,9 @@ const setInputString = (input = '') => {
 
 const _refreshInputReader = async (useEOL = false) => {
     jumpHome();
+    const line = menu.readInputMode.password ? "*".repeat(menu.readInputMode.line.length) : menu.readInputMode.line.join('')
     Term.defaultColor(menu.readInputMode.question)
-        .defaultColor(menu.readInputMode.line.join(''))
+        .defaultColor(line)
         .defaultColor(prompt.cursor.promptChar)
     Term.flush();
     Term.eraseDisplayBelow();
@@ -461,13 +462,15 @@ const _windowResizeHandler = () => {
 let _eventListener = undefined;
 let _readLineListener = undefined;
 
-const readLine = async (eventListener = (event, key) => { }, question = '', disableMenuClearBack = false) => {
+const readLine = async (eventListener = (event, key) => { }, question = '', disableMenuClearBack = false, password = false) => {
     _readLineListener = eventListener;
     if (disableMenuClearBack) Term.reset();
     if (!disableMenuClearBack) Term.newScreen();
+    Term.cursorHide();
     menu.readInputMode.line = [];
     menu.readInputMode.question = question;
     menu.readInputMode.enabled = true;
+    menu.readInputMode.password = password;
     _refreshInputReader();
     _eventListener(event.INPUT_READ_START, eventListener);
 }
