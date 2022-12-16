@@ -45,7 +45,7 @@ Just run `jj` if you have `jj.js` file or `*.jj.js` files in the current folder.
 * possible to run script from `jj.js` or `*.jj.js`
 * if the working folder contains `*.jj.js` possible to sort with number. ex. `*.0.jj,js` `*.1.jj,js`
 * prompt base sub menu system, please check the [example/demo/jj.js#L1](example/demo/jj.js#L1)
-* search in the menu and is descriptions
+* search in the menu and in descriptions
 * all **script runs** inside a **node spawn**
 * provided **global functions**, which means you **do not need to import anything** for use in your `*.jj.js` file:
   * '`jj.cl.do`': which run a simple script. The output simple printed:``jj.cl.do`echo hello wold` ``. possible to combine with fix parameter between array. `jj.cl.do(``docker exec alpine sh -c``, [``ls -al``]);` or `jj.cl.do(``docker exec alpine sh -c``, [``ls -al``], ``/usr``, [``/path with space``]);`
