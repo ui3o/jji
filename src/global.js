@@ -122,7 +122,6 @@ function scriptCollector(...args) {
         else if (typeof e === 'string') script = [...script, ...e.split(' ')];
         else script = [...script, e];
     });
-    console.log('scriptCollector', script);
     return { script, options };
 }
 
