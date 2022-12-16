@@ -3,36 +3,51 @@
 **J**ust a simple **J**umper cl**I** tool.
 
 This tool aims to make an easy menu system to organize your cli workflow.
-* Just run `jj` if you have only one `jj.js` file in the current folder or `jj script.jj.js`.
+
+Just run `jj` if you have `jj.js` file or `*.jj.js` files in the current folder.
 
 # Install 
-* ```npm i -g jji```
+
+```npm i -g jji```
 
 # How menu structure works
+
 * every menu item has name: `module.export.test`
-* every menu item has command which can be: `string`, `featured function` or `null`
+* every menu item has command which can be: `ss` - *simple script*, `ff` - *featured function* or `null`
 * every menu item optionally can have a description. in this case the definition change to array where description is on the first place: `module.exports.run = ["run simple", "echo hello"]`
-* every menu item (**this** type of menu **is a group**) can have sub menu which can be after description or after command
-  * after description: `module.exports.run = ["run simple", {...}]`
-  * after command: `module.exports.run = ["run simple", "echo hello", {...}]`
-* every group can have a group command which can be: `string`
-* when one item selected, all group command and item command going to concat into one string and executed in **node spawn** shell
+* every menu item can have sub menu which can be after description or after command (it called as **group**)
+  * after description: `module.exports.group_name = ["group description", {...}]`
+  * after command: `module.exports.group_name = ["group description", ss("echo hello"), {...}]`
+* every group can have a group command which can be: `ss` - *simple script*
+* when one item selected, all group command and item command going to be concatenated into one string and executed in **node spawn** shell
 * there are 3 extra type of menu item:
-  * **lazy** load menu, which means when you enter into the menu the Promise start after the select
-  * **slow** menu, which means the Promise start after the program start
-  * **read only** not selectable menu item (in this case the menu command is null)
+  * **lazy** load menu - `ff.lazy.do(async (resolve)=>{...})`, which means when you enter into the menu the Promise start after the select
+  * **slow** menu - `ff.menu.do(async (resolve)=>{...})`, which means the Promise start after the program start
+  * **read only** - `null`, not selectable menu item
 
 # Examples
+
 * [example/demo/jj.js#L1](example/demo/jj.js#L1)
 * [example/real/jj.js#L1](example/real/jj.js#L1)
 
+# Menu control keys
+
+* **arrow-up/down and tab**: up/down in the menu
+* **select**: enter
+* **one level up**: esc
+* **on top level**: esc equals exit
+* **terminate**: ctrl+c
+* **clear screen**: ctrl+l
+* **fly mode start**: ctrl+space or text start with space
+
 # Features
+
 * possible to run script from `jj.js` or `*.jj.js`
-* if the working folder contains *.jj.js possible to sort with number. ex. *.0.jj,js *.1.jj,js
+* if the working folder contains `*.jj.js` possible to sort with number. ex. `*.0.jj,js` `*.1.jj,js`
 * prompt base sub menu system, please check the [example/demo/jj.js#L1](example/demo/jj.js#L1)
-* search in the menu (in the name and description)
+* search in the menu and is descriptions
 * all **script runs** inside a **node spawn**
-* provided **global functions**, which means you **do not need to import anything** for use in your *.jj.js file:
+* provided **global functions**, which means you **do not need to import anything** for use in your `*.jj.js` file:
   * '`jj.cl.do`': which run a simple script. The output simple printed:``jj.cl.do`echo hello wold` ``. possible to combine with fix parameter between array. `jj.cl.do(``docker exec alpine sh -c``, [``ls -al``]);` or `jj.cl.do(``docker exec alpine sh -c``, [``ls -al``], ``/usr``, [``/path with space``]);`
   * '`jj.cli.do`' which run a simple script. same as `jj.cl`, but output is not printed and parsed. Example:`` const a = await jj.cli.do`echo other done other`; console.log(a) ``. [default]: *no split*. Possible to add extra parameters (option object place in the arguments list no matter):
     * **splitByLine**: the output will not be split: `await __(``hi ${false}``, { __splitByLine: true }, 'other');` [example/demo/jj.js#L76](example/demo/jj.js#L76)
@@ -62,27 +77,12 @@ This tool aims to make an easy menu system to organize your cli workflow.
   * global control properties for jji workflow:
     * **process.env.__shell** [boolean] **true** means all spawn command will be executed in shell.
 
-
-* menu control keys:
-  * **arrow-up/down and tab**: up/down in the menu
-  * **select**: enter
-  * **one level up**: esc
-  * **on top level**: esc equals exit
-  * **terminate**: ctrl+c
-  * **clear screen**: ctrl+l
-  * **fly mode start**: ctrl+space or text start with space
-
-# Examples
-
-Examples are located in [example](example/).
-
 # Usage
 
 | command        | description|
 | ------------- |:-------------|
 | *jj* | it gives a nice *choices* menu |
-| *jj --help* | gives a standard help manual|
-
+| *jj -h* | gives a standard help manual|
 
 # Status
 
