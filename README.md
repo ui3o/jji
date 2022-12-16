@@ -14,7 +14,7 @@ Just run `jj` if you have `jj.js` file or `*.jj.js` files in the current folder.
 
 * every menu item has name: `module.export.test`
 * every menu item has command which can be: `ss` - *simple script*, `ff` - *featured function* or `null`
-* every menu item optionally can have a description. in this case the definition change to array where description is on the first place: `module.exports.run = ["run simple", "echo hello"]`
+* every menu item optionally can have a description. in this case the definition change to array where description is on the first place: `module.exports.run = ["run simple", ss("echo hello")]`
 * every menu item can have sub menu which can be after description or after command (it called as **group**)
   * after description: `module.exports.group_name = ["group description", {...}]`
   * after command: `module.exports.group_name = ["group description", ss("echo hello"), {...}]`
