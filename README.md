@@ -48,6 +48,14 @@ Just run `jj` if you have `jj.js` file or `*.jj.js` files in the current folder.
 * search in the menu and in descriptions
 * all **script runs** inside a **node spawn**
 * provided **global functions**, which means you **do not need to import anything** for use in your `*.jj.js` file:
+  * **ss** - *simple script*
+  * **ff** - *featured function*
+  * **jj** - *just jump* extra functions
+
+##### * ss - *simple script*
+##### * ff - *featured function*
+##### * jj - *just jump* extra functions
+ 
   * '`jj.cl.do`': which run a simple script. The output simple printed:``jj.cl.do`echo hello wold` ``. possible to combine with fix parameter between array. `jj.cl.do(``docker exec alpine sh -c``, [``ls -al``]);` or `jj.cl.do(``docker exec alpine sh -c``, [``ls -al``], ``/usr``, [``/path with space``]);`
   * '`jj.cli.do`' which run a simple script. same as `jj.cl`, but output is not printed and parsed. Example:`` const a = await jj.cli.do`echo other done other`; console.log(a) ``. [default]: *no split*. Possible to add extra parameters (option object place in the arguments list no matter):
     * **splitByLine**: the output will not be split: `await __(``hi ${false}``, { __splitByLine: true }, 'other');` [example/demo/jj.js#L76](example/demo/jj.js#L76)
