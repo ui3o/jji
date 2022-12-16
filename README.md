@@ -52,9 +52,10 @@ Just run `jj` if you have `jj.js` file or `*.jj.js` files in the current folder.
   * **ff** - *featured function*
   * **jj** - *just jump* extra functions
 
-##### * ss - *simple script*
-##### * ff - *featured function*
-##### * jj - *just jump* extra functions
+### Global functions
+##### ss - *simple script*
+##### ff - *featured function*
+##### jj - *just jump* extra functions
  
   * '`jj.cl.do`': which run a simple script. The output simple printed:``jj.cl.do`echo hello wold` ``. possible to combine with fix parameter between array. `jj.cl.do(``docker exec alpine sh -c``, [``ls -al``]);` or `jj.cl.do(``docker exec alpine sh -c``, [``ls -al``], ``/usr``, [``/path with space``]);`
   * '`jj.cli.do`' which run a simple script. same as `jj.cl`, but output is not printed and parsed. Example:`` const a = await jj.cli.do`echo other done other`; console.log(a) ``. [default]: *no split*. Possible to add extra parameters (option object place in the arguments list no matter):
