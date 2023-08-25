@@ -166,6 +166,14 @@ declare interface IJJ {
    */
   cl: ICL;
   /**
+   * **background/detached command line:** execute external **script**, inside spawn.
+   * **clb** means start background spawn without stdio.
+   *
+   * finalize the script call the **do** function at *last* position.
+   *
+   */
+  clb: ICLB;
+  /**
    * **command line:** execute external **script**, inside spawn.
    * **cle** means start **extended command line** spawn with fixed inherited stdio.
    * Some program like `docker logs -f` not handle *CTRL+C* inside spawn with
@@ -272,6 +280,35 @@ declare interface ICL {
    * examples:
    * * ```const code = await jj.cl.do('ls', '-al')```
    * * ```module.exports.example1 = ss("bash -c", ["echo hello"])```
+   *
+   * @param commandLine string list the first parameter is the program name
+   * @returns command result code
+   */
+  do(...commandLineArgs: string | number | boolean | undefined | null): Promise<number>;
+}
+
+declare interface ICLB {
+  /**
+   * **wd** means set the process working directory
+   * @param wd path to working directory
+   */
+  wd(wd: string): ICLB;
+  /**
+   * **err** means pipe the process stderr into file
+   * @param err path to stderr file
+   */
+  err(err: string): ICLB;
+  /**
+   * **out** means pipe the process stdout into file
+   * @param out path to stderr file
+   */
+  out(out: string): ICLB;
+  /**
+   * **do** means spawn the command
+   * 
+   * **First item** need to be the **program** name.
+   * examples:
+   * * ```jj.clb.do('ls', '-al')```
    *
    * @param commandLine string list the first parameter is the program name
    * @returns command result code

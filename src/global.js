@@ -2,6 +2,7 @@ const { Term } = require("./term");
 const { existsSync, mkdir, rm } = require('fs');
 const { spawn } = require('child_process');
 const menu = require('./menu');
+const fs = require('fs');
 global.JJ.jji = require('../index');
 
 const exitError = msg => { console.log(`\n[ERROR] ${msg}${Term.mc.cursorShow}`) };
@@ -89,6 +90,7 @@ global.jj = {
     cmd: Term,
     cmdOpts: {},
     cl: {},
+    clb: {},
     cle: {},
     cli: {}
 }
@@ -102,6 +104,11 @@ global.jj.cli = {
     wd: (wd = '') => { global.jj.__prop__.cwd = wd; return global.jj.cli; },
     eol: (eol = '') => { global.jj.__prop__.eol = eol; return global.jj.cli; },
 }
+global.jj.clb = {
+    wd: (wd = '') => { global.jj.__prop__.cwd = wd; return global.jj.clb; },
+    err: (err = '') => { global.jj.__prop__.err = err; return global.jj.clb; },
+    out: (out = '') => { global.jj.__prop__.out = out; return global.jj.clb; },
+}
 global.jj.cl = {
     wd: (wd = '') => { global.jj.__prop__.cwd = wd; return global.jj.cl; },
 }
@@ -112,6 +119,19 @@ global.jj.cle = {
 global.jj.cl.do = async (...args) => { return await spawnCommand(...args); }
 global.jj.cle.do = async (...args) => { global.jj.__prop__.cle = true; return await spawnCommand(...args); }
 global.jj.cli.do = async (...args) => { global.jj.__prop__.cli = true; return await spawnCommand(...args); }
+global.jj.clb.do = (...args) => {
+    const { script, options } = scriptCollector(...args);
+    const out = options.out ? fs.openSync(options.out, 'a') : "ignore";
+    const err = options.err ? fs.openSync(options.err, 'a') : "ignore";
+    const cmd = script.shift();
+    require('child_process').spawn(cmd, [...script], {
+        env: {
+            CLB_ENV:`__CLB__${cmd}__${new Date().getTime()}__CLB__`
+        },
+        stdio: ['ignore', out, err],
+        detached: true
+    }).unref();
+}
 
 function scriptCollector(...args) {
     let script = [];
