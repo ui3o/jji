@@ -2,6 +2,9 @@ module.exports.later_load = ['later load menu item description', ff.menu.do((res
     setTimeout(() => {
         res({
             echo_test: ss("echo simple echo test"),
+            jj_test:ff.do(async _=>{
+                await jj.cl.do('bash -c', ['sleep 1 && echo hello'], "sdf sdf")
+            }),
             test_eval: ff.do(async () => { console.log('simple beval'); await jj.cl.do(`sh -c`, [`sleep 3 && echo hello world`]); }),
             test_later_load: ['another later load desc.', ff.menu.do((res) => {
                 setTimeout(() => {

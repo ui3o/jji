@@ -4,6 +4,10 @@ const env = process.env;
 process.env.HELLO = 'hello';
 process.env.WORLD = 'world';
 
+module.exports.ls = ff.stay.do(async () => {
+    jj.clb.out('ps.out').err('ps.err').do(`bash`, ['-c', 'docker ps 1>&2']);
+});
+
 module.exports.log = ff.stay.do(async () => {
     await jj.cle.handler((c, t, d) => {
         if (t === 0 && d === '\r') return false;

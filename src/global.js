@@ -126,6 +126,7 @@ global.jj.clb.do = (...args) => {
     const cmd = script.shift();
     require('child_process').spawn(cmd, [...script], {
         env: {
+            ...process.env,
             CLB_ENV:`__CLB__${cmd}__${new Date().getTime()}__CLB__`
         },
         stdio: ['ignore', out, err],
