@@ -131,7 +131,7 @@ global.jj.clb.do = (...args) => {
     };
     require('child_process').spawn(cmd, [...script], {
         env,
-        stdio: global.jj.clb.stdio_clb ? global.jj.clb.stdio_clb(cmd, [...script], startTime) : ['ignore', out, err],
+        stdio: global.jj.clb.stdio_cb ? global.jj.clb.stdio_cb(cmd, [...script], startTime) : ['ignore', out, err],
         detached: true
     }).unref();
 }
