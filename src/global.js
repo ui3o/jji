@@ -124,12 +124,14 @@ global.jj.clb.do = (...args) => {
     const out = options.out ? fs.openSync(options.out, 'a') : "ignore";
     const err = options.err ? fs.openSync(options.err, 'a') : "ignore";
     const cmd = script.shift();
+    const startTime = new Date().getTime();
+    const env = {
+        ...process.env,
+        CLB_ENV: `__CLB__${cmd}__${startTime}__CLB__`
+    };
     require('child_process').spawn(cmd, [...script], {
-        env: {
-            ...process.env,
-            CLB_ENV:`__CLB__${cmd}__${new Date().getTime()}__CLB__`
-        },
-        stdio: ['ignore', out, err],
+        env,
+        stdio: global.jj.clb.stdio_clb ? global.jj.clb.stdio_clb(cmd, [...script], startTime) : ['ignore', out, err],
         detached: true
     }).unref();
 }

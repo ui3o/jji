@@ -289,6 +289,14 @@ declare interface ICL {
 
 declare interface ICLB {
   /**
+  * **stdio callback** means set the global stdio before spawn call, it is never reset automatically after do method call
+  * @param cmd command
+  * @param params command of params
+  * @param cmd start timestamp
+  * @returns ChildProcess.SpawnOptionsWithoutStdio
+  */
+  stdio_clb(cmd: string, params: Array<string>, startTimestamp: number):Array<any>;
+  /**
    * **wd** means set the process working directory
    * @param wd path to working directory
    */
